@@ -48,7 +48,8 @@ export function applyTheme(choice: ThemeChoice) {
     // Expected: storage blocked — the choice lasts for this page only.
   }
   const dark =
-    choice === 'dark' || (choice === 'system' && matchMedia('(prefers-color-scheme: dark)').matches);
+    choice === 'dark' ||
+    (choice === 'system' && matchMedia('(prefers-color-scheme: dark)').matches);
   document.documentElement.classList.toggle('dark', dark);
   listeners.forEach((l) => l());
 }

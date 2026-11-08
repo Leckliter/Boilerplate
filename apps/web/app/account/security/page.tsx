@@ -17,7 +17,9 @@ export default async function SecurityPage() {
       <Card>
         <CardHeader>
           <CardTitle>Sign-in</CardTitle>
-          <CardDescription>There is no password to remember or leak: we email you a one-time code each time.</CardDescription>
+          <CardDescription>
+            There is no password to remember or leak: we email you a one-time code each time.
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <DetailList>

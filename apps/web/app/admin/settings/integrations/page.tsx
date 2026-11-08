@@ -18,7 +18,10 @@ export default async function IntegrationsPage() {
   const result = await callAction(listIntegrations, {}, viewer.actor);
   return (
     <div className="grid gap-6">
-      <PageHeader title="Integrations" description="Set the variables in your host's environment (see .env.example). The switch turns a configured service off without removing its keys." />
+      <PageHeader
+        title="Integrations"
+        description="Set the variables in your host's environment (see .env.example). The switch turns a configured service off without removing its keys."
+      />
       {!result.ok ? (
         <ActionError error={result.error} what="the integrations" />
       ) : (
@@ -28,7 +31,13 @@ export default async function IntegrationsPage() {
               <CardHeader>
                 <CardTitle className="flex flex-wrap items-center gap-2">
                   {i.label}
-                  {i.configured ? <Badge color="green">Configured</Badge> : i.core ? <Badge color="red">Missing</Badge> : <Badge color="outline">Not set up</Badge>}
+                  {i.configured ? (
+                    <Badge color="green">Configured</Badge>
+                  ) : i.core ? (
+                    <Badge color="red">Missing</Badge>
+                  ) : (
+                    <Badge color="outline">Not set up</Badge>
+                  )}
                   {i.core && <Badge color="outline">Required</Badge>}
                 </CardTitle>
                 <CardDescription>{i.description}</CardDescription>
@@ -39,8 +48,15 @@ export default async function IntegrationsPage() {
                     'All variables are set.'
                   ) : (
                     <>
-                      Missing: {i.missing.map((m) => <code key={m} className="mr-1 text-xs">{m}</code>)}
-                      {i.invalid.length > 0 && <span className="block">Invalid: {i.invalid.join(', ')}</span>}
+                      Missing:{' '}
+                      {i.missing.map((m) => (
+                        <code key={m} className="mr-1 text-xs">
+                          {m}
+                        </code>
+                      ))}
+                      {i.invalid.length > 0 && (
+                        <span className="block">Invalid: {i.invalid.join(', ')}</span>
+                      )}
                     </>
                   )}
                 </div>

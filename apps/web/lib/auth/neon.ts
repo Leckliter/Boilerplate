@@ -40,7 +40,11 @@ export function neonAdapter(): AuthAdapter {
     },
     async sendEmailCode(email) {
       const { error } = await auth.emailOtp.sendVerificationOtp({ email, type: 'sign-in' });
-      if (error) throw new AuthFailure(error.message ?? 'Could not send the code.', String(error.code ?? ''));
+      if (error)
+        throw new AuthFailure(
+          error.message ?? 'Could not send the code.',
+          String(error.code ?? ''),
+        );
     },
     async verifyEmailCode(email, code) {
       const { data, error } = await auth.signIn.emailOtp({ email, otp: code.trim() });

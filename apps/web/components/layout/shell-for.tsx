@@ -54,11 +54,21 @@ export async function ShellFor({
     groups: translate(m.groups),
   }));
   const items = allItems(navGroups);
-  const toDock = (i: (typeof items)[number]) => ({ href: i.href, label: i.label, icon: i.icon, exact: i.exact });
-  const dockItems = items.filter((i) => i.dock).slice(0, 4).map(toDock);
+  const toDock = (i: (typeof items)[number]) => ({
+    href: i.href,
+    label: i.label,
+    icon: i.icon,
+    exact: i.exact,
+  });
+  const dockItems = items
+    .filter((i) => i.dock)
+    .slice(0, 4)
+    .map(toDock);
   const launcherItems = [
     ...items.map(toDock),
-    ...apps.filter((a) => a.id !== appId).map((a) => ({ href: a.href, label: a.label, icon: a.icon })),
+    ...apps
+      .filter((a) => a.id !== appId)
+      .map((a) => ({ href: a.href, label: a.label, icon: a.icon })),
   ];
 
   return (

@@ -16,7 +16,11 @@ export function ResolveForm({ reference }: { reference: string }) {
       submitVariant="secondary"
     >
       {(errors) => (
-        <Field label="What fixed it?" hint="A commit, PR link or short note." error={errors.resolution}>
+        <Field
+          label="What fixed it?"
+          hint="A commit, PR link or short note."
+          error={errors.resolution}
+        >
           <Input name="resolution" minLength={3} required />
         </Field>
       )}

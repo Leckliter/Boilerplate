@@ -26,14 +26,21 @@ export function SiteHeader() {
         </Link>
         <nav aria-label="Main" className="ml-4 hidden items-center gap-1 md:flex">
           {SITE_LINKS.slice(1).map((l) => (
-            <Link key={l.href} href={l.href} className="rounded-lg px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-tint hover:text-foreground">
+            <Link
+              key={l.href}
+              href={l.href}
+              className="rounded-lg px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-tint hover:text-foreground"
+            >
               {l.label}
             </Link>
           ))}
         </nav>
         <div className="ml-auto flex items-center gap-2">
           <ThemeSwitch compact />
-          <Link href="/login" className={buttonVariants({ variant: 'ghost', className: 'hidden sm:inline-flex' })}>
+          <Link
+            href="/login"
+            className={buttonVariants({ variant: 'ghost', className: 'hidden sm:inline-flex' })}
+          >
             Sign in
           </Link>
           <LinkButton href="/account" variant="primary">

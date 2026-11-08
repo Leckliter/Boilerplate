@@ -16,7 +16,8 @@ import { type AuthAdapter, AuthFailure, type AuthSession } from './types';
 function env() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  if (!url || !key) throw new Error('NEXT_PUBLIC_SUPABASE_URL / NEXT_PUBLIC_SUPABASE_ANON_KEY are not set.');
+  if (!url || !key)
+    throw new Error('NEXT_PUBLIC_SUPABASE_URL / NEXT_PUBLIC_SUPABASE_ANON_KEY are not set.');
   return { url, key };
 }
 
@@ -59,14 +60,18 @@ export function supabaseAdapter(): AuthAdapter {
       return data.user?.email ? toSession(data.user) : null;
     },
     async sendEmailCode(email) {
-      const { error } = await (await client()).auth.signInWithOtp({
+      const { error } = await (
+        await client()
+      ).auth.signInWithOtp({
         email,
         options: { shouldCreateUser: true },
       });
       if (error) throw new AuthFailure(error.message, error.code ?? 'otp_failed');
     },
     async verifyEmailCode(email, code) {
-      const { data, error } = await (await client()).auth.verifyOtp({
+      const { data, error } = await (
+        await client()
+      ).auth.verifyOtp({
         email,
         token: code.trim(),
         type: 'email',
@@ -83,12 +88,17 @@ export function supabaseAdapter(): AuthAdapter {
       await (await client()).auth.signOut();
     },
     async confirmLink({ tokenHash, type }) {
-      const { data, error } = await (await client()).auth.verifyOtp({
+      const { data, error } = await (
+        await client()
+      ).auth.verifyOtp({
         token_hash: tokenHash,
         type: type as 'email' | 'magiclink' | 'signup' | 'recovery' | 'invite' | 'email_change',
       });
       if (error || !data.user) {
-        throw new AuthFailure('That link is invalid or has expired.', error?.code ?? 'link_invalid');
+        throw new AuthFailure(
+          'That link is invalid or has expired.',
+          error?.code ?? 'link_invalid',
+        );
       }
       return toSession(data.user);
     },

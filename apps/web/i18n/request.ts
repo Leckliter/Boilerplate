@@ -24,5 +24,7 @@ async function loadMessages(locale: Locale): Promise<Messages> {
   const en = (await import('../messages/en.json')).default as Messages;
   if (locale === 'en') return en;
   const other = (await import(`../messages/${locale}.json`)).default as Messages;
-  return Object.fromEntries(Object.entries(en).map(([ns, keys]) => [ns, { ...keys, ...other[ns] }]));
+  return Object.fromEntries(
+    Object.entries(en).map(([ns, keys]) => [ns, { ...keys, ...other[ns] }]),
+  );
 }

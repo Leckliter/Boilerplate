@@ -2,7 +2,13 @@
 
 import { Logo } from '@app/ui/components/logo';
 import { Sidebar, useSidebar } from '@app/ui/components/sidebar';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from '@app/ui/components/dropdown-menu';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from '@app/ui/components/dropdown-menu';
 import { ListIcon, SidebarSimpleIcon, XIcon } from '@app/ui/components/icons';
 import { cn } from '@app/ui/lib/utils';
 import { useTranslations } from 'next-intl';
@@ -46,7 +52,11 @@ function subscribePhone(onChange: () => void) {
 }
 
 function useIsPhone() {
-  return useSyncExternalStore(subscribePhone, () => window.matchMedia(PHONE_QUERY).matches, () => false);
+  return useSyncExternalStore(
+    subscribePhone,
+    () => window.matchMedia(PHONE_QUERY).matches,
+    () => false,
+  );
 }
 
 export type ShellUser = { id: string; name: string; email: string };
@@ -154,15 +164,19 @@ export function AppShell({
                 tabIndex={-1}
                 data-shell-main
                 className={cn(
-                  'flex min-w-0 flex-1 flex-col overflow-y-auto bg-background [scrollbar-gutter:stable] outline-none',
+                  'flex min-w-0 flex-1 [scrollbar-gutter:stable] flex-col overflow-y-auto bg-background outline-none',
                   hasDock && 'pb-20 md:pb-0',
                 )}
               >
-                <div className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 sm:px-6 sm:py-8">{children}</div>
+                <div className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 sm:px-6 sm:py-8">
+                  {children}
+                </div>
               </main>
             </div>
           </ContentColumn>
-          {hasDock && <MobileDock items={dockItems} allItems={launcherItems} title={t('allApps')} />}
+          {hasDock && (
+            <MobileDock items={dockItems} allItems={launcherItems} title={t('allApps')} />
+          )}
           <MobilePrimaryActionFab />
         </Sidebar.Provider>
       </MobilePageActionsProvider>
@@ -184,7 +198,10 @@ export function AppShell({
 function ContentColumn({ children }: { children: ReactNode }) {
   const { isMobile, openMobile } = useSidebar();
   return (
-    <div inert={isMobile && openMobile ? true : undefined} className="flex min-w-0 flex-1 flex-col overflow-hidden">
+    <div
+      inert={isMobile && openMobile ? true : undefined}
+      className="flex min-w-0 flex-1 flex-col overflow-hidden"
+    >
       {children}
     </div>
   );

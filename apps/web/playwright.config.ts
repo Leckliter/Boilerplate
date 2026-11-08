@@ -24,5 +24,10 @@ export default defineConfig({
   projects: [{ name: 'desktop', use: { ...devices['Desktop Chrome'] } }],
   webServer: process.env.E2E_BASE_URL
     ? undefined
-    : { command: `pnpm start --port ${port}`, url: `${baseURL}/api/healthcheck`, reuseExistingServer: !process.env.CI, timeout: 120_000 },
+    : {
+        command: `pnpm start --port ${port}`,
+        url: `${baseURL}/api/healthcheck`,
+        reuseExistingServer: !process.env.CI,
+        timeout: 120_000,
+      },
 });

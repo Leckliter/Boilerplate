@@ -6,5 +6,8 @@ const PAGES = ['/', '/pricing', '/about', '/brand', '/docs'];
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const base = getSiteUrl();
-  return PAGES.map((path) => ({ url: `${base}${path === '/' ? '' : path}`, changeFrequency: 'monthly' }));
+  return PAGES.map((path) => ({
+    url: `${base}${path === '/' ? '' : path}`,
+    changeFrequency: 'monthly',
+  }));
 }

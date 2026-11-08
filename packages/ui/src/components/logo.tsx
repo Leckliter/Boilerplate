@@ -17,16 +17,19 @@ export function Logo({
 }) {
   return (
     <span
-      className={cn('inline-flex items-center gap-2 font-semibold tracking-tight text-primary', className)}
+      className={cn(
+        'inline-flex items-center gap-2 font-semibold tracking-tight text-primary',
+        className,
+      )}
       aria-label={name}
     >
       <span
         aria-hidden
-        className="bg-primary text-primary-foreground inline-flex size-7 items-center justify-center rounded-lg text-sm"
+        className="inline-flex size-7 items-center justify-center rounded-lg bg-primary text-sm text-primary-foreground"
       >
         {name.charAt(0).toUpperCase()}
       </span>
-      {compact ? null : <span className="text-foreground text-base">{name}</span>}
+      {compact ? null : <span className="text-base text-foreground">{name}</span>}
     </span>
   );
 }

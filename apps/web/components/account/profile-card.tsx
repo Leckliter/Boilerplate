@@ -16,10 +16,14 @@ export function ProfileCard({ me }: { me: ContactView }) {
     <EditableCard
       title="Your details"
       description="Only you and staff can see these."
-      onSave={async (form) => (await run('account.update', formDataToInput(form, {}, 'null'), { success: 'Saved' })).ok}
+      onSave={async (form) =>
+        (await run('account.update', formDataToInput(form, {}, 'null'), { success: 'Saved' })).ok
+      }
       view={
         <DetailList>
-          <DetailItem label="Name">{[me.firstName, me.lastName].filter(Boolean).join(' ')}</DetailItem>
+          <DetailItem label="Name">
+            {[me.firstName, me.lastName].filter(Boolean).join(' ')}
+          </DetailItem>
           <DetailItem label="Email" copy={me.email}>
             {me.email}
           </DetailItem>
@@ -36,7 +40,13 @@ export function ProfileCard({ me }: { me: ContactView }) {
         </Field>
       </div>
       <Field label="Phone" hint="Used only if you agree to texts." required={false}>
-        <Input name="phone" type="tel" defaultValue={me.phone ?? ''} autoComplete="tel" placeholder="(816) 555-1234" />
+        <Input
+          name="phone"
+          type="tel"
+          defaultValue={me.phone ?? ''}
+          autoComplete="tel"
+          placeholder="(816) 555-1234"
+        />
       </Field>
     </EditableCard>
   );

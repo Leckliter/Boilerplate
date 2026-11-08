@@ -22,7 +22,9 @@ export default async function VerifyEmailPage({
       <h1 className="text-xl font-semibold tracking-tight">
         {disabled ? t('disabledTitle') : t('verifyTitle')}
       </h1>
-      <p className="text-sm text-muted-foreground">{disabled ? t('disabledBody') : t('verifyBody')}</p>
+      <p className="text-sm text-muted-foreground">
+        {disabled ? t('disabledBody') : t('verifyBody')}
+      </p>
       {viewer.status === 'verify_email' && (
         <p className="text-sm">
           Signed in as <strong>{viewer.email}</strong>
@@ -32,7 +34,10 @@ export default async function VerifyEmailPage({
         <form action={signOut}>
           <Button type="submit">{tc('signOut')}</Button>
         </form>
-        <Link href="/login" className="inline-flex h-9 items-center px-3 text-sm underline underline-offset-4">
+        <Link
+          href="/login"
+          className="inline-flex h-9 items-center px-3 text-sm underline underline-offset-4"
+        >
           {tc('signIn')}
         </Link>
       </div>

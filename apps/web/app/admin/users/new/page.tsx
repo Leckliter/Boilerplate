@@ -17,7 +17,15 @@ export default async function NewUserPage() {
       <RecordHeader back={<Link href="/admin/users">← Users</Link>} title="New user" />
       <Card>
         <CardContent>
-          <NewUserForm tags={tags.ok ? tags.data.filter((t) => t.kind === 'type').map((t) => ({ slug: t.slug, label: t.label })) : []} />
+          <NewUserForm
+            tags={
+              tags.ok
+                ? tags.data
+                    .filter((t) => t.kind === 'type')
+                    .map((t) => ({ slug: t.slug, label: t.label }))
+                : []
+            }
+          />
         </CardContent>
       </Card>
     </div>

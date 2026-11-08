@@ -98,6 +98,8 @@ export const serverEnvSchema = z.object({
   S3_BUCKET: str(),
   S3_ACCESS_KEY_ID: str(),
   S3_SECRET_ACCESS_KEY: str(),
+  S3_PUBLIC_URL: str(),
+  S3_FORCE_PATH_STYLE: str(),
   // messaging
   RESEND_API_KEY: str(),
   EMAIL_FROM: str(),
@@ -106,6 +108,9 @@ export const serverEnvSchema = z.object({
   TEST_RECIPIENTS_EMAIL: str(),
   TEST_RECIPIENTS_SMS: str(),
   NOTIFICATIONS_SECRET: str(),
+  QUO_API_BASE: str(),
+  APP_NAME: str(),
+  AUTOMATIONS_WEBHOOK_SECRET: str(),
   // abuse protection
   TURNSTILE_SECRET_KEY: str(),
   NEXT_PUBLIC_TURNSTILE_SITE_KEY: str(),

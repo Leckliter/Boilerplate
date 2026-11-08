@@ -1,11 +1,5 @@
 import { callAction, listActivity, listChanges } from '@app/core';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@app/ui/components/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@app/ui/components/card';
 
 import { ActionError } from '@/components/action-error';
 import { ActivityList, actorLabel, timeFormat } from './activity-list';

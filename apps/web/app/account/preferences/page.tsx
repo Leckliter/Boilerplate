@@ -31,7 +31,9 @@ export default async function PreferencesPage() {
       <Card>
         <CardHeader>
           <CardTitle>Language</CardTitle>
-          <CardDescription>The language of menus and messages. Page content may stay in English.</CardDescription>
+          <CardDescription>
+            The language of menus and messages. Page content may stay in English.
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <Field label="Language" hideLabel>
@@ -42,7 +44,9 @@ export default async function PreferencesPage() {
       <Card>
         <CardHeader>
           <CardTitle>Time zone</CardTitle>
-          <CardDescription>Dates and times are shown in the business’s time zone, whatever your device says.</CardDescription>
+          <CardDescription>
+            Dates and times are shown in the business’s time zone, whatever your device says.
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <DetailList>

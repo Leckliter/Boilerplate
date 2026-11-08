@@ -17,7 +17,6 @@ import { requireViewer } from '@/lib/viewer';
 
 export const metadata = { title: 'Activity entry' };
 
-
 const inherit = linkVariants({ tone: 'inherit' });
 
 export default async function ActivityEntryPage({ params }: { params: Promise<{ id: string }> }) {

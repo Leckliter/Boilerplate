@@ -14,7 +14,10 @@ const LOGIN_API = ['/api/account'];
  */
 export default async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  if (pathname.startsWith('/api/') && !LOGIN_API.some((p) => pathname === p || pathname.startsWith(`${p}/`))) {
+  if (
+    pathname.startsWith('/api/') &&
+    !LOGIN_API.some((p) => pathname === p || pathname.startsWith(`${p}/`))
+  ) {
     return NextResponse.next();
   }
   const guarded = isProtected(pathname) || pathname.startsWith('/api/');
@@ -37,7 +40,10 @@ function isProtected(pathname: string) {
 function denied(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
   if (pathname.startsWith('/api/')) {
-    return Response.json({ ok: false, error: { code: 'unauthenticated', message: 'Sign in first.' } }, { status: 401 });
+    return Response.json(
+      { ok: false, error: { code: 'unauthenticated', message: 'Sign in first.' } },
+      { status: 401 },
+    );
   }
   const login = request.nextUrl.clone();
   login.pathname = '/login';

@@ -2,7 +2,11 @@
 
 import { IconProvider } from '@app/ui/components/icons';
 import { TooltipProvider } from '@app/ui/components/tooltip';
-import { type LinkComponentProps, LinkProvider, PortalProvider } from '@app/ui/components/ui-context';
+import {
+  type LinkComponentProps,
+  LinkProvider,
+  PortalProvider,
+} from '@app/ui/components/ui-context';
 import NextLink from 'next/link';
 import { forwardRef, type ReactNode, useState } from 'react';
 

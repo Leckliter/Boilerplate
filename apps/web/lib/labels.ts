@@ -22,11 +22,16 @@ const FIELD_LABELS: Record<string, string> = {
 
 /** "contact_tags" → "Contact tags", "first_name" → "First name". */
 export function humanize(name: string): string {
-  const spaced = name.replace(/^app\./, '').replace(/[_.-]+/g, ' ').replace(/([a-z])([A-Z])/g, '$1 $2').trim();
+  const spaced = name
+    .replace(/^app\./, '')
+    .replace(/[_.-]+/g, ' ')
+    .replace(/([a-z])([A-Z])/g, '$1 $2')
+    .trim();
   return spaced.charAt(0).toUpperCase() + spaced.slice(1).toLowerCase();
 }
 
-export const tableLabel = (table: string) => TABLE_LABELS[table.replace(/^app\./, '')] ?? humanize(table);
+export const tableLabel = (table: string) =>
+  TABLE_LABELS[table.replace(/^app\./, '')] ?? humanize(table);
 export const fieldLabel = (field: string) => FIELD_LABELS[field] ?? humanize(field);
 
 /** Subject types in the activity log → where to open them (add yours). */

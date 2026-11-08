@@ -29,7 +29,9 @@ for (const path of ['/', '/brand']) {
   test(`no sideways scrolling at 320px on ${path}`, async ({ page }) => {
     await page.setViewportSize({ width: 320, height: 700 });
     await page.goto(path);
-    const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+    const overflow = await page.evaluate(
+      () => document.documentElement.scrollWidth - window.innerWidth,
+    );
     expect(overflow).toBeLessThanOrEqual(0);
   });
 }

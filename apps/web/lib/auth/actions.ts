@@ -29,7 +29,11 @@ export type SignInState =
 const Email = z.email().max(320);
 
 export async function requestCode(_prev: SignInState, form: FormData): Promise<SignInState> {
-  const parsed = Email.safeParse(String(form.get('email') ?? '').trim().toLowerCase());
+  const parsed = Email.safeParse(
+    String(form.get('email') ?? '')
+      .trim()
+      .toLowerCase(),
+  );
   if (!parsed.success) return { step: 'email', error: 'Enter a valid email address.' };
   const email = parsed.data;
   const request = await currentRequestInfo();
@@ -49,15 +53,15 @@ export async function requestCode(_prev: SignInState, form: FormData): Promise<S
   return { step: 'code', email, notice: 'Code sent.' };
 }
 
-export async function verifyCode(
-  prev: SignInState,
-  form: FormData,
-): Promise<SignInState> {
-  const email = String(form.get('email') ?? '').trim().toLowerCase();
+export async function verifyCode(prev: SignInState, form: FormData): Promise<SignInState> {
+  const email = String(form.get('email') ?? '')
+    .trim()
+    .toLowerCase();
   const code = String(form.get('code') ?? '').replace(/\s+/g, '');
   const next = safeNext(String(form.get('next') ?? ''), '/account');
   if (!email) return { step: 'email' };
-  if (!/^\d{4,10}$/.test(code)) return { step: 'code', email, error: 'Enter the digits from the email.' };
+  if (!/^\d{4,10}$/.test(code))
+    return { step: 'code', email, error: 'Enter the digits from the email.' };
   const adapter = await getAuthAdapter();
   if (!adapter) return { step: 'email', error: 'Sign-in is not set up on this site yet.' };
   try {
@@ -75,7 +79,11 @@ export async function verifyCode(
       await recordFailedSignIn(email, err.code);
       return { step: 'code', email, error: err.message };
     }
-    const ref = await reportError(err, { source: 'action', action: 'auth.verifyEmailCode', request: await currentRequestInfo() });
+    const ref = await reportError(err, {
+      source: 'action',
+      action: 'auth.verifyEmailCode',
+      request: await currentRequestInfo(),
+    });
     return { step: 'code', email, error: `We couldn’t sign you in. Error reference: ${ref}` };
   }
   void prev;
@@ -90,7 +98,11 @@ export async function signOut() {
     await adapter?.signOut();
   } catch (err) {
     // Signing out must still work: report it and clear what we can.
-    await reportError(err, { source: 'action', action: 'auth.signOut', request: await currentRequestInfo() });
+    await reportError(err, {
+      source: 'action',
+      action: 'auth.signOut',
+      request: await currentRequestInfo(),
+    });
   }
   redirect('/');
 }

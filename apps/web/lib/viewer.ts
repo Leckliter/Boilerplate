@@ -42,7 +42,10 @@ export const getViewer = cache(async (): Promise<Viewer> => {
     session = await watched('getViewer: auth getSession', () => adapter.getSession());
   } catch (err) {
     // The provider is down or misconfigured: report it (with a reference in the log) and show the site signed out.
-    await reportError(err, { source: 'request', context: { where: 'getViewer', backend: process.env.BACKEND } });
+    await reportError(err, {
+      source: 'request',
+      context: { where: 'getViewer', backend: process.env.BACKEND },
+    });
     return { status: 'guest' };
   }
   if (!session?.email) return { status: 'guest' };
@@ -84,10 +87,7 @@ export async function getActor(): Promise<Actor> {
 }
 
 /** Use at the top of a protected layout/page. Redirects instead of rendering when not allowed. */
-export async function requireViewer(
-  permission?: Permission,
-  next = '/',
-): Promise<SignedInViewer> {
+export async function requireViewer(permission?: Permission, next = '/'): Promise<SignedInViewer> {
   const viewer = await getViewer();
   if (viewer.status === 'guest') redirect(`/login?next=${encodeURIComponent(next)}`);
   if (viewer.status === 'verify_email') redirect('/verify-email');

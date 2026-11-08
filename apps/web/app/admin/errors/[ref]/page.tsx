@@ -1,11 +1,5 @@
 import { callAction, getError } from '@app/core';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@app/ui/components/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@app/ui/components/card';
 import { CodeBlock } from '@app/ui/components/code-block';
 import { CopyButton } from '@app/ui/components/copy-button';
 import { DetailItem, DetailList } from '@app/ui/components/detail-list';

@@ -2,7 +2,9 @@
   "name": "app",
   "private": true,
   "packageManager": "pnpm@10.28.0",
-  "engines": { "node": ">=22" },
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "dev": "turbo dev --filter=web",
     "build": "turbo build",
@@ -11,11 +13,12 @@
     "format": "prettier --check .",
     "format:fix": "prettier --write .",
     "rules": "node scripts/check-rules.mjs",
-    "check": "pnpm typecheck && pnpm lint && pnpm rules && pnpm format && pnpm actions:docs --check && pnpm test && pnpm actions:tests",
+    "check": "pnpm typecheck && pnpm lint && pnpm rules && pnpm format && pnpm actions:docs --check && pnpm docs:build --check && pnpm test && pnpm actions:tests",
     "db:generate": "pnpm --filter @app/db generate",
     "db:migrate": "pnpm --filter @app/db migrate",
     "db:seed": "pnpm --filter @app/db seed",
     "db:studio": "pnpm --filter @app/db studio",
+    "docs:build": "pnpm --filter @app/core docs:build --",
     "actions:docs": "pnpm --filter @app/core actions:docs --",
     "actions:tests": "pnpm --filter @app/core actions:tests --",
     "test": "turbo test"

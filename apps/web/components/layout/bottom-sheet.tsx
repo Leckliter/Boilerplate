@@ -35,7 +35,9 @@ export function BottomSheet({
           )}
         >
           <div aria-hidden className="mx-auto mb-3 h-1 w-10 rounded-full bg-fill" />
-          <DialogPrimitive.Title className="mb-2 text-sm font-semibold">{title}</DialogPrimitive.Title>
+          <DialogPrimitive.Title className="mb-2 text-sm font-semibold">
+            {title}
+          </DialogPrimitive.Title>
           {children}
         </DialogPrimitive.Popup>
       </DialogPrimitive.Portal>

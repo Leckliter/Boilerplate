@@ -21,7 +21,15 @@ const GROUP_LABEL = [
   '[[data-sidebar=group]:first-child_&]:after:hidden',
 ].join(' ');
 
-function Row({ item, pathname, onNavigate }: { item: NavItem; pathname: string; onNavigate?: () => void }) {
+function Row({
+  item,
+  pathname,
+  onNavigate,
+}: {
+  item: NavItem;
+  pathname: string;
+  onNavigate?: () => void;
+}) {
   const active = isItemActive(pathname, item);
   const Icon = item.icon;
   return (
@@ -31,17 +39,32 @@ function Row({ item, pathname, onNavigate }: { item: NavItem; pathname: string; 
       aria-current={active ? 'page' : undefined}
       onClick={onNavigate}
       tooltip={item.label}
-      icon={<Icon weight={active ? 'fill' : undefined} className={cn('size-4 shrink-0', active ? 'text-primary' : 'opacity-60')} />}
+      icon={
+        <Icon
+          weight={active ? 'fill' : undefined}
+          className={cn('size-4 shrink-0', active ? 'text-primary' : 'opacity-60')}
+        />
+      }
     >
       {item.label}
     </Sidebar.MenuButton>
   );
 }
 
-function Groups({ groups, pathname, onNavigate }: { groups: NavGroup[]; pathname: string; onNavigate?: () => void }) {
+function Groups({
+  groups,
+  pathname,
+  onNavigate,
+}: {
+  groups: NavGroup[];
+  pathname: string;
+  onNavigate?: () => void;
+}) {
   return groups.map((group) => (
     <Sidebar.Group key={group.key}>
-      {group.label ? <Sidebar.GroupLabel className={GROUP_LABEL}>{group.label}</Sidebar.GroupLabel> : null}
+      {group.label ? (
+        <Sidebar.GroupLabel className={GROUP_LABEL}>{group.label}</Sidebar.GroupLabel>
+      ) : null}
       <Sidebar.Menu>
         {group.items.map((item) => (
           <Row key={item.key + item.href} item={item} pathname={pathname} onNavigate={onNavigate} />
@@ -52,7 +75,15 @@ function Groups({ groups, pathname, onNavigate }: { groups: NavGroup[]; pathname
 }
 
 /** The main menu: labelled groups of links, the current page filled. */
-export function AppNav({ groups, label, onNavigate }: { groups: NavGroup[]; label: string; onNavigate?: () => void }) {
+export function AppNav({
+  groups,
+  label,
+  onNavigate,
+}: {
+  groups: NavGroup[];
+  label: string;
+  onNavigate?: () => void;
+}) {
   const pathname = usePathname();
   return (
     <nav aria-label={label} className="flex min-w-0 flex-col">
@@ -87,7 +118,11 @@ export function AppSubNav({
           {back.label}
         </Sidebar.MenuButton>
       </Sidebar.Menu>
-      {header ? <div className="px-2 pt-3 pb-1 text-sm font-semibold group-data-[state=collapsed]/sidebar:hidden">{header}</div> : null}
+      {header ? (
+        <div className="px-2 pt-3 pb-1 text-sm font-semibold group-data-[state=collapsed]/sidebar:hidden">
+          {header}
+        </div>
+      ) : null}
       <Groups groups={groups} pathname={pathname} onNavigate={onNavigate} />
     </nav>
   );

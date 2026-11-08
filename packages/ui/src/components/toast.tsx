@@ -120,8 +120,7 @@ function wrapManagerMethods<
       options: {
         loading: UiToastManagerAddOptions<any>;
         success: UiToastManagerAddOptions<any> | ((data: P) => UiToastManagerAddOptions<any>);
-        error:
-          UiToastManagerAddOptions<any> | ((error: Error) => UiToastManagerAddOptions<any>);
+        error: UiToastManagerAddOptions<any> | ((error: Error) => UiToastManagerAddOptions<any>);
       },
     ) =>
       manager.promise(promise, {
@@ -293,10 +292,4 @@ export type {
   UiToastVariant,
   ToastyProps,
 };
-export {
-  createUiToastManager,
-  Toasty,
-  Toasty as ToastProvider,
-  toastVariants,
-  useUiToastManager,
-};
+export { createUiToastManager, Toasty, Toasty as ToastProvider, toastVariants, useUiToastManager };

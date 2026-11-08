@@ -7,8 +7,7 @@ import { activeItem, type AppDef, type NavGroup } from '@/lib/nav';
 
 const ID_LIKE = /^([0-9a-f]{8}-[0-9a-f-]{27}|[0-9a-f]{24,}|\d+)$/i;
 
-const title = (segment: string) =>
-  segment.replace(/-/g, ' ').replace(/^./, (c) => c.toUpperCase());
+const title = (segment: string) => segment.replace(/-/g, ' ').replace(/^./, (c) => c.toUpperCase());
 
 /**
  * The trail in the header, built from the URL and the nav: App › Section › Record. Ids show as "Details"
@@ -17,17 +16,26 @@ const title = (segment: string) =>
 export function HeaderCrumbs({ app, groups }: { app: AppDef; groups: NavGroup[] }) {
   const pathname = usePathname();
   const item = activeItem(pathname, groups);
-  const rest = pathname.split('/').filter(Boolean).slice(app.href.split('/').filter(Boolean).length);
+  const rest = pathname
+    .split('/')
+    .filter(Boolean)
+    .slice(app.href.split('/').filter(Boolean).length);
   const trail: { label: string; href: string }[] = [];
   let href = app.href;
-  const itemDepth = item ? item.href.split('/').filter(Boolean).length - app.href.split('/').filter(Boolean).length : 0;
+  const itemDepth = item
+    ? item.href.split('/').filter(Boolean).length - app.href.split('/').filter(Boolean).length
+    : 0;
   rest.forEach((segment, i) => {
     href += `/${segment}`;
     if (item && i < itemDepth) {
       if (i === itemDepth - 1) trail.push({ label: item.label, href });
       return;
     }
-    const label = ID_LIKE.test(segment) ? 'Details' : /^E-/.test(segment) ? segment : title(decodeURIComponent(segment));
+    const label = ID_LIKE.test(segment)
+      ? 'Details'
+      : /^E-/.test(segment)
+        ? segment
+        : title(decodeURIComponent(segment));
     trail.push({ label, href });
   });
   const here = trail.at(-1);

@@ -60,7 +60,9 @@ export function UserMenu({
           {apps.map((app) => (
             <DropdownMenuLinkItem
               key={app.id}
-              render={<Link href={app.href} aria-current={app.id === currentApp ? 'page' : undefined} />}
+              render={
+                <Link href={app.href} aria-current={app.id === currentApp ? 'page' : undefined} />
+              }
             >
               <app.icon weight={app.id === currentApp ? 'fill' : undefined} />
               {tn(app.key)}

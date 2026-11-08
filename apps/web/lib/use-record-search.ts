@@ -17,7 +17,12 @@ export type RecordSource = {
   search: (query: string) => Promise<CommandItem[]>;
 };
 
-type ContactRow = { id: string; displayName: string; email: string | null; companyName: string | null };
+type ContactRow = {
+  id: string;
+  displayName: string;
+  email: string | null;
+  companyName: string | null;
+};
 
 export const ADMIN_RECORD_SOURCES: RecordSource[] = [
   {
@@ -38,7 +43,10 @@ export const ADMIN_RECORD_SOURCES: RecordSource[] = [
 
 /** Debounced record search for the palette. `sources` is empty for people who cannot search records. */
 export function useRecordSearch(query: string, sources: RecordSource[], enabled: boolean) {
-  const [state, setState] = useState<{ query: string; groups: { label: string; items: CommandItem[] }[] }>({
+  const [state, setState] = useState<{
+    query: string;
+    groups: { label: string; items: CommandItem[] }[];
+  }>({
     query: '',
     groups: [],
   });
@@ -49,10 +57,13 @@ export function useRecordSearch(query: string, sources: RecordSource[], enabled:
     let live = true;
     const timer = setTimeout(async () => {
       const groups = await Promise.all(
-        sources.map(async (s) => ({ label: s.label, items: await s.search(q).catch(() => {
+        sources.map(async (s) => ({
+          label: s.label,
+          items: await s.search(q).catch(() => {
             // Expected: search is best-effort; a failing source just shows no results.
             return [];
-          }) })),
+          }),
+        })),
       );
       if (live) setState({ query: q, groups });
     }, 200);

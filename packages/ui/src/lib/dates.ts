@@ -32,23 +32,26 @@ function fmt(locale: string, opts: Intl.DateTimeFormatOptions): Intl.DateTimeFor
   return f;
 }
 
-const dateFmt = () => fmt('en-US', {
-  month: 'short',
-  day: 'numeric',
-  year: 'numeric',
-});
-const dateTimeFmt = () => fmt('en-US', {
-  month: 'short',
-  day: 'numeric',
-  year: 'numeric',
-  hour: 'numeric',
-  minute: '2-digit',
-});
-const isoDayFmt = () => fmt('en-CA', {
-  year: 'numeric',
-  month: '2-digit',
-  day: '2-digit',
-});
+const dateFmt = () =>
+  fmt('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
+const dateTimeFmt = () =>
+  fmt('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+  });
+const isoDayFmt = () =>
+  fmt('en-CA', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  });
 
 type DateInput = Date | string | number;
 const toDate = (d: DateInput) => (d instanceof Date ? d : new Date(d));
@@ -134,26 +137,32 @@ export function monthGridDays(day: string): string[] {
   return Array.from({ length: 42 }, (_, i) => addDaysToDay(start, i));
 }
 
-const minutesFmt = () => fmt('en-US', {
-  hourCycle: 'h23',
-  hour: 'numeric',
-  minute: 'numeric',
-});
+const minutesFmt = () =>
+  fmt('en-US', {
+    hourCycle: 'h23',
+    hour: 'numeric',
+    minute: 'numeric',
+  });
 
 /** Minutes after midnight on the app zone's clock (9:30 AM → 570). */
 export function minutesInAppZone(d: DateInput): number {
   const parts = Object.fromEntries(
-    minutesFmt().formatToParts(toDate(d)).map((p) => [p.type, Number(p.value)]),
+    minutesFmt()
+      .formatToParts(toDate(d))
+      .map((p) => [p.type, Number(p.value)]),
   );
   return (parts.hour ?? 0) * 60 + (parts.minute ?? 0);
 }
 
-const timeFmt = () => fmt('en-US', {
-  hour: 'numeric',
-  minute: '2-digit',
-});
-const shortTimeFmt = () => fmt('en-US', {
- hour: 'numeric' });
+const timeFmt = () =>
+  fmt('en-US', {
+    hour: 'numeric',
+    minute: '2-digit',
+  });
+const shortTimeFmt = () =>
+  fmt('en-US', {
+    hour: 'numeric',
+  });
 
 /** "9:00 AM" */
 export function formatTime(d: DateInput): string {
@@ -164,7 +173,9 @@ export function formatTime(d: DateInput): string {
 export function formatShortTime(d: DateInput): string {
   const date = toDate(d);
   const mins = minutesInAppZone(date) % 60;
-  const hour = shortTimeFmt().format(date).replace(/\s?(AM|PM)/, '');
+  const hour = shortTimeFmt()
+    .format(date)
+    .replace(/\s?(AM|PM)/, '');
   const ap = /PM/.test(shortTimeFmt().format(date)) ? 'p' : 'a';
   return `${hour}${mins ? `:${String(mins).padStart(2, '0')}` : ''}${ap}`;
 }
@@ -217,13 +228,14 @@ export function formatDayTitle(day: string): string {
   }).format(new Date(Date.UTC(y!, m! - 1, d!, 12)));
 }
 
-const weekdayTimeFmt = () => fmt('en-US', {
-  weekday: 'short',
-  month: 'short',
-  day: 'numeric',
-  hour: 'numeric',
-  minute: '2-digit',
-});
+const weekdayTimeFmt = () =>
+  fmt('en-US', {
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+  });
 
 /** "Tue, Nov 4, 9:00 AM" (a moment, with its weekday: due times, bookings). */
 export function formatWeekdayTime(d: DateInput): string {

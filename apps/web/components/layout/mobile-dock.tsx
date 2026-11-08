@@ -91,7 +91,12 @@ export function MobileDock({
                   >
                     <Icon className="size-5" weight={active ? 'fill' : undefined} />
                   </span>
-                  <span className={cn('text-[11px] leading-tight font-medium', active ? 'text-primary' : 'text-muted-foreground')}>
+                  <span
+                    className={cn(
+                      'text-[11px] leading-tight font-medium',
+                      active ? 'text-primary' : 'text-muted-foreground',
+                    )}
+                  >
                     {item.label}
                   </span>
                 </Link>
@@ -215,7 +220,8 @@ export function MobilePageActionsButton({ label = 'Page options' }: { label?: st
         title={label}
         // Close after a link or submit button inside the sheet is used.
         onClick={(e) => {
-          if ((e.target as HTMLElement).closest('a, button[type="submit"], [data-close-sheet]')) setOpen(false);
+          if ((e.target as HTMLElement).closest('a, button[type="submit"], [data-close-sheet]'))
+            setOpen(false);
         }}
       >
         <div className="grid gap-2">

@@ -35,7 +35,10 @@ export default async function UserPage({
   const canRoles = viewer.can('roles.manage');
   const [tags, roles] =
     tab === 'overview'
-      ? await Promise.all([callAction(listTags, {}, viewer.actor), canRoles ? callAction(listRoles, {}, viewer.actor) : null])
+      ? await Promise.all([
+          callAction(listTags, {}, viewer.actor),
+          canRoles ? callAction(listRoles, {}, viewer.actor) : null,
+        ])
       : [null, null];
 
   return (
@@ -47,7 +50,8 @@ export default async function UserPage({
         badges={c.status === 'archived' ? <Badge color="outline">Archived</Badge> : undefined}
         meta={
           <>
-            Added {formatDate(c.createdAt)} from {c.source} · {c.hasLogin ? 'has a login' : 'no login yet'}
+            Added {formatDate(c.createdAt)} from {c.source} ·{' '}
+            {c.hasLogin ? 'has a login' : 'no login yet'}
           </>
         }
         actions={canWrite && <ArchiveButton id={c.id} archived={c.status === 'archived'} />}
@@ -56,7 +60,15 @@ export default async function UserPage({
         label="User sections"
         items={[
           { href: `/admin/users/${c.id}`, label: 'Overview', active: tab === 'overview' },
-          ...(viewer.can('activity.read') ? [{ href: `/admin/users/${c.id}?tab=history`, label: 'History', active: tab === 'history' }] : []),
+          ...(viewer.can('activity.read')
+            ? [
+                {
+                  href: `/admin/users/${c.id}?tab=history`,
+                  label: 'History',
+                  active: tab === 'history',
+                },
+              ]
+            : []),
         ]}
       />
       {tab === 'history' ? (
@@ -75,21 +87,38 @@ export default async function UserPage({
                   contactId={c.id}
                   tags={c.tags}
                   canEdit={canWrite}
-                  options={tags?.ok ? tags.data.map(({ slug, label, kind }) => ({ slug, label, kind })) : []}
+                  options={
+                    tags?.ok
+                      ? tags.data.map(({ slug, label, kind }) => ({ slug, label, kind }))
+                      : []
+                  }
                 />
               </CardContent>
             </Card>
             <Card>
               <CardHeader>
                 <CardTitle>App access</CardTitle>
-                <CardDescription>Roles unlock Admin. Everyone with a login gets My account.</CardDescription>
+                <CardDescription>
+                  Roles unlock Admin. Everyone with a login gets My account.
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 {canRoles && roles?.ok ? (
-                  <RoleEditor contactId={c.id} roles={c.roles} hasLogin={c.hasLogin} options={roles.data.map(({ role, description }) => ({ role, description }))} />
+                  <RoleEditor
+                    contactId={c.id}
+                    roles={c.roles}
+                    hasLogin={c.hasLogin}
+                    options={roles.data.map(({ role, description }) => ({ role, description }))}
+                  />
                 ) : (
                   <DetailList>
-                    <DetailItem label="Roles">{c.roles.length ? <span className="capitalize">{c.roles.join(', ')}</span> : 'Customer access only'}</DetailItem>
+                    <DetailItem label="Roles">
+                      {c.roles.length ? (
+                        <span className="capitalize">{c.roles.join(', ')}</span>
+                      ) : (
+                        'Customer access only'
+                      )}
+                    </DetailItem>
                   </DetailList>
                 )}
               </CardContent>

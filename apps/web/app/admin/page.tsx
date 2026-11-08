@@ -12,16 +12,35 @@ import { requireViewer } from '@/lib/viewer';
 
 export const metadata = { title: 'Dashboard' };
 
-function Tile({ label, value, hint, href, tone }: { label: string; value: React.ReactNode; hint?: string; href?: string; tone?: 'bad' | 'ok' }) {
+function Tile({
+  label,
+  value,
+  hint,
+  href,
+  tone,
+}: {
+  label: string;
+  value: React.ReactNode;
+  hint?: string;
+  href?: string;
+  tone?: 'bad' | 'ok';
+}) {
   const body = (
     <Card className="h-full p-4 transition-colors hover:bg-tint">
       <p className="text-sm text-muted-foreground">{label}</p>
-      <p className={`mt-1 text-3xl font-semibold tracking-tight tabular-nums ${tone === 'bad' ? 'text-destructive' : ''}`}>{value}</p>
+      <p
+        className={`mt-1 text-3xl font-semibold tracking-tight tabular-nums ${tone === 'bad' ? 'text-destructive' : ''}`}
+      >
+        {value}
+      </p>
       {hint && <p className="mt-1 text-xs text-muted-foreground">{hint}</p>}
     </Card>
   );
   return href ? (
-    <Link href={href} className="block rounded-xl outline-none focus-visible:ring-2 focus-visible:ring-ring">
+    <Link
+      href={href}
+      className="block rounded-xl outline-none focus-visible:ring-2 focus-visible:ring-ring"
+    >
       {body}
     </Link>
   ) : (
@@ -35,7 +54,9 @@ export default async function AdminDashboard() {
   const [users, activity, errors, health] = await Promise.all([
     viewer.can('users.read') ? callAction(listContacts, { limit: 1 }, viewer.actor) : null,
     viewer.can('activity.read') ? callAction(listActivity, { limit: 8 }, viewer.actor) : null,
-    viewer.can('errors.manage') ? callAction(listErrors, { status: 'open', sinceDays: 30, limit: 5 }, viewer.actor) : null,
+    viewer.can('errors.manage')
+      ? callAction(listErrors, { status: 'open', sinceDays: 30, limit: 5 }, viewer.actor)
+      : null,
     viewer.can('system.manage') ? callAction(systemHealth, {}, viewer.actor) : null,
   ]);
   const openErrors = errors?.ok ? errors.data.length : null;
@@ -44,15 +65,40 @@ export default async function AdminDashboard() {
 
   return (
     <div className="grid gap-6">
-      <PageHeader title={`Welcome back, ${viewer.displayName.split(' ')[0]}`} description="What is happening across the app." />
+      <PageHeader
+        title={`Welcome back, ${viewer.displayName.split(' ')[0]}`}
+        description="What is happening across the app."
+      />
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {users?.ok && <Tile label="Users" value={users.data.total} href="/admin/users" hint="Active contacts" />}
-        {openErrors !== null && (
-          <Tile label="Open errors" value={errors?.ok && errors.data.length === 5 ? '5+' : openErrors} href="/admin/errors" tone={openErrors > 0 ? 'bad' : 'ok'} hint="Last 30 days" />
+        {users?.ok && (
+          <Tile label="Users" value={users.data.total} href="/admin/users" hint="Active contacts" />
         )}
-        {failedJobs !== null && <Tile label="Failed jobs" value={failedJobs} href="/admin/system" tone={failedJobs > 0 ? 'bad' : 'ok'} hint="Background queue" />}
+        {openErrors !== null && (
+          <Tile
+            label="Open errors"
+            value={errors?.ok && errors.data.length === 5 ? '5+' : openErrors}
+            href="/admin/errors"
+            tone={openErrors > 0 ? 'bad' : 'ok'}
+            hint="Last 30 days"
+          />
+        )}
+        {failedJobs !== null && (
+          <Tile
+            label="Failed jobs"
+            value={failedJobs}
+            href="/admin/system"
+            tone={failedJobs > 0 ? 'bad' : 'ok'}
+            hint="Background queue"
+          />
+        )}
         {health?.ok && (
-          <Tile label="Scheduled jobs" value={staleCrons ? `${staleCrons} stale` : 'Healthy'} href="/admin/system" tone={staleCrons ? 'bad' : 'ok'} hint={`${health.data.environment}${health.data.commit ? ` · ${health.data.commit}` : ''}`} />
+          <Tile
+            label="Scheduled jobs"
+            value={staleCrons ? `${staleCrons} stale` : 'Healthy'}
+            href="/admin/system"
+            tone={staleCrons ? 'bad' : 'ok'}
+            hint={`${health.data.environment}${health.data.commit ? ` · ${health.data.commit}` : ''}`}
+          />
         )}
       </div>
 
@@ -67,7 +113,13 @@ export default async function AdminDashboard() {
                 </Link>
               </CardDescription>
             </CardHeader>
-            <CardContent>{activity.ok ? <ActivityList entries={activity.data} /> : <ActionError error={activity.error} what="the activity" />}</CardContent>
+            <CardContent>
+              {activity.ok ? (
+                <ActivityList entries={activity.data} />
+              ) : (
+                <ActionError error={activity.error} what="the activity" />
+              )}
+            </CardContent>
           </Card>
         )}
         <div className="grid gap-6">
@@ -86,7 +138,10 @@ export default async function AdminDashboard() {
                   <ul className="grid gap-2">
                     {errors.data.map((e) => (
                       <li key={e.fingerprint}>
-                        <Link href={`/admin/errors/${e.ref}`} className="-mx-2 flex items-start gap-3 rounded-md px-2 py-1.5 text-sm hover:bg-accent">
+                        <Link
+                          href={`/admin/errors/${e.ref}`}
+                          className="-mx-2 flex items-start gap-3 rounded-md px-2 py-1.5 text-sm hover:bg-accent"
+                        >
                           <span className="min-w-0 flex-1">
                             <span className="block truncate font-medium">{e.message}</span>
                             <span className="block truncate text-xs text-muted-foreground">
@@ -118,10 +173,18 @@ export default async function AdminDashboard() {
                         <span className="min-w-0">
                           <span className="font-medium">{c.label}</span>
                           <span className="block text-xs text-muted-foreground">
-                            {c.lastOkAt ? `Last OK ${formatDateTime(c.lastOkAt)}` : 'Has not run here yet'}
+                            {c.lastOkAt
+                              ? `Last OK ${formatDateTime(c.lastOkAt)}`
+                              : 'Has not run here yet'}
                           </span>
                         </span>
-                        {c.stale ? <Badge color="red">Stale</Badge> : c.lastOkAt ? <Badge color="green">Running</Badge> : <Badge color="outline">Unknown</Badge>}
+                        {c.stale ? (
+                          <Badge color="red">Stale</Badge>
+                        ) : c.lastOkAt ? (
+                          <Badge color="green">Running</Badge>
+                        ) : (
+                          <Badge color="outline">Unknown</Badge>
+                        )}
                       </li>
                     ))}
                   </ul>

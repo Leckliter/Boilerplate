@@ -57,7 +57,10 @@ export function useAction() {
           // The tab is older than the deployed app: nothing ran, ask to reload.
           if (!isStaleDeploy(err)) throw err;
           promptReload();
-          resolve({ ok: false, message: 'A new version of the app is available. Reload to continue.' });
+          resolve({
+            ok: false,
+            message: 'A new version of the app is available. Reload to continue.',
+          });
           return;
         }
         if (!res.ok) {

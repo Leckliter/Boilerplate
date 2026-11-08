@@ -55,7 +55,10 @@ function ListBody({ rows }: { rows: number }) {
       </div>
       <Card className="gap-0 overflow-hidden p-0">
         {Array.from({ length: rows }, (_, i) => (
-          <div key={i} className="flex items-center gap-4 border-b border-hairline p-3 last:border-b-0">
+          <div
+            key={i}
+            className="flex items-center gap-4 border-b border-hairline p-3 last:border-b-0"
+          >
             <Skeleton className="size-8 shrink-0 rounded-full" />
             <div className="grid min-w-0 flex-1 gap-1.5">
               <SkeletonLine minWidth={30} maxWidth={60} />

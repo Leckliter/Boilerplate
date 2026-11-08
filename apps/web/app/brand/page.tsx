@@ -399,11 +399,17 @@ export default function BrandPage() {
         </div>
       </Section>
 
-      <Section title="Page building blocks" description="The toolbar above lists, loading states, the skip link, the providers and the form wiring that every screen uses.">
+      <Section
+        title="Page building blocks"
+        description="The toolbar above lists, loading states, the skip link, the providers and the form wiring that every screen uses."
+      >
         <ExtrasDemos />
       </Section>
 
-      <Section title="Icons" description="Phosphor, light weight by default, from @app/ui/components/icons only. Click one to copy its name.">
+      <Section
+        title="Icons"
+        description="Phosphor, light weight by default, from @app/ui/components/icons only. Click one to copy its name."
+      >
         <IconsGallery />
       </Section>
 
@@ -448,14 +454,38 @@ export default function BrandPage() {
         </Prose>
       </Section>
 
-      <Section title="Rules" description="The short version of docs/design-system.md. `pnpm rules` checks the mechanical ones.">
+      <Section
+        title="Rules"
+        description="The short version of docs/design-system.md. `pnpm rules` checks the mechanical ones."
+      >
         <ol className="grid list-decimal gap-1.5 pl-5 text-sm">
-          <li>Tokens only: <code className="font-mono text-xs">bg-primary</code>, <code className="font-mono text-xs">text-muted-foreground</code>. No hex, rgb or palette classes.</li>
-          <li>One primary button per screen; secondary is the default; destructive only after a <code className="font-mono text-xs">confirm()</code>.</li>
-          <li>Every control sits in a <code className="font-mono text-xs">&lt;Field&gt;</code>; every screen starts with <code className="font-mono text-xs">&lt;PageHeader&gt;</code> or <code className="font-mono text-xs">&lt;RecordHeader&gt;</code>.</li>
-          <li>Record pages show details read-only in an <code className="font-mono text-xs">EditableCard</code>; create pages are plain forms.</li>
-          <li>Icons from <code className="font-mono text-xs">@app/ui/components/icons</code> only; tabs are <code className="font-mono text-xs">Tabs</code> / <code className="font-mono text-xs">FilterTabs</code>, notices are <code className="font-mono text-xs">Callout</code>.</li>
-          <li>Works at 320px wide with no sideways scrolling; touch targets at least 40px on phones.</li>
+          <li>
+            Tokens only: <code className="font-mono text-xs">bg-primary</code>,{' '}
+            <code className="font-mono text-xs">text-muted-foreground</code>. No hex, rgb or palette
+            classes.
+          </li>
+          <li>
+            One primary button per screen; secondary is the default; destructive only after a{' '}
+            <code className="font-mono text-xs">confirm()</code>.
+          </li>
+          <li>
+            Every control sits in a <code className="font-mono text-xs">&lt;Field&gt;</code>; every
+            screen starts with <code className="font-mono text-xs">&lt;PageHeader&gt;</code> or{' '}
+            <code className="font-mono text-xs">&lt;RecordHeader&gt;</code>.
+          </li>
+          <li>
+            Record pages show details read-only in an{' '}
+            <code className="font-mono text-xs">EditableCard</code>; create pages are plain forms.
+          </li>
+          <li>
+            Icons from <code className="font-mono text-xs">@app/ui/components/icons</code> only;
+            tabs are <code className="font-mono text-xs">Tabs</code> /{' '}
+            <code className="font-mono text-xs">FilterTabs</code>, notices are{' '}
+            <code className="font-mono text-xs">Callout</code>.
+          </li>
+          <li>
+            Works at 320px wide with no sideways scrolling; touch targets at least 40px on phones.
+          </li>
           <li>Dark mode: surfaces get lighter with elevation, they do not invert.</li>
           <li>New component: add it to packages/ui and a demo here.</li>
         </ol>

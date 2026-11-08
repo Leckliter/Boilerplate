@@ -6,7 +6,20 @@
     "build": {
       "dependsOn": ["^build"],
       "outputs": [".next/**", "!.next/cache/**", "dist/**"],
-      "env": ["DATABASE_URL", "NEXT_PUBLIC_*", "BACKEND", "SUPABASE_*", "NEON_*", "S3_*", "RESEND_*", "QUO_*"]
+      "env": [
+        "DATABASE_URL",
+        "NEXT_PUBLIC_*",
+        "BACKEND",
+        "SUPABASE_*",
+        "NEON_*",
+        "S3_*",
+        "RESEND_*",
+        "QUO_*",
+        "EMAIL_FROM",
+        "APP_NAME",
+        "APP_TIME_ZONE",
+        "NOTIFICATIONS_SECRET"
+      ]
     },
     "dev": { "cache": false, "persistent": true },
     "typecheck": { "dependsOn": ["^typecheck"] },

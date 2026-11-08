@@ -5,7 +5,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@app/
 import { Empty } from '@app/ui/components/empty';
 import { ClockCountdownIcon } from '@app/ui/components/icons';
 import { PageHeader } from '@app/ui/components/page';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@app/ui/components/table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@app/ui/components/table';
 import { formatDateTime } from '@app/ui/lib/dates';
 import Link from 'next/link';
 
@@ -28,42 +35,70 @@ const STATUSES = [
 const when = (d: Date | null) => (d ? formatDateTime(d) : '—');
 
 /** Health, scheduled jobs (crons) and the background-job queue, with retry / cancel. */
-export default async function SystemPage({ searchParams }: { searchParams: Promise<{ status?: string }> }) {
+export default async function SystemPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ status?: string }>;
+}) {
   const viewer = await requireViewer('system.manage', '/admin/system');
   const { status: raw } = await searchParams;
   const status = STATUSES.find((s) => s.value === raw)?.value ?? 'all';
   const [health, jobs] = await Promise.all([
     callAction(systemHealth, {}, viewer.actor),
-    callAction(listJobs, { status: status === 'all' ? undefined : [status], limit: 50 }, viewer.actor),
+    callAction(
+      listJobs,
+      { status: status === 'all' ? undefined : [status], limit: 50 },
+      viewer.actor,
+    ),
   ]);
 
   return (
     <div className="grid gap-6">
-      <PageHeader title="System" description="Is everything running? Database, scheduled jobs and the background queue." />
+      <PageHeader
+        title="System"
+        description="Is everything running? Database, scheduled jobs and the background queue."
+      />
       {!health.ok ? (
         <ActionError error={health.error} what="the system health" />
       ) : (
         <>
-          {!health.data.ok && <Callout tone="danger">Something needs attention: {Object.entries(health.data.checks).filter(([, c]) => !c.ok).map(([k]) => k).join(', ')}.</Callout>}
+          {!health.data.ok && (
+            <Callout tone="danger">
+              Something needs attention:{' '}
+              {Object.entries(health.data.checks)
+                .filter(([, c]) => !c.ok)
+                .map(([k]) => k)
+                .join(', ')}
+              .
+            </Callout>
+          )}
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <Card className="p-4">
               <p className="text-sm text-muted-foreground">Environment</p>
               <p className="mt-1 text-xl font-semibold capitalize">{health.data.environment}</p>
-              <p className="text-xs text-muted-foreground">{health.data.commit ? `commit ${health.data.commit}` : 'no commit id'}</p>
+              <p className="text-xs text-muted-foreground">
+                {health.data.commit ? `commit ${health.data.commit}` : 'no commit id'}
+              </p>
             </Card>
-            {Object.entries(health.data.checks).filter(([k]) => !k.startsWith('cron/')).map(([k, c]) => (
-              <Card key={k} className="p-4">
-                <p className="text-sm text-muted-foreground capitalize">{k}</p>
-                <p className="mt-1 flex items-center gap-2 text-xl font-semibold">{c.ok ? <Badge color="green">OK</Badge> : <Badge color="red">Failing</Badge>}</p>
-                <p className="text-xs text-muted-foreground">{c.detail}</p>
-              </Card>
-            ))}
+            {Object.entries(health.data.checks)
+              .filter(([k]) => !k.startsWith('cron/'))
+              .map(([k, c]) => (
+                <Card key={k} className="p-4">
+                  <p className="text-sm text-muted-foreground capitalize">{k}</p>
+                  <p className="mt-1 flex items-center gap-2 text-xl font-semibold">
+                    {c.ok ? <Badge color="green">OK</Badge> : <Badge color="red">Failing</Badge>}
+                  </p>
+                  <p className="text-xs text-muted-foreground">{c.detail}</p>
+                </Card>
+              ))}
             <Card className="p-4">
               <p className="text-sm text-muted-foreground">Job queue</p>
               <p className="mt-1 text-sm">
                 {Object.entries(health.data.queues.jobs).length === 0
                   ? 'Empty'
-                  : Object.entries(health.data.queues.jobs).map(([s, n]) => `${n} ${s}`).join(' · ')}
+                  : Object.entries(health.data.queues.jobs)
+                      .map(([s, n]) => `${n} ${s}`)
+                      .join(' · ')}
               </p>
             </Card>
           </div>
@@ -71,7 +106,10 @@ export default async function SystemPage({ searchParams }: { searchParams: Promi
             <CardHeader>
               <CardTitle>Scheduled jobs</CardTitle>
               <CardDescription>
-                Each cron route records a run. A job is stale when its last OK run is older than twice its interval. Point your scheduler at <code className="text-xs">/api/cron/*</code> with <code className="text-xs">CRON_SECRET</code>.
+                Each cron route records a run. A job is stale when its last OK run is older than
+                twice its interval. Point your scheduler at{' '}
+                <code className="text-xs">/api/cron/*</code> with{' '}
+                <code className="text-xs">CRON_SECRET</code>.
               </CardDescription>
             </CardHeader>
             <CardContent className="p-0">
@@ -92,8 +130,18 @@ export default async function SystemPage({ searchParams }: { searchParams: Promi
                         <code className="block text-xs text-muted-foreground">{c.job}</code>
                       </TableCell>
                       <TableCell className="text-muted-foreground">{when(c.lastOkAt)}</TableCell>
-                      <TableCell className="hidden max-w-xs truncate text-xs text-muted-foreground md:table-cell">{c.lastError ?? '—'}</TableCell>
-                      <TableCell>{c.stale ? <Badge color="red">Stale</Badge> : c.lastOkAt ? <Badge color="green">Running</Badge> : <Badge color="outline">Not run here</Badge>}</TableCell>
+                      <TableCell className="hidden max-w-xs truncate text-xs text-muted-foreground md:table-cell">
+                        {c.lastError ?? '—'}
+                      </TableCell>
+                      <TableCell>
+                        {c.stale ? (
+                          <Badge color="red">Stale</Badge>
+                        ) : c.lastOkAt ? (
+                          <Badge color="green">Running</Badge>
+                        ) : (
+                          <Badge color="outline">Not run here</Badge>
+                        )}
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -105,14 +153,25 @@ export default async function SystemPage({ searchParams }: { searchParams: Promi
 
       <div className="grid gap-4">
         <h2 className="text-lg font-semibold">Background jobs</h2>
-        <FilterLinks label="Job status" items={STATUSES.map((s) => ({ href: `/admin/system?status=${s.value}`, label: s.label, active: s.value === status }))} />
+        <FilterLinks
+          label="Job status"
+          items={STATUSES.map((s) => ({
+            href: `/admin/system?status=${s.value}`,
+            label: s.label,
+            active: s.value === status,
+          }))}
+        />
         <Card>
           {!jobs.ok ? (
             <div className="p-5">
               <ActionError error={jobs.error} what="the jobs" />
             </div>
           ) : jobs.data.length === 0 ? (
-            <Empty icon={<ClockCountdownIcon />} title="No jobs here" description="Jobs are queued by actions (enqueue) and run by the jobs cron every minute." />
+            <Empty
+              icon={<ClockCountdownIcon />}
+              title="No jobs here"
+              description="Jobs are queued by actions (enqueue) and run by the jobs cron every minute."
+            />
           ) : (
             <Table>
               <TableHeader>
@@ -135,7 +194,10 @@ export default async function SystemPage({ searchParams }: { searchParams: Promi
                         {j.errorRef && (
                           <>
                             {' · '}
-                            <Link href={`/admin/errors/${j.errorRef}`} className="underline underline-offset-4">
+                            <Link
+                              href={`/admin/errors/${j.errorRef}`}
+                              className="underline underline-offset-4"
+                            >
                               {j.errorRef}
                             </Link>
                           </>
@@ -145,7 +207,9 @@ export default async function SystemPage({ searchParams }: { searchParams: Promi
                     <TableCell>
                       <JobStatusBadge status={j.status} />
                     </TableCell>
-                    <TableCell className="hidden text-muted-foreground md:table-cell">{when(j.finishedAt ?? j.runAt)}</TableCell>
+                    <TableCell className="hidden text-muted-foreground md:table-cell">
+                      {when(j.finishedAt ?? j.runAt)}
+                    </TableCell>
                     <TableCell className="text-right">
                       <JobButtons id={j.id} status={j.status} />
                     </TableCell>

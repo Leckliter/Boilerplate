@@ -17,10 +17,18 @@ import { FormDialog } from '@/components/forms/form-dialog';
 export function CreateApiKey() {
   const [secret, setSecret] = useState<string | null>(null);
   return (
-    <FormDialog title="New API key" description="For scripts and AI assistants (REST API and MCP). The key acts as you." trigger="New API key" icon={<PlusIcon />} triggerVariant="primary">
+    <FormDialog
+      title="New API key"
+      description="For scripts and AI assistants (REST API and MCP). The key acts as you."
+      trigger="New API key"
+      icon={<PlusIcon />}
+      triggerVariant="primary"
+    >
       {secret ? (
         <div className="grid gap-3">
-          <Callout tone="warning">Copy the key now. It is shown only once and cannot be recovered.</Callout>
+          <Callout tone="warning">
+            Copy the key now. It is shown only once and cannot be recovered.
+          </Callout>
           <CodeBlock copy={secret}>{secret}</CodeBlock>
         </div>
       ) : (

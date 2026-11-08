@@ -90,7 +90,15 @@ export function WorkspaceTabsProvider({
   );
 }
 
-function Provider({ userId, groups, children }: { userId: string; groups: NavGroup[]; children: ReactNode }) {
+function Provider({
+  userId,
+  groups,
+  children,
+}: {
+  userId: string;
+  groups: NavGroup[];
+  children: ReactNode;
+}) {
   const router = useRouter();
   const pathname = usePathname();
   const search = useSearchParams().toString();
@@ -106,10 +114,13 @@ function Provider({ userId, groups, children }: { userId: string; groups: NavGro
   useEffect(() => {
     const saved = load<State | null>(stateKey(userId), null);
     memory.current = load<Memory>(memoryKey(userId), {});
-    const valid = saved?.tabs.filter((t) => typeof t.id === 'number' && ADMIN_PATH.test(pathOf(t.href))) ?? [];
+    const valid =
+      saved?.tabs.filter((t) => typeof t.id === 'number' && ADMIN_PATH.test(pathOf(t.href))) ?? [];
     if (valid.length > 0) {
       const holder = valid.find((t) => t.href === url);
-      const activeId = holder?.id ?? (valid.some((t) => t.id === saved?.activeId) ? saved!.activeId : valid[0]!.id);
+      const activeId =
+        holder?.id ??
+        (valid.some((t) => t.id === saved?.activeId) ? saved!.activeId : valid[0]!.id);
       const tabs = holder ? valid : valid.map((t) => (t.id === activeId ? { ...t, href: url } : t));
       nextId.current = Math.max(...tabs.map((t) => t.id)) + 1;
       // Restoring saved state from an external store after hydration is what this effect is for.
@@ -127,7 +138,12 @@ function Provider({ userId, groups, children }: { userId: string; groups: NavGro
     setState((s) =>
       s.tabs.find((t) => t.id === s.activeId)?.href === url
         ? s
-        : { ...s, tabs: s.tabs.map((t) => (t.id === s.activeId ? { ...t, href: url, title: undefined } : t)) },
+        : {
+            ...s,
+            tabs: s.tabs.map((t) =>
+              t.id === s.activeId ? { ...t, href: url, title: undefined } : t,
+            ),
+          },
     );
   }, [url]);
 
@@ -138,7 +154,11 @@ function Provider({ userId, groups, children }: { userId: string; groups: NavGro
       if (!raw) return;
       setState((s) => ({
         ...s,
-        tabs: s.tabs.map((tab) => (tab.id === s.activeId && tab.href === url && tab.title !== raw ? { ...tab, title: raw } : tab)),
+        tabs: s.tabs.map((tab) =>
+          tab.id === s.activeId && tab.href === url && tab.title !== raw
+            ? { ...tab, title: raw }
+            : tab,
+        ),
       }));
     }, 250);
     return () => clearTimeout(t);
@@ -154,7 +174,10 @@ function Provider({ userId, groups, children }: { userId: string; groups: NavGro
 
   const rememberScroll = useCallback(() => {
     const el = main();
-    setState((s) => ({ ...s, tabs: s.tabs.map((t) => (t.id === s.activeId ? { ...t, scroll: el?.scrollTop ?? 0 } : t)) }));
+    setState((s) => ({
+      ...s,
+      tabs: s.tabs.map((t) => (t.id === s.activeId ? { ...t, scroll: el?.scrollTop ?? 0 } : t)),
+    }));
   }, []);
 
   const restoreScroll = useCallback((top: number) => {
@@ -241,7 +264,9 @@ function Provider({ userId, groups, children }: { userId: string; groups: NavGro
       const a = (e.target as HTMLElement | null)?.closest('a[href]');
       if (!a || a.getAttribute('target') === '_blank') return null;
       const u = new URL((a as HTMLAnchorElement).href, window.location.href);
-      return u.origin === window.location.origin && ADMIN_PATH.test(u.pathname) ? u.pathname + u.search : null;
+      return u.origin === window.location.origin && ADMIN_PATH.test(u.pathname)
+        ? u.pathname + u.search
+        : null;
     }
     const onClick = (e: MouseEvent) => {
       if (e.button !== 0 || !(e.ctrlKey || e.metaKey) || e.shiftKey) return;
@@ -271,7 +296,16 @@ function Provider({ userId, groups, children }: { userId: string; groups: NavGro
   );
 
   const value = useMemo<Ctx>(
-    () => ({ tabs: state.tabs, activeId: state.activeId, activate, close, open, remember, recall, titleFor }),
+    () => ({
+      tabs: state.tabs,
+      activeId: state.activeId,
+      activate,
+      close,
+      open,
+      remember,
+      recall,
+      titleFor,
+    }),
     [state, activate, close, open, remember, recall, titleFor],
   );
   return <TabsContext.Provider value={value}>{children}</TabsContext.Provider>;
@@ -315,7 +349,11 @@ export function WorkspaceTabsStrip() {
   if (!ctx) return null;
   const { tabs, activeId, activate, close, open } = ctx;
   return (
-    <div role="tablist" aria-label="Open pages" className="flex min-w-0 items-end gap-1 overflow-x-auto px-3 pt-1.5">
+    <div
+      role="tablist"
+      aria-label="Open pages"
+      className="flex min-w-0 items-end gap-1 overflow-x-auto px-3 pt-1.5"
+    >
       {tabs.map((tab) => {
         const active = tab.id === activeId;
         return (
@@ -330,7 +368,9 @@ export function WorkspaceTabsStrip() {
             }}
             className={cn(
               'group/tab flex h-8 max-w-48 min-w-24 items-center gap-1 rounded-t-lg border border-b-0 pr-1 pl-3 text-sm transition-colors',
-              active ? 'border-border bg-background font-medium text-foreground' : 'border-transparent text-muted-foreground hover:bg-tint',
+              active
+                ? 'border-border bg-background font-medium text-foreground'
+                : 'border-transparent text-muted-foreground hover:bg-tint',
             )}
           >
             <button

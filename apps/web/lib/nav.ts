@@ -67,7 +67,14 @@ export type AppDef = {
 
 export const APPS: AppDef[] = [
   { id: 'account', key: 'myAccount', label: 'My account', href: '/account', icon: UserIcon },
-  { id: 'admin', key: 'admin', label: 'Admin', href: '/admin', icon: ShieldCheckIcon, permission: 'admin.access' },
+  {
+    id: 'admin',
+    key: 'admin',
+    label: 'Admin',
+    href: '/admin',
+    icon: ShieldCheckIcon,
+    permission: 'admin.access',
+  },
 ];
 
 export const ACCOUNT_NAV: NavGroup[] = [
@@ -75,11 +82,29 @@ export const ACCOUNT_NAV: NavGroup[] = [
     key: 'account',
     label: 'Account',
     items: [
-      { key: 'account', label: 'Overview', href: '/account', icon: HouseIcon, exact: true, dock: true },
+      {
+        key: 'account',
+        label: 'Overview',
+        href: '/account',
+        icon: HouseIcon,
+        exact: true,
+        dock: true,
+      },
       { key: 'profile', label: 'Profile', href: '/account/profile', icon: UserIcon, dock: true },
       { key: 'security', label: 'Security', href: '/account/security', icon: LockIcon },
-      { key: 'notifications', label: 'Notifications', href: '/account/notifications', icon: BellIcon, dock: true },
-      { key: 'preferences', label: 'Preferences', href: '/account/preferences', icon: SlidersHorizontalIcon },
+      {
+        key: 'notifications',
+        label: 'Notifications',
+        href: '/account/notifications',
+        icon: BellIcon,
+        dock: true,
+      },
+      {
+        key: 'preferences',
+        label: 'Preferences',
+        href: '/account/preferences',
+        icon: SlidersHorizontalIcon,
+      },
     ],
   },
 ];
@@ -89,15 +114,35 @@ export const ADMIN_NAV: NavGroup[] = [
     key: 'overview',
     label: 'Overview',
     items: [
-      { key: 'dashboard', label: 'Dashboard', href: '/admin', icon: GaugeIcon, exact: true, dock: true },
+      {
+        key: 'dashboard',
+        label: 'Dashboard',
+        href: '/admin',
+        icon: GaugeIcon,
+        exact: true,
+        dock: true,
+      },
     ],
   },
   {
     key: 'people',
     label: 'People',
     items: [
-      { key: 'users', label: 'Users', href: '/admin/users', icon: UsersIcon, permission: 'users.read', dock: true },
-      { key: 'roles', label: 'Roles & permissions', href: '/admin/roles', icon: ShieldCheckIcon, permission: 'roles.manage' },
+      {
+        key: 'users',
+        label: 'Users',
+        href: '/admin/users',
+        icon: UsersIcon,
+        permission: 'users.read',
+        dock: true,
+      },
+      {
+        key: 'roles',
+        label: 'Roles & permissions',
+        href: '/admin/roles',
+        icon: ShieldCheckIcon,
+        permission: 'roles.manage',
+      },
     ],
   },
   {
@@ -105,8 +150,20 @@ export const ADMIN_NAV: NavGroup[] = [
     key: 'build',
     label: 'Build',
     items: [
-      { key: 'automations', label: 'Automations', href: '/admin/automations', icon: LightningIcon, permission: 'automations.manage' },
-      { key: 'notifications', label: 'Notifications', href: '/admin/notifications', icon: BellIcon, permission: 'notifications.manage' },
+      {
+        key: 'automations',
+        label: 'Automations',
+        href: '/admin/automations',
+        icon: LightningIcon,
+        permission: 'automations.manage',
+      },
+      {
+        key: 'notifications',
+        label: 'Notifications',
+        href: '/admin/notifications',
+        icon: BellIcon,
+        permission: 'notifications.manage',
+      },
       { key: 'docs', label: 'Docs', href: '/docs', icon: BookOpenIcon },
     ],
   },
@@ -114,17 +171,50 @@ export const ADMIN_NAV: NavGroup[] = [
     key: 'monitor',
     label: 'Monitor',
     items: [
-      { key: 'activity', label: 'Activity', href: '/admin/activity', icon: PulseIcon, permission: 'activity.read', dock: true },
-      { key: 'errors', label: 'Errors', href: '/admin/errors', icon: BugIcon, permission: 'errors.manage', dock: true },
-      { key: 'system', label: 'System', href: '/admin/system', icon: GearIcon, permission: 'system.manage' },
+      {
+        key: 'activity',
+        label: 'Activity',
+        href: '/admin/activity',
+        icon: PulseIcon,
+        permission: 'activity.read',
+        dock: true,
+      },
+      {
+        key: 'errors',
+        label: 'Errors',
+        href: '/admin/errors',
+        icon: BugIcon,
+        permission: 'errors.manage',
+        dock: true,
+      },
+      {
+        key: 'system',
+        label: 'System',
+        href: '/admin/system',
+        icon: GearIcon,
+        permission: 'system.manage',
+      },
     ],
   },
   {
     key: 'configure',
     label: 'Configure',
     items: [
-      { key: 'apiKeys', label: 'API keys', href: '/admin/api-keys', icon: KeyIcon, permission: 'api_keys.manage' },
-      { key: 'settings', label: 'Settings', href: '/admin/settings', icon: GearIcon, permission: 'settings.manage', drill: 'settings' },
+      {
+        key: 'apiKeys',
+        label: 'API keys',
+        href: '/admin/api-keys',
+        icon: KeyIcon,
+        permission: 'api_keys.manage',
+      },
+      {
+        key: 'settings',
+        label: 'Settings',
+        href: '/admin/settings',
+        icon: GearIcon,
+        permission: 'settings.manage',
+        drill: 'settings',
+      },
     ],
   },
 ];
@@ -140,9 +230,28 @@ export const SUBMENUS: SubMenu[] = [
         key: 'settings',
         label: '',
         items: [
-          { key: 'settings', label: 'Settings', href: '/admin/settings', icon: SlidersHorizontalIcon, exact: true, permission: 'settings.manage' },
-          { key: 'integrations', label: 'Integrations', href: '/admin/settings/integrations', icon: PlugIcon, permission: 'settings.manage' },
-          { key: 'apiKeys', label: 'API keys', href: '/admin/api-keys', icon: KeyIcon, permission: 'api_keys.manage' },
+          {
+            key: 'settings',
+            label: 'Settings',
+            href: '/admin/settings',
+            icon: SlidersHorizontalIcon,
+            exact: true,
+            permission: 'settings.manage',
+          },
+          {
+            key: 'integrations',
+            label: 'Integrations',
+            href: '/admin/settings/integrations',
+            icon: PlugIcon,
+            permission: 'settings.manage',
+          },
+          {
+            key: 'apiKeys',
+            label: 'API keys',
+            href: '/admin/api-keys',
+            icon: KeyIcon,
+            permission: 'api_keys.manage',
+          },
         ],
       },
     ],
@@ -186,7 +295,5 @@ export function activeItem(pathname: string, groups: NavGroup[]): NavItem | unde
 }
 
 export function submenuFor(pathname: string, menus: SubMenu[]): SubMenu | undefined {
-  return menus.find((m) =>
-    m.prefixes.some((p) => pathname === p || pathname.startsWith(`${p}/`)),
-  );
+  return menus.find((m) => m.prefixes.some((p) => pathname === p || pathname.startsWith(`${p}/`)));
 }

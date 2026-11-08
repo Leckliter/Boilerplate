@@ -4,20 +4,49 @@ import { CheckIcon } from '@app/ui/components/icons';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
-export const metadata: Metadata = { title: 'Pricing', description: 'Placeholder pricing page: replace the plans with your own.' };
+export const metadata: Metadata = {
+  title: 'Pricing',
+  description: 'Placeholder pricing page: replace the plans with your own.',
+};
 
 /** Placeholder: replace the plans with your own (or delete the page and its links in components/site). */
 const PLANS = [
-  { name: 'Starter', price: '$0', note: 'For trying things out', features: ['Public site and sign-in', 'Customer portal', 'Community support'], cta: 'Start free' },
-  { name: 'Team', price: '$29', note: 'per month', features: ['Everything in Starter', 'Admin with roles', 'Activity log and errors', 'Email support'], cta: 'Choose Team', featured: true },
-  { name: 'Business', price: '$99', note: 'per month', features: ['Everything in Team', 'REST API and MCP', 'Automations', 'Priority support'], cta: 'Contact us' },
+  {
+    name: 'Starter',
+    price: '$0',
+    note: 'For trying things out',
+    features: ['Public site and sign-in', 'Customer portal', 'Community support'],
+    cta: 'Start free',
+  },
+  {
+    name: 'Team',
+    price: '$29',
+    note: 'per month',
+    features: [
+      'Everything in Starter',
+      'Admin with roles',
+      'Activity log and errors',
+      'Email support',
+    ],
+    cta: 'Choose Team',
+    featured: true,
+  },
+  {
+    name: 'Business',
+    price: '$99',
+    note: 'per month',
+    features: ['Everything in Team', 'REST API and MCP', 'Automations', 'Priority support'],
+    cta: 'Contact us',
+  },
 ];
 
 export default function PricingPage() {
   return (
     <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
       <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">Simple pricing</h1>
-      <p className="mt-2 max-w-xl text-muted-foreground">These plans are placeholders. Replace them with your own.</p>
+      <p className="mt-2 max-w-xl text-muted-foreground">
+        These plans are placeholders. Replace them with your own.
+      </p>
       <div className="mt-10 grid gap-4 md:grid-cols-3">
         {PLANS.map((p) => (
           <Card key={p.name} className={p.featured ? 'p-6 ring-2 ring-primary' : 'p-6'}>
@@ -31,7 +60,11 @@ export default function PricingPage() {
                 </li>
               ))}
             </ul>
-            <LinkButton href="/login" variant={p.featured ? 'primary' : 'secondary'} className="mt-6 w-full">
+            <LinkButton
+              href="/login"
+              variant={p.featured ? 'primary' : 'secondary'}
+              className="mt-6 w-full"
+            >
               {p.cta}
             </LinkButton>
           </Card>

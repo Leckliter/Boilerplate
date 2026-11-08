@@ -26,7 +26,8 @@ export function sessionFor(email: string): AuthSession {
 }
 
 function guard() {
-  if (!devLoginEnabled()) throw new Error('Dev login is off (needs DEV_LOGIN=1, never in production).');
+  if (!devLoginEnabled())
+    throw new Error('Dev login is off (needs DEV_LOGIN=1, never in production).');
 }
 
 export const devAdapter: AuthAdapter = {

@@ -9,7 +9,13 @@ import { UserFields } from './user-form';
 /** "New user" in the Users page's actions: a dialog around `contacts.create`. */
 export function NewUserDialog({ tags }: { tags: { slug: string; label: string }[] }) {
   return (
-    <FormDialog title="New user" description="Anyone the business deals with: a customer, a lead, staff, a vendor." trigger="New user" icon={<PlusIcon />} triggerVariant="primary">
+    <FormDialog
+      title="New user"
+      description="Anyone the business deals with: a customer, a lead, staff, a vendor."
+      trigger="New user"
+      icon={<PlusIcon />}
+      triggerVariant="primary"
+    >
       <ActionForm action="contacts.create" success="User created" submitLabel="Create user">
         {(errors) => (
           <>

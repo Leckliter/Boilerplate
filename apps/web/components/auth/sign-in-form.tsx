@@ -15,13 +15,13 @@ export function SignInForm({ next }: { next: string }) {
   const [request, sendCode, sending] = useActionState<SignInState, FormData>(requestCode, {
     step: 'email',
   });
-  const [verify, check, checking] = useActionState<SignInState, FormData>(
-    verifyCode,
-    { step: 'email' },
-  );
+  const [verify, check, checking] = useActionState<SignInState, FormData>(verifyCode, {
+    step: 'email',
+  });
 
   // The code step is shown once a code was requested (and stays on a wrong code).
-  const email = verify.step === 'code' ? verify.email : request.step === 'code' ? request.email : null;
+  const email =
+    verify.step === 'code' ? verify.email : request.step === 'code' ? request.email : null;
 
   if (email) {
     const error = verify.step === 'code' ? verify.error : undefined;
@@ -50,12 +50,18 @@ export function SignInForm({ next }: { next: string }) {
             {t('verify')}
           </Button>
         </form>
-        <form action={sendCode} className="flex flex-wrap items-center justify-between gap-2 text-sm">
+        <form
+          action={sendCode}
+          className="flex flex-wrap items-center justify-between gap-2 text-sm"
+        >
           <input type="hidden" name="email" value={email} />
           <Button type="submit" variant="ghost" size="sm" loading={sending}>
             {t('resend')}
           </Button>
-          <a href={`/login?next=${encodeURIComponent(next)}`} className="text-muted-foreground underline underline-offset-4">
+          <a
+            href={`/login?next=${encodeURIComponent(next)}`}
+            className="text-muted-foreground underline underline-offset-4"
+          >
             {t('differentEmail')}
           </a>
         </form>
@@ -77,7 +83,14 @@ export function SignInForm({ next }: { next: string }) {
       </div>
       <form action={sendCode} className="grid gap-4">
         <Field label={t('email')} error={request.step === 'email' ? request.error : undefined}>
-          <Input name="email" type="email" autoComplete="email" placeholder="you@example.com" required autoFocus />
+          <Input
+            name="email"
+            type="email"
+            autoComplete="email"
+            placeholder="you@example.com"
+            required
+            autoFocus
+          />
         </Field>
         <Button type="submit" variant="primary" loading={sending}>
           {t('sendCode')}

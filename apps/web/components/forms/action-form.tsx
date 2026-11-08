@@ -154,7 +154,11 @@ export function ActionForm({
       } catch (err) {
         if (isStaleDeploy(err)) {
           promptReload();
-          return { status: 'error', at: Date.now(), message: 'A new version of the app is available. Reload to continue.' };
+          return {
+            status: 'error',
+            at: Date.now(),
+            message: 'A new version of the app is available. Reload to continue.',
+          };
         }
         throw err;
       }

@@ -3,13 +3,7 @@
 import { Breadcrumbs } from '@app/ui/components/breadcrumbs';
 import { Button, RefreshButton } from '@app/ui/components/button';
 import { ButtonGroup } from '@app/ui/components/button-group';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@app/ui/components/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@app/ui/components/card';
 import { Collapsible } from '@app/ui/components/collapsible';
 import {
   DropdownMenu,

@@ -7,7 +7,14 @@ import { Callout } from '@app/ui/components/callout';
 import { CheckIcon } from '@app/ui/components/icons';
 import { PageHeader } from '@app/ui/components/page';
 import { rowLink, rowLinkRow } from '@app/ui/components/link';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@app/ui/components/table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@app/ui/components/table';
 import { cn } from '@app/ui/lib/utils';
 import Link from 'next/link';
 
@@ -19,7 +26,10 @@ export const metadata = { title: 'Roles & permissions' };
 /** Who can do what: the role × permission matrix (from the code, read-only) and who holds each role. */
 export default async function RolesPage() {
   const viewer = await requireViewer('roles.manage', '/admin/roles');
-  const [roles, staff] = await Promise.all([callAction(listRoles, {}, viewer.actor), callAction(listStaff, {}, viewer.actor)]);
+  const [roles, staff] = await Promise.all([
+    callAction(listRoles, {}, viewer.actor),
+    callAction(listStaff, {}, viewer.actor),
+  ]);
 
   return (
     <div className="grid gap-6">
@@ -56,7 +66,13 @@ export default async function RolesPage() {
                     </TableCell>
                     {roles.data.map((r) => (
                       <TableCell key={r.role} className="text-center">
-                        {r.permissions.includes(p) ? <CheckIcon className="mx-auto size-4 text-success" aria-label="Yes" /> : <span className="text-muted-foreground" aria-label="No">–</span>}
+                        {r.permissions.includes(p) ? (
+                          <CheckIcon className="mx-auto size-4 text-success" aria-label="Yes" />
+                        ) : (
+                          <span className="text-muted-foreground" aria-label="No">
+                            –
+                          </span>
+                        )}
                       </TableCell>
                     ))}
                   </TableRow>
@@ -88,7 +104,9 @@ export default async function RolesPage() {
             </div>
           ) : staff.data.length === 0 ? (
             <div className="p-5">
-              <Callout tone="warning">Nobody has a role yet. Set OWNER_EMAILS and sign in to become the first owner.</Callout>
+              <Callout tone="warning">
+                Nobody has a role yet. Set OWNER_EMAILS and sign in to become the first owner.
+              </Callout>
             </div>
           ) : (
             <Table>
@@ -102,7 +120,10 @@ export default async function RolesPage() {
                 {staff.data.map((c) => (
                   <TableRow key={c.id} className={rowLinkRow}>
                     <TableCell>
-                      <Link href={`/admin/users/${c.id}`} className={cn('flex items-center gap-3', rowLink)}>
+                      <Link
+                        href={`/admin/users/${c.id}`}
+                        className={cn('flex items-center gap-3', rowLink)}
+                      >
                         <Avatar name={c.displayName} />
                         <span className="grid min-w-0">
                           <span className="truncate font-medium">{c.displayName}</span>

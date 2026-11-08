@@ -1,6 +1,6 @@
 import 'server-only';
 
-import { recordAuthEvent } from '@app/core';
+import { recordAuthEvent, resolveSignedInContact, runAction, systemActor } from '@app/core';
 import { z } from 'zod';
 
 import type { AuthSession } from './auth';
@@ -24,6 +24,18 @@ export async function recordSignIn(session: AuthSession, method: 'email_code' | 
     request: await currentRequestInfo(),
     detail: { method },
   });
+  // Lets automations react to "user.signed_in" (events module; delete this block if you remove it).
+  const contact = await resolveSignedInContact({
+    id: session.userId,
+    email: session.email,
+    emailVerified: true,
+  });
+  if (contact.status !== 'ok') return;
+  await runAction(
+    'events.recordSignIn',
+    { contactId: contact.contactId, displayName: contact.displayName, first: false },
+    systemActor(),
+  );
 }
 
 export async function recordFailedSignIn(email: string, reason: string) {

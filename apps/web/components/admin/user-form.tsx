@@ -8,7 +8,14 @@ export function UserFields({
   contact,
   errors = {},
 }: {
-  contact?: { firstName: string | null; lastName: string | null; companyName: string | null; email: string | null; phone: string | null; notes: string | null };
+  contact?: {
+    firstName: string | null;
+    lastName: string | null;
+    companyName: string | null;
+    email: string | null;
+    phone: string | null;
+    notes: string | null;
+  };
   errors?: Record<string, string | undefined>;
 }) {
   return (
@@ -29,7 +36,12 @@ export function UserFields({
           <Input name="email" type="email" defaultValue={contact?.email ?? ''} />
         </Field>
         <Field label="Phone" error={errors.phone}>
-          <Input name="phone" type="tel" defaultValue={contact?.phone ?? ''} placeholder="(816) 555-1234" />
+          <Input
+            name="phone"
+            type="tel"
+            defaultValue={contact?.phone ?? ''}
+            placeholder="(816) 555-1234"
+          />
         </Field>
       </div>
       <Field label="Notes" required={false} error={errors.notes}>

@@ -3,7 +3,13 @@ import { Badge } from '@app/ui/components/badge';
 import { Callout } from '@app/ui/components/callout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@app/ui/components/card';
 import { PageHeader } from '@app/ui/components/page';
-import { ArrowRightIcon, LockIcon, ShieldCheckIcon, SlidersHorizontalIcon, UserIcon } from '@app/ui/components/icons';
+import {
+  ArrowRightIcon,
+  LockIcon,
+  ShieldCheckIcon,
+  SlidersHorizontalIcon,
+  UserIcon,
+} from '@app/ui/components/icons';
 import { formatDate } from '@app/ui/lib/dates';
 import Link from 'next/link';
 
@@ -14,18 +20,35 @@ export const metadata = { title: 'Overview' };
 
 const LINKS = [
   { href: '/account/profile', title: 'Profile', text: 'Your name and phone.', icon: UserIcon },
-  { href: '/account/security', title: 'Security', text: 'How you sign in, and signing out.', icon: LockIcon },
-  { href: '/account/preferences', title: 'Preferences', text: 'Theme, language and time zone.', icon: SlidersHorizontalIcon },
+  {
+    href: '/account/security',
+    title: 'Security',
+    text: 'How you sign in, and signing out.',
+    icon: LockIcon,
+  },
+  {
+    href: '/account/preferences',
+    title: 'Preferences',
+    text: 'Theme, language and time zone.',
+    icon: SlidersHorizontalIcon,
+  },
 ];
 
 /** The customer portal home. Add your own cards (orders, invoices, projects …) here. */
-export default async function AccountPage({ searchParams }: { searchParams: Promise<{ denied?: string }> }) {
+export default async function AccountPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ denied?: string }>;
+}) {
   const viewer = await requireViewer(undefined, '/account');
   const { denied } = await searchParams;
   const me = await callAction(getMyAccount, {}, viewer.actor);
   return (
     <div className="grid gap-6">
-      <PageHeader title={`Hello, ${viewer.displayName.split(' ')[0]}`} description="Manage your details and how we reach you." />
+      <PageHeader
+        title={`Hello, ${viewer.displayName.split(' ')[0]}`}
+        description="Manage your details and how we reach you."
+      />
       {denied && <Callout tone="warning">You don’t have access to that page.</Callout>}
       {!me.ok ? (
         <ActionError error={me.error} what="your account" />
@@ -58,7 +81,11 @@ export default async function AccountPage({ searchParams }: { searchParams: Prom
       )}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {LINKS.map((l) => (
-          <Link key={l.href} href={l.href} className="group block rounded-xl outline-none focus-visible:ring-2 focus-visible:ring-ring">
+          <Link
+            key={l.href}
+            href={l.href}
+            className="group block rounded-xl outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
             <Card className="h-full p-4 transition-colors group-hover:bg-tint">
               <l.icon className="size-5 text-muted-foreground" />
               <p className="mt-3 flex items-center justify-between gap-2 font-semibold">
