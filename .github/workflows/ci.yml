@@ -1,0 +1,56 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main, dev]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: app
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DATABASE_URL: postgres://postgres:postgres@localhost:5432/app
+      BACKEND: neon
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Typecheck
+        run: pnpm typecheck
+      - name: Lint
+        run: pnpm lint
+      - name: Rules (AGENTS.md, checked mechanically)
+        run: |
+          git fetch --no-tags --depth=1 origin main || echo "no origin/main; skipping the edited-migration check"
+          pnpm rules
+      - name: Format
+        run: pnpm format
+      - name: Action docs are up to date
+        run: pnpm actions:docs --check
+      - name: Migrations apply cleanly
+        run: pnpm db:migrate
+      - name: Migrations match the schema
+        run: pnpm --filter @app/db exec drizzle-kit check
+      - name: Tests
+        run: pnpm test
+      - name: Every action has a "works" and a "refused" test
+        run: pnpm actions:tests
+      - name: Build
+        run: pnpm --filter web build

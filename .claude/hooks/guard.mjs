@@ -65,7 +65,9 @@ if (['Edit', 'Write', 'MultiEdit', 'NotebookEdit'].includes(tool)) {
   if (/\.generated\.(ts|md)$/.test(rel)) {
     block(
       `${rel} is generated — don't edit it. Change the source and run ` +
-        (rel.includes('actions') ? '`pnpm actions:docs`.' : 'its generator (see package.json scripts).'),
+        (rel.includes('actions')
+          ? '`pnpm actions:docs`.'
+          : 'its generator (see package.json scripts).'),
     );
   }
 

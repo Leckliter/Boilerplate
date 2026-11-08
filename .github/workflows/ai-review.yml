@@ -1,0 +1,59 @@
+name: AI review
+
+# A second AI reads every pull request against AGENTS.md — a fresh reviewer catches what the
+# AI that wrote the change talked itself into. Comments only; it never approves or merges.
+# Optional: delete this file if you don't want it. Needs the ANTHROPIC_API_KEY repository
+# secret; skipped until it is set.
+
+on:
+  pull_request:
+    types: [opened, synchronize, ready_for_review, reopened]
+
+concurrency:
+  group: ai-review-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  review:
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+      id-token: write
+    env:
+      HAS_KEY: ${{ secrets.ANTHROPIC_API_KEY != '' }}
+    steps:
+      - name: Skip (no ANTHROPIC_API_KEY secret yet)
+        if: env.HAS_KEY != 'true'
+        run: echo "Set the ANTHROPIC_API_KEY repository secret to turn on AI review."
+      - uses: actions/checkout@v4
+        if: env.HAS_KEY == 'true'
+        with:
+          fetch-depth: 1
+      - uses: anthropics/claude-code-action@v1
+        if: env.HAS_KEY == 'true'
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          prompt: |
+            REPO: ${{ github.repository }}
+            PR NUMBER: ${{ github.event.pull_request.number }}
+
+            Review this pull request. Read AGENTS.md first: its numbered rules are the checklist,
+            together with docs/actions.md and the docs AGENTS.md points to for the areas touched.
+            `pnpm rules` and CI already catch the mechanical cases — look for what they can't:
+            - business logic or permission checks outside an action; an action that trusts its caller
+            - money not in integer cents; prices taken from the browser
+            - someone notified without notify(), or texted without consent
+            - errors swallowed or turned into vague messages; missing error references
+            - a second table of people; tags used to grant access
+            - schema changes without a migration, an edited applied migration, an untracked new table
+            - data read through a provider client (Supabase JS / Neon Data API) instead of an action
+            - tests that don't test the behaviour (only the happy path, or mocks where the real DB is used)
+            - screens or processes changed without their docs; TODO.md not updated
+            - real bugs: race conditions, missing transactions, wrong time zones, off-by-one dates
+            Be specific and brief: file:line, what's wrong, the fix. Use inline comments for line-level
+            problems and one summary comment. If it's good, say so in one line. Never approve or merge.
+          claude_args: |
+            --allowedTools "mcp__github_inline_comment__create_inline_comment,Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*),Read,Grep,Glob"

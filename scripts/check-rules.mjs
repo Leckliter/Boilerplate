@@ -295,7 +295,11 @@ function checkSource(file, text) {
       if (SAFE_ACTION_PKG.test(spec)) flag(node, 'no-next-safe-action');
     }
 
-    if (ts.isIdentifier(node) && node.text === 'authActionClient' && !ts.isImportSpecifier(node.parent)) {
+    if (
+      ts.isIdentifier(node) &&
+      node.text === 'authActionClient' &&
+      !ts.isImportSpecifier(node.parent)
+    ) {
       flag(node, 'no-next-safe-action');
     }
 
@@ -304,7 +308,9 @@ function checkSource(file, text) {
       importsProvider &&
       ts.isPropertyAccessExpression(node) &&
       ['from', 'rpc', 'storage', 'schema'].includes(node.name.text) &&
-      !/^(Array|Buffer|Uint8Array|Object|String|Promise|Iterator)$/.test(node.expression.getText(sf))
+      !/^(Array|Buffer|Uint8Array|Object|String|Promise|Iterator)$/.test(
+        node.expression.getText(sf),
+      )
     ) {
       flag(node, 'no-provider-client-for-data');
     }
@@ -563,7 +569,11 @@ function allowed(text, lineIndex, rule) {
 }
 
 function git(argv) {
-  return execFileSync('git', argv, { cwd: ROOT, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
+  return execFileSync('git', argv, {
+    cwd: ROOT,
+    encoding: 'utf8',
+    stdio: ['ignore', 'pipe', 'pipe'],
+  });
 }
 
 function refExists(ref) {
