@@ -1,0 +1,29 @@
+{
+  "name": "app",
+  "private": true,
+  "packageManager": "pnpm@10.28.0",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "dev": "turbo dev --filter=web",
+    "build": "turbo build",
+    "typecheck": "turbo typecheck",
+    "lint": "turbo lint",
+    "format": "prettier --check .",
+    "format:fix": "prettier --write .",
+    "rules": "node scripts/check-rules.mjs",
+    "check": "pnpm typecheck && pnpm lint && pnpm rules && pnpm format && pnpm actions:docs --check && pnpm test && pnpm actions:tests",
+    "db:generate": "pnpm --filter @app/db generate",
+    "db:migrate": "pnpm --filter @app/db migrate",
+    "db:seed": "pnpm --filter @app/db seed",
+    "db:studio": "pnpm --filter @app/db studio",
+    "actions:docs": "pnpm --filter @app/core actions:docs --",
+    "actions:tests": "pnpm --filter @app/core actions:tests --",
+    "test": "turbo test"
+  },
+  "devDependencies": {
+    "prettier": "^3.9.10",
+    "prettier-plugin-tailwindcss": "^0.8.1",
+    "turbo": "^2.11.10",
+    "typescript": "^5.9.3"
+  }
+}

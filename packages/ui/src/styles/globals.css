@@ -1,0 +1,366 @@
+/*
+ * RSKC design tokens — THE single source of truth for colour, radius, type
+ * and shadow. Components only ever use these tokens (bg-primary, text-muted-foreground,
+ * border-border …), never raw colours. Change the brand here and the whole app follows.
+ *
+ * Look & feel: Cloudflare Kumo (crisp neutral greys, hairline borders, rounded-lg
+ * controls, rounded-xl surfaces, soft shadows, 100ms transitions) with the
+ * RSKC Cardinal Orange brand. Token NAMES follow shadcn/ui so AI tools and docs
+ * work out of the box. See docs/design-system.md.
+ */
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+@source '../**/*.{ts,tsx}';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  /* Brand — Cardinal Orange */
+  --brand-50: oklch(0.962 0.028 45);
+  --brand-100: oklch(0.925 0.045 44);
+  --brand-200: oklch(0.885 0.06 45);
+  --brand-300: oklch(0.8 0.1 42);
+  --brand-400: oklch(0.7 0.18 39);
+  --brand-500: #e5542f;
+  --brand-600: #c4431f;
+  --brand-700: oklch(0.515 0.165 38);
+  --brand-800: oklch(0.44 0.13 36);
+  --brand-900: oklch(0.38 0.1 36);
+
+  /* Surfaces (Kumo: canvas → base → elevated) */
+  --background: oklch(0.9875 0 0); /* page canvas */
+  --foreground: oklch(0.21 0.006 285.9);
+  --card: oklch(1 0 0); /* panels, cards, inputs */
+  --card-foreground: var(--foreground);
+  --popover: oklch(1 0 0);
+  --popover-foreground: var(--foreground);
+  --sidebar: oklch(0.98 0 0);
+  --sidebar-foreground: var(--foreground);
+
+  /* Actions */
+  --primary: var(--brand-500);
+  --primary-hover: var(--brand-600);
+  --primary-foreground: oklch(1 0 0);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.145 0 0);
+  --accent: oklch(0.965 0 0); /* hover fill for ghost buttons, menu items */
+  --accent-foreground: oklch(0.145 0 0);
+
+  /* Quiet text & fills */
+  --muted: oklch(0.96 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+
+  /* Status */
+  --destructive: oklch(0.505 0.213 27.5);
+  --destructive-foreground: oklch(1 0 0);
+  --success: oklch(0.432 0.095 166.9);
+  --warning: oklch(0.597 0.144 57.5);
+  --info: oklch(0.424 0.199 265.6);
+
+  /* Lines */
+  --border: oklch(0.145 0 0 / 0.1); /* Kumo "line" */
+  --hairline: oklch(0.935 0 0);
+  --input: oklch(0.145 0 0 / 0.12);
+  --ring: oklch(0.15 0 0 / 0.5); /* Kumo focus ring: neutral, not brand */
+
+  --radius: 0.625rem;
+  --shadow-color: oklch(0 0 0 / 0.08);
+
+  /*
+   * Kumo's extra surfaces, text and status tints (cloudflare/kumo, MIT), under shadcn-style
+   * names. light-dark() follows html.dark's color-scheme, so one line per token covers both modes.
+   * kumo-base → card · kumo-canvas → background · kumo-subtle → muted-foreground ·
+   * kumo-line → border · kumo-brand → primary · kumo-danger → destructive.
+   */
+  --elevated: light-dark(oklch(0.98 0 0), oklch(0.12 0 0));
+  --recessed: light-dark(oklch(0.96 0 0), oklch(0.15 0 0));
+  --tint: light-dark(oklch(0.97 0 0), oklch(0.269 0 0));
+  --contrast: light-dark(oklch(0.085 0 0), oklch(0.985 0 0));
+  --overlay: light-dark(oklch(0.975 0 0), oklch(0.269 0 0));
+  --control: light-dark(oklch(1 0 0), oklch(0.21 0.006 285.9));
+  --interact: light-dark(oklch(0.87 0 0), oklch(0.371 0 0));
+  --fill: light-dark(oklch(0.922 0 0), oklch(0.269 0 0));
+  --fill-hover: light-dark(oklch(0.965 0 0), oklch(0.371 0 0));
+  --inactive: light-dark(oklch(0.87 0 0), oklch(0.439 0 0));
+  --placeholder: light-dark(oklch(0.708 0 0), oklch(0.556 0 0));
+  --inverse: light-dark(oklch(0.97 0 0), oklch(0.205 0 0));
+  --link: light-dark(oklch(0.424 0.199 265.6), oklch(0.707 0.165 254.6));
+  --destructive-tint: light-dark(oklch(0.936 0.032 17.7 / 0.42), oklch(0.429 0.176 28.7 / 0.17));
+  --success-tint: light-dark(oklch(0.962 0.043 156.7 / 0.57), oklch(0.393 0.096 152.3 / 0.2));
+  --warning-tint: light-dark(oklch(0.931 0.107 94.6 / 0.2), oklch(0.353 0.079 65 / 0.37));
+  --info-tint: light-dark(oklch(0.932 0.032 255.6 / 0.45), oklch(0.38 0.145 265.5 / 0.22));
+  --banner-info: light-dark(oklch(0.932 0.032 255.6 / 0.7), oklch(0.379 0.146 265.5 / 0.5));
+  --banner-warning: light-dark(oklch(0.973 0.071 103.2), oklch(0.554 0.135 66.4 / 0.5));
+  --badge-red: light-dark(oklch(0.577 0.245 27.3), oklch(0.505 0.213 27.5));
+  --badge-green: light-dark(oklch(0.596 0.145 163.2), oklch(0.508 0.118 165.6));
+  --badge-orange: oklch(0.815 0.197 76);
+  --badge-purple: light-dark(oklch(0.558 0.288 302.3), oklch(0.496 0.265 301.9));
+  --badge-teal: light-dark(oklch(0.549 0.096 184.6), oklch(0.511 0.096 186.4));
+  --badge-blue: light-dark(oklch(0.546 0.245 262.9), oklch(0.488 0.243 264.4));
+  --badge-neutral: light-dark(oklch(0.556 0 0), oklch(0.439 0 0));
+  --badge-inverted: light-dark(oklch(0.145 0 0), oklch(1 0 0));
+  --badge-inverted-foreground: light-dark(oklch(1 0 0), oklch(0 0 0));
+  --badge-orange-subtle: light-dark(oklch(0.47 0.157 37.3), oklch(0.901 0.076 70.7));
+  --badge-teal-subtle: light-dark(oklch(0.437 0.078 188.2), oklch(0.91 0.096 180.4));
+  --badge-neutral-subtle: light-dark(oklch(0.269 0 0), oklch(0.922 0 0));
+  --arrow-edge: light-dark(oklch(0.145 0 0 / 0.1), transparent);
+  --arrow-stroke: light-dark(transparent, oklch(0.32 0 0));
+
+  /*
+   * Payment cards (<PaymentCard>) — the face of each card network, so a saved
+   * card looks like the real thing. Same in light and dark mode, like a real card.
+   */
+  --pay-visa-from: oklch(0.46 0.19 277);
+  --pay-visa-to: oklch(0.24 0.12 268);
+  --pay-mastercard-from: oklch(0.33 0.01 260);
+  --pay-mastercard-to: oklch(0.16 0.005 260);
+  --pay-amex-from: oklch(0.62 0.11 232);
+  --pay-amex-to: oklch(0.4 0.12 250);
+  --pay-discover-from: oklch(0.36 0.02 55);
+  --pay-discover-to: oklch(0.19 0.01 55);
+  --pay-diners-from: oklch(0.52 0.04 245);
+  --pay-diners-to: oklch(0.3 0.04 250);
+  --pay-jcb-from: oklch(0.5 0.11 165);
+  --pay-jcb-to: oklch(0.3 0.07 175);
+  --pay-unionpay-from: oklch(0.5 0.16 25);
+  --pay-unionpay-to: oklch(0.3 0.1 20);
+  --pay-cb-from: oklch(0.48 0.09 215);
+  --pay-cb-to: oklch(0.28 0.07 230);
+  --pay-interac-from: oklch(0.34 0.02 95);
+  --pay-interac-to: oklch(0.18 0.01 95);
+  --pay-eftpos-from: oklch(0.42 0.06 300);
+  --pay-eftpos-to: oklch(0.24 0.04 300);
+  --pay-link-from: oklch(0.55 0.14 158);
+  --pay-link-to: oklch(0.33 0.09 165);
+  --pay-generic-from: oklch(0.42 0 0);
+  --pay-generic-to: oklch(0.2 0 0);
+  /* Logo + detail colours on a card face */
+  --pay-ink: oklch(1 0 0);
+  --pay-sheen: oklch(1 0 0 / 0.16);
+  --pay-stripe: oklch(0.12 0 0);
+  --pay-signature: oklch(0.95 0.01 90);
+  --pay-chip: oklch(0.82 0.12 85);
+  --pay-chip-line: oklch(0.6 0.1 75);
+  --pay-mc-red: oklch(0.6 0.23 28);
+  --pay-mc-yellow: oklch(0.8 0.17 75);
+  --pay-mc-orange: oklch(0.7 0.21 48);
+  --pay-amex-blue: oklch(0.55 0.15 245);
+  --pay-discover-orange: oklch(0.7 0.19 50);
+  --pay-jcb-blue: oklch(0.45 0.15 255);
+  --pay-jcb-red: oklch(0.55 0.2 25);
+  --pay-jcb-green: oklch(0.55 0.15 150);
+  --pay-unionpay-red: oklch(0.55 0.21 27);
+  --pay-unionpay-blue: oklch(0.42 0.15 255);
+  --pay-unionpay-teal: oklch(0.55 0.1 195);
+  --pay-interac-yellow: oklch(0.85 0.17 90);
+}
+
+.dark {
+  --background: oklch(0.1 0 0);
+  --foreground: oklch(0.97 0 0);
+  --card: oklch(0.17 0 0);
+  --card-foreground: var(--foreground);
+  --popover: oklch(0.2 0 0);
+  --popover-foreground: var(--foreground);
+  --sidebar: oklch(0.12 0 0);
+  --sidebar-foreground: var(--foreground);
+
+  --primary: var(--brand-400);
+  --primary-hover: var(--brand-500);
+  --primary-foreground: oklch(1 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+
+  --muted: oklch(0.22 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+
+  --destructive: oklch(0.704 0.191 22.2);
+  --success: oklch(0.905 0.093 164.2);
+  --warning: oklch(0.75 0.183 55.9);
+  --info: oklch(0.707 0.165 254.6);
+
+  --border: oklch(0.32 0 0);
+  --hairline: oklch(0.269 0 0);
+  --input: oklch(0.32 0 0);
+  --ring: oklch(0.935 0 0 / 0.5);
+  --shadow-color: oklch(0 0 0 / 0.3);
+}
+
+@theme inline {
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+
+  --color-brand-50: var(--brand-50);
+  --color-brand-100: var(--brand-100);
+  --color-brand-200: var(--brand-200);
+  --color-brand-300: var(--brand-300);
+  --color-brand-400: var(--brand-400);
+  --color-brand-500: var(--brand-500);
+  --color-brand-600: var(--brand-600);
+  --color-brand-700: var(--brand-700);
+  --color-brand-800: var(--brand-800);
+  --color-brand-900: var(--brand-900);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-info: var(--info);
+  --color-border: var(--border);
+  --color-hairline: var(--hairline);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-elevated: var(--elevated);
+  --color-recessed: var(--recessed);
+  --color-tint: var(--tint);
+  --color-contrast: var(--contrast);
+  --color-overlay: var(--overlay);
+  --color-control: var(--control);
+  --color-interact: var(--interact);
+  --color-fill: var(--fill);
+  --color-fill-hover: var(--fill-hover);
+  --color-inactive: var(--inactive);
+  --color-placeholder: var(--placeholder);
+  --color-inverse: var(--inverse);
+  --color-link: var(--link);
+  --color-destructive-tint: var(--destructive-tint);
+  --color-success-tint: var(--success-tint);
+  --color-warning-tint: var(--warning-tint);
+  --color-info-tint: var(--info-tint);
+  --color-banner-info: var(--banner-info);
+  --color-banner-warning: var(--banner-warning);
+  --color-badge-red: var(--badge-red);
+  --color-badge-green: var(--badge-green);
+  --color-badge-orange: var(--badge-orange);
+  --color-badge-purple: var(--badge-purple);
+  --color-badge-teal: var(--badge-teal);
+  --color-badge-blue: var(--badge-blue);
+  --color-badge-neutral: var(--badge-neutral);
+  --color-badge-inverted: var(--badge-inverted);
+  --color-badge-inverted-foreground: var(--badge-inverted-foreground);
+  --color-badge-orange-subtle: var(--badge-orange-subtle);
+  --color-badge-teal-subtle: var(--badge-teal-subtle);
+  --color-badge-neutral-subtle: var(--badge-neutral-subtle);
+  --color-arrow-edge: var(--arrow-edge);
+  --color-arrow-stroke: var(--arrow-stroke);
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+
+  --shadow-xs: 0 1px 2px 0 var(--shadow-color);
+  --shadow-sm: 0 1px 3px 0 var(--shadow-color), 0 1px 2px -1px var(--shadow-color);
+  --shadow-lg:
+    0 20px 25px -5px oklch(0 0 0 / 0.04), 0 8px 10px -6px oklch(0 0 0 / 0.04),
+    0 0 0 1px var(--border);
+
+  --default-transition-duration: 100ms;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    color-scheme: light;
+  }
+  html.dark {
+    color-scheme: dark;
+  }
+  body {
+    @apply bg-background font-sans text-foreground antialiased;
+    font-feature-settings: 'cv11', 'ss01';
+    /* A long email, URL or reference wraps instead of pushing the page sideways on a phone. */
+    overflow-wrap: break-word;
+  }
+  /*
+   * Phones: a grid cell may be narrower than its content. Without this, one wide
+   * child (a table, a `truncate` line, a code block) stretches the whole column —
+   * and the page — past the screen, instead of scrolling or truncating inside it.
+   * Zero specificity (:where), so any `min-w-*` utility still wins.
+   */
+  :where(.grid) > * {
+    min-width: 0;
+  }
+  button:not(:disabled),
+  [role='button']:not(:disabled) {
+    cursor: pointer;
+  }
+}
+
+/* Kumo Tabs: a row that overflows scrolls sideways without a scrollbar or page bounce. */
+.kumo-tabs-list {
+  overscroll-behavior-x: contain;
+}
+@supports (animation-timeline: scroll()) {
+  .kumo-tabs-list {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .kumo-tabs-list::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Kumo motion: skeleton shimmer, toast bump on update, bounce-in tick. */
+@keyframes shimmer {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+@keyframes toast-bump {
+  0%,
+  100% {
+    scale: 1;
+  }
+  20% {
+    scale: 1.02;
+  }
+}
+@keyframes bounce-in {
+  0% {
+    scale: 0.6;
+    opacity: 0;
+  }
+  60% {
+    scale: 1.2;
+    opacity: 1;
+  }
+  100% {
+    scale: 1;
+  }
+}
+@utility animate-toast-bump {
+  animation: toast-bump 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@utility animate-toast-bump-alternate {
+  animation: toast-bump 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) 0.001s;
+}
+@utility animate-bounce-in {
+  animation: bounce-in 0.4s ease-out;
+}

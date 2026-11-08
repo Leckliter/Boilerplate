@@ -1,0 +1,10 @@
+pnpm-lock.yaml
+packages/db/migrations/meta
+.next
+node_modules
+docs/actions.generated.md
+docs/events.generated.md
+packages/core/src/docs/docs.generated.ts
+packages/core/src/docs/docs-es.generated.ts
+packages/core/src/docs/docs-es-slugs.generated.ts
+packages/core/src/legal/legal.generated.ts
