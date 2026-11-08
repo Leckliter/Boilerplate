@@ -2,6 +2,7 @@ import { and, contactRoles, contacts, eq, inArray } from '@app/db';
 import { z } from 'zod';
 
 import { ActionError, defineAction } from '../define';
+import { emit } from '../../events/emit';
 import { getContactOrThrow } from './shared';
 
 export const archiveContact = defineAction({
@@ -42,6 +43,7 @@ export const archiveContact = defineAction({
       throw new ActionError('conflict', 'This is the last owner; add another owner first.');
     }
     await tx.update(contacts).set({ status: 'archived' }).where(eq(contacts.id, input.id));
+    await emit(tx, 'contact.archived', { contactId: c.id, displayName: c.displayName });
     log({ subjectType: 'contact', subjectId: c.id, summary: `Archived ${c.displayName}` });
     return { id: c.id, status: 'archived' as const };
   },

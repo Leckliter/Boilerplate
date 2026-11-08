@@ -1,7 +1,8 @@
-import { and, contactTags, eq, inArray } from '@app/db';
+import { and, contactTags, eq, inArray, tags } from '@app/db';
 import { z } from 'zod';
 
 import { defineAction } from '../define';
+import { emit } from '../../events/emit';
 import { getContactOrThrow, resolveTagIds, tagSlugsField, withTagsAndRoles } from './shared';
 
 export const addContactTags = defineAction({
@@ -17,10 +18,30 @@ export const addContactTags = defineAction({
   async run({ input, actor, tx, log }) {
     const c = await getContactOrThrow(tx, input.id);
     const tagIds = await resolveTagIds(tx, input.tags);
-    await tx
+    const added = await tx
       .insert(contactTags)
       .values(tagIds.map((tagId) => ({ contactId: c.id, tagId, addedBy: actor.contactId })))
-      .onConflictDoNothing();
+      .onConflictDoNothing()
+      .returning({ tagId: contactTags.tagId });
+    if (added.length) {
+      // Only the tags that were really new (adding one they already have is a no-op).
+      const newSlugs = (
+        await tx
+          .select({ slug: tags.slug })
+          .from(tags)
+          .where(
+            inArray(
+              tags.id,
+              added.map((r) => r.tagId),
+            ),
+          )
+      ).map((t) => t.slug);
+      await emit(tx, 'contact.tagged', {
+        contactId: c.id,
+        displayName: c.displayName,
+        tags: newSlugs,
+      });
+    }
     log({
       subjectType: 'contact',
       subjectId: c.id,

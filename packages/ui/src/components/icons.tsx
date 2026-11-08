@@ -177,4 +177,13 @@ export {
   GlobeHemisphereWestIcon,
   InfoIcon,
   WarningCircleIcon,
+  SlidersHorizontalIcon,
+  DesktopIcon,
+  TranslateIcon,
+  ClockIcon,
+  CommandIcon,
+  TagIcon,
+  UserCircleIcon,
+  SealCheckIcon,
+  ArrowsOutSimpleIcon,
 } from '@phosphor-icons/react';

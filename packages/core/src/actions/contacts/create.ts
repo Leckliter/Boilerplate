@@ -2,6 +2,7 @@ import { contacts, contactTags } from '@app/db';
 import { z } from 'zod';
 
 import { defineAction } from '../define';
+import { emit } from '../../events/emit';
 import {
   assertEmailFree,
   buildDisplayName,
@@ -57,6 +58,13 @@ export const createContact = defineAction({
         .insert(contactTags)
         .values(tagIds.map((tagId) => ({ contactId: row!.id, tagId, addedBy: actor.contactId })));
     }
+    await emit(tx, 'contact.created', {
+      contactId: row!.id,
+      displayName: row!.displayName,
+      email: row!.email,
+      phone: row!.phone,
+      tags: input.tags,
+    });
     log({ subjectType: 'contact', subjectId: row!.id, summary: `Created ${row!.displayName}` });
     const [view] = await withTagsAndRoles(tx, [row!]);
     return view!;

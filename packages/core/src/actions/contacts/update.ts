@@ -2,6 +2,7 @@ import { contactRoles, contacts, eq } from '@app/db';
 import { z } from 'zod';
 
 import { ActionError, defineAction } from '../define';
+import { emit } from '../../events/emit';
 import {
   assertEmailFree,
   buildDisplayName,
@@ -58,10 +59,18 @@ export const updateContact = defineAction({
       })
       .where(eq(contacts.id, id))
       .returning();
+    const changed = Object.keys(changes);
+    if (changed.length) {
+      await emit(tx, 'contact.updated', {
+        contactId: id,
+        displayName: row!.displayName,
+        fields: changed,
+      });
+    }
     log({
       subjectType: 'contact',
       subjectId: id,
-      summary: `Updated ${row!.displayName}: ${Object.keys(changes).join(', ') || 'no changes'}`,
+      summary: `Updated ${row!.displayName}: ${changed.join(', ') || 'no changes'}`,
     });
     const [view] = await withTagsAndRoles(tx, [row!]);
     return view!;

@@ -77,13 +77,17 @@ describe('background jobs', () => {
   it('a queued job runs once, and only exists if the action committed; dedupeKey queues it once', async () => {
     const owner = await makeActor(['owner']);
     done.length = 0;
+    // (A failed action also files an error report, which the events module turns into an
+    // `events.dispatch` job — so look only at this test's own jobs.)
+    const mine = async () =>
+      (await getDb().select().from(jobs)).filter((j) => j.type.startsWith('test.'));
     await callAction(queuer, { fail: true }, owner);
-    expect(await getDb().select().from(jobs)).toHaveLength(0);
+    expect(await mine()).toHaveLength(0);
     await callAction(queuer, {}, owner);
-    expect(await getDb().select().from(jobs)).toHaveLength(1);
-    expect(await runDueJobs()).toEqual({ done: 1, retrying: 0, failed: 0 });
+    expect(await mine()).toHaveLength(1);
+    expect(await runDueJobs()).toMatchObject({ retrying: 0, failed: 0 });
     expect(done).toEqual(['ok:7']);
-    const [job] = await getDb().select().from(jobs);
+    const [job] = await getDb().select().from(jobs).where(eq(jobs.type, 'test.ok'));
     expect(job).toMatchObject({ status: 'done', attempts: 1, result: { n: 7 } });
     expect(job?.activityId).toBeTruthy(); // linked to the action that queued it
   });
@@ -94,12 +98,12 @@ describe('background jobs', () => {
       await enqueue(tx, 'test.permanent', {});
     });
     const first = await runDueJobs();
-    expect(first).toEqual({ done: 0, retrying: 1, failed: 1 });
+    expect(first).toMatchObject({ retrying: 1, failed: 1 });
     const flaky = (await getDb().select().from(jobs).where(eq(jobs.type, 'test.flaky')))[0]!;
     expect(flaky).toMatchObject({ status: 'pending', attempts: 1, lastError: 'flaky failure' });
     expect(flaky.runAt.getTime()).toBeGreaterThan(Date.now());
     await getDb().update(jobs).set({ runAt: new Date() }).where(eq(jobs.id, flaky.id));
-    expect(await runDueJobs()).toEqual({ done: 0, retrying: 0, failed: 1 });
+    expect(await runDueJobs()).toMatchObject({ retrying: 0, failed: 1 });
     const failed = (await getDb().select().from(jobs).where(eq(jobs.type, 'test.flaky')))[0]!;
     expect(failed.status).toBe('failed');
     expect(failed.errorRef).toMatch(/^E-/);

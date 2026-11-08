@@ -1,0 +1,40 @@
+{
+  "common": {
+    "save": "Guardar cambios",
+    "cancel": "Cancelar",
+    "signIn": "Iniciar sesión",
+    "signOut": "Cerrar sesión",
+    "tryAgain": "Intentar de nuevo",
+    "back": "Volver"
+  },
+  "nav": {
+    "dashboard": "Panel",
+    "users": "Usuarios",
+    "roles": "Roles y permisos",
+    "activity": "Actividad",
+    "errors": "Errores",
+    "settings": "Configuración",
+    "system": "Sistema",
+    "account": "Resumen",
+    "profile": "Perfil",
+    "security": "Seguridad",
+    "preferences": "Preferencias",
+    "myAccount": "Mi cuenta",
+    "backToSite": "Volver al sitio"
+  },
+  "auth": {
+    "signInTitle": "Inicia sesión o crea una cuenta",
+    "signInIntro": "Escribe tu correo y te enviaremos un código de un solo uso.",
+    "email": "Correo electrónico",
+    "sendCode": "Enviarme un código",
+    "codeTitle": "Revisa tu correo",
+    "code": "Código",
+    "verify": "Iniciar sesión"
+  },
+  "errors": {
+    "title": "Algo salió mal",
+    "body": "Ya quedó registrado. Intentar de nuevo suele funcionar; si sigue pasando, envíanos la referencia de abajo.",
+    "notFoundTitle": "Página no encontrada",
+    "home": "Ir al inicio"
+  }
+}

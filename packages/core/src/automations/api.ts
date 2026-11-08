@@ -1,0 +1,32 @@
+/** What the web app imports from the automations module (`@app/core/automations`). */
+export {
+  conditionSchema,
+  definitionSchema,
+  OPERATORS,
+  STEP_TYPES,
+  stepSchema,
+  triggerSchema,
+  type Condition,
+  type Definition,
+  type DefinitionInput,
+  type Step,
+  type StepInput,
+  type StepType,
+  type Trigger,
+} from './definition';
+export {
+  archiveAutomation,
+  automationsReference,
+  cancelRunAction,
+  createAutomation,
+  duplicateAutomation,
+  getAutomation,
+  getRun,
+  listAutomations,
+  listAutomationTags,
+  listRuns,
+  retryRunAction,
+  runAutomation,
+  updateAutomation,
+  type AutomationView,
+} from '../actions/automations';

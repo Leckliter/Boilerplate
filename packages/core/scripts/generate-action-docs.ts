@@ -6,7 +6,7 @@
  *   pnpm actions:docs           # regenerate
  *   pnpm actions:docs --check   # CI: fail if the file is out of date
  */
-import { readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
 import { z } from 'zod';
@@ -75,6 +75,12 @@ for (const a of listActions()) {
 const files: [string, string, string][] = [
   [out, lines.join('\n'), `${listActions().length} actions`],
 ];
+// The events module (events/ + automations/) adds its own catalog; without the folder there is none.
+const eventsOut = fileURLToPath(new URL('../../../docs/events.generated.md', import.meta.url));
+if (existsSync(fileURLToPath(new URL('../src/events/docs.ts', import.meta.url)))) {
+  const { eventsMarkdown } = await import('../src/events/docs');
+  files.push([eventsOut, eventsMarkdown(), 'the event catalog']);
+}
 if (process.argv.includes('--check')) {
   let stale = false;
   for (const [file, content] of files) {

@@ -64,6 +64,40 @@ See [actions.md](./actions.md) for how the system works.
 | [`jobs.list`](#jobslist) | `system.manage` |  |
 | [`jobs.retry`](#jobsretry) | `system.manage` | yes |
 | [`jobs.cancel`](#jobscancel) | `system.manage` | yes |
+| [`events.list`](#eventslist) | `automations.manage` |  |
+| [`events.recordSignIn`](#eventsrecordSignIn) | `system` | yes |
+| [`automations.reference`](#automationsreference) | `automations.manage` |  |
+| [`automations.list`](#automationslist) | `automations.manage` |  |
+| [`automations.get`](#automationsget) | `automations.manage` |  |
+| [`automations.tags`](#automationstags) | `automations.manage` |  |
+| [`automations.create`](#automationscreate) | `automations.manage` | yes |
+| [`automations.update`](#automationsupdate) | `automations.manage` | yes |
+| [`automations.archive`](#automationsarchive) | `automations.manage` | yes |
+| [`automations.duplicate`](#automationsduplicate) | `automations.manage` | yes |
+| [`automations.run`](#automationsrun) | `automations.manage` | yes |
+| [`automations.listRuns`](#automationslistRuns) | `automations.manage` |  |
+| [`automations.getRun`](#automationsgetRun) | `automations.manage` |  |
+| [`automations.cancelRun`](#automationscancelRun) | `automations.manage` | yes |
+| [`automations.retryRun`](#automationsretryRun) | `automations.manage` | yes |
+| [`notifications.list`](#notificationslist) | `authenticated` |  |
+| [`notifications.unreadCount`](#notificationsunreadCount) | `authenticated` |  |
+| [`notifications.markRead`](#notificationsmarkRead) | `authenticated` | yes |
+| [`notifications.dismiss`](#notificationsdismiss) | `authenticated` | yes |
+| [`notifications.open`](#notificationsopen) | `authenticated` | yes |
+| [`notifications.preferences`](#notificationspreferences) | `authenticated` |  |
+| [`notifications.setPreference`](#notificationssetPreference) | `authenticated` | yes |
+| [`notifications.setSmsConsent`](#notificationssetSmsConsent) | `authenticated` | yes |
+| [`notifications.unsubscribe`](#notificationsunsubscribe) | `public` | yes |
+| [`notifications.sendTest`](#notificationssendTest) | `authenticated` | yes |
+| [`notifications.deliveries`](#notificationsdeliveries) | `notifications.manage` |  |
+| [`notifications.retry`](#notificationsretry) | `notifications.manage` | yes |
+| [`notifications.recordSuppression`](#notificationsrecordSuppression) | `system` | yes |
+| [`files.requestUpload`](#filesrequestUpload) | `authenticated` | yes |
+| [`files.confirm`](#filesconfirm) | `authenticated` | yes |
+| [`files.list`](#fileslist) | `authenticated` |  |
+| [`files.delete`](#filesdelete) | `authenticated` | yes |
+| [`docs.list`](#docslist) | `public` |  |
+| [`docs.get`](#docsget) | `public` |  |
 
 ### contacts.list
 
@@ -1298,6 +1332,2472 @@ See [actions.md](./actions.md) for how the system works.
   },
   "required": [
     "id"
+  ]
+}
+```
+
+### events.list
+
+**List business events** — The event log, newest first: what happened (contact.created, role.granted …), its data, what it was about, and whether automations have been handed it yet (dispatchedAt). Filter by type or subject.
+
+- Who: `automations.manage`
+- Changes data: no
+- Returns: [{ id, type, data, subjectType, subjectId, depth, causeAutomationId, occurredAt, dispatchedAt }]
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "type": {
+      "type": "string"
+    },
+    "subjectType": {
+      "type": "string"
+    },
+    "subjectId": {
+      "type": "string",
+      "format": "uuid",
+      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+    },
+    "limit": {
+      "default": 50,
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 200
+    }
+  }
+}
+```
+
+### events.recordSignIn
+
+**Record a sign-in as an event** — System only: called by the web app after someone signed in (and was linked to their contact), so automations can react (`user.signed_in`). `first` = their first ever sign-in. Not an AI tool; nothing to call by hand.
+
+- Who: `system`
+- Changes data: yes (written to the activity log)
+- Returns: { emitted: boolean }
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "contactId": {
+      "type": "string",
+      "format": "uuid",
+      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+    },
+    "displayName": {
+      "type": "string",
+      "maxLength": 300
+    },
+    "first": {
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "contactId",
+    "displayName",
+    "first"
+  ]
+}
+```
+
+### automations.reference
+
+**Automation building blocks** — Everything needed to write an automation: every event (when it fires, its data fields as JSON Schema, an example), every step type, condition operators, trigger shapes, the template syntax, the actions YOU may use in an action step (with their input as JSON Schema) and the staff permissions a notifyStaff step can target. Call this before automations.create.
+
+- Who: `automations.manage`
+- Changes data: no
+- Returns: { events, stepTypes, operators, templates, actions: [{ name, title, description, mutates, destructive, input }], permissions, schemas: { trigger, step, condition } }
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {}
+}
+```
+
+### automations.list
+
+**List automations** — All automations with their tags and trigger, whether they are on, how many runs are going and when one last ran. Filter by tag (exact, case-insensitive) or search the name and description.
+
+- Who: `automations.manage`
+- Changes data: no
+- Returns: [{ id, name, description, tags, enabled, trigger, steps, version, activeRuns, failedRuns30d, lastRunAt, … }]
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "includeArchived": {
+      "default": false,
+      "type": "boolean"
+    },
+    "tag": {
+      "description": "Only automations with this tag",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 40
+    },
+    "search": {
+      "description": "Words in the name or description",
+      "type": "string",
+      "maxLength": 100
+    }
+  }
+}
+```
+
+### automations.get
+
+**Get an automation** — One automation in full (trigger, conditions, steps, cancel rules) and its 25 most recent runs.
+
+- Who: `automations.manage`
+- Changes data: no
+- Returns: { automation, runs: [{ id, status, triggerKey, currentStep, note, error, createdAt, finishedAt }] }
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid",
+      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+    }
+  },
+  "required": [
+    "id"
+  ]
+}
+```
+
+### automations.tags
+
+**List automation tags** — Every tag used on an automation that isn’t archived, with how many use it.
+
+- Who: `automations.manage`
+- Changes data: no
+- Returns: [{ tag, count }]
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {}
+}
+```
+
+### automations.create
+
+**Create an automation** — Create an automation: a trigger (an event like contact.created, or a schedule), optional conditions, steps (run an action, wait, wait for an event, check a condition, message staff or a customer, call a webhook) and optional cancelOn rules. It starts OFF unless enabled=true; use automations.run to test it first. Call automations.reference for the event list, step shapes and template syntax. Every action used must be one you may run yourself.
+
+- Who: `automations.manage`
+- Changes data: yes (written to the activity log)
+- Returns: The automation
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "definition": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 2000
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "tags": {
+          "description": "Labels for finding and grouping automations, e.g. [\"rentals\", \"follow-up\"]",
+          "default": [],
+          "maxItems": 20,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 40,
+            "pattern": "^[^,]+$"
+          }
+        },
+        "trigger": {
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "const": "event"
+                },
+                "event": {
+                  "type": "string",
+                  "description": "Event name, e.g. contact.created (see automations.reference)"
+                }
+              },
+              "required": [
+                "type",
+                "event"
+              ]
+            },
+            {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "const": "schedule"
+                },
+                "everyMinutes": {
+                  "description": "Run every N minutes (at least 5)",
+                  "type": "integer",
+                  "minimum": 5,
+                  "maximum": 10080
+                },
+                "dailyAt": {
+                  "description": "Run once a day at this time in the app’s time zone (APP_TIME_ZONE), e.g. 08:30",
+                  "type": "string",
+                  "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+                },
+                "weekdays": {
+                  "description": "With dailyAt: only these days (1 = Monday … 7 = Sunday)",
+                  "minItems": 1,
+                  "type": "array",
+                  "items": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 7
+                  }
+                }
+              },
+              "required": [
+                "type"
+              ]
+            }
+          ]
+        },
+        "conditions": {
+          "default": [],
+          "description": "All must hold for a run to start (checked against the trigger event)",
+          "maxItems": 20,
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "path": {
+                "type": "string",
+                "pattern": "^[A-Za-z_][\\w]*(\\.[\\w-]+)*$",
+                "description": "Dotted path into the context, e.g. event.data.contactId or steps.contact.status"
+              },
+              "op": {
+                "type": "string",
+                "enum": [
+                  "equals",
+                  "notEquals",
+                  "in",
+                  "notIn",
+                  "exists",
+                  "notExists",
+                  "gt",
+                  "gte",
+                  "lt",
+                  "lte",
+                  "contains"
+                ]
+              },
+              "value": {
+                "description": "Compared with (templates allowed). Not for exists."
+              }
+            },
+            "required": [
+              "path",
+              "op"
+            ]
+          }
+        },
+        "steps": {
+          "minItems": 1,
+          "maxItems": 100,
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/__schema0"
+          }
+        },
+        "cancelOn": {
+          "default": [],
+          "description": "Events that stop a run that is still going",
+          "maxItems": 10,
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "event": {
+                "type": "string",
+                "description": "e.g. role.revoked"
+              },
+              "match": {
+                "description": "e.g. { field: \"data.orderId\", equals: \"{{event.data.contactId}}\" }",
+                "type": "object",
+                "properties": {
+                  "field": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z_][\\w]*(\\.[\\w-]+)*$",
+                    "description": "Dotted path into the context, e.g. event.data.contactId or steps.contact.status"
+                  },
+                  "equals": {}
+                },
+                "required": [
+                  "field",
+                  "equals"
+                ]
+              }
+            },
+            "required": [
+              "event"
+            ]
+          }
+        },
+        "concurrencyKey": {
+          "description": "Template, e.g. {{event.data.contactId}}: while a run with the same value is active, new ones are skipped",
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 200
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "name",
+        "trigger",
+        "steps"
+      ]
+    },
+    "enabled": {
+      "default": false,
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "definition"
+  ],
+  "$defs": {
+    "__schema0": {
+      "oneOf": [
+        {
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "description": "Name for this step so later steps can use its output: {{steps.<id>.…}}",
+                  "type": "string",
+                  "pattern": "^[a-z][a-zA-Z0-9]{0,39}$"
+                },
+                "label": {
+                  "description": "What it does, for people",
+                  "type": "string",
+                  "maxLength": 120
+                },
+                "type": {
+                  "type": "string",
+                  "const": "action"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "An action name, e.g. contacts.addTags (see GET /api/v1/actions)"
+                },
+                "input": {
+                  "default": {},
+                  "description": "Its input (templates allowed)",
+                  "type": "object",
+                  "propertyNames": {
+                    "type": "string"
+                  },
+                  "additionalProperties": {}
+                },
+                "continueOnError": {
+                  "default": false,
+                  "description": "Keep going if the action refuses (not_found, conflict …). Default: stop the run.",
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "type",
+                "action"
+              ]
+            },
+            {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "description": "Name for this step so later steps can use its output: {{steps.<id>.…}}",
+                  "type": "string",
+                  "pattern": "^[a-z][a-zA-Z0-9]{0,39}$"
+                },
+                "label": {
+                  "description": "What it does, for people",
+                  "type": "string",
+                  "maxLength": 120
+                },
+                "type": {
+                  "type": "string",
+                  "const": "wait"
+                },
+                "for": {
+                  "type": "string",
+                  "pattern": "^\\d{1,4}(m|h|d|w)$",
+                  "description": "How long to pause, e.g. 3d"
+                }
+              },
+              "required": [
+                "type",
+                "for"
+              ]
+            },
+            {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "description": "Name for this step so later steps can use its output: {{steps.<id>.…}}",
+                  "type": "string",
+                  "pattern": "^[a-z][a-zA-Z0-9]{0,39}$"
+                },
+                "label": {
+                  "description": "What it does, for people",
+                  "type": "string",
+                  "maxLength": 120
+                },
+                "type": {
+                  "type": "string",
+                  "const": "waitForEvent"
+                },
+                "event": {
+                  "type": "string",
+                  "description": "The event to wait for, e.g. role.revoked"
+                },
+                "match": {
+                  "description": "Only an event whose field (e.g. data.itemId) equals this value (templates allowed)",
+                  "type": "object",
+                  "properties": {
+                    "field": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z_][\\w]*(\\.[\\w-]+)*$",
+                      "description": "Dotted path into the context, e.g. event.data.contactId or steps.contact.status"
+                    },
+                    "equals": {}
+                  },
+                  "required": [
+                    "field",
+                    "equals"
+                  ]
+                },
+                "timeout": {
+                  "type": "string",
+                  "pattern": "^\\d{1,4}(m|h|d|w)$",
+                  "description": "Give up waiting after this long"
+                },
+                "onTimeout": {
+                  "default": "continue",
+                  "type": "string",
+                  "enum": [
+                    "continue",
+                    "stop"
+                  ]
+                }
+              },
+              "required": [
+                "type",
+                "event",
+                "timeout"
+              ]
+            },
+            {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "description": "Name for this step so later steps can use its output: {{steps.<id>.…}}",
+                  "type": "string",
+                  "pattern": "^[a-z][a-zA-Z0-9]{0,39}$"
+                },
+                "label": {
+                  "description": "What it does, for people",
+                  "type": "string",
+                  "maxLength": 120
+                },
+                "type": {
+                  "type": "string",
+                  "const": "condition"
+                },
+                "match": {
+                  "default": "all",
+                  "description": "all = every condition must hold (AND); any = at least one (OR)",
+                  "type": "string",
+                  "enum": [
+                    "all",
+                    "any"
+                  ]
+                },
+                "conditions": {
+                  "minItems": 1,
+                  "maxItems": 20,
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "path": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z_][\\w]*(\\.[\\w-]+)*$",
+                        "description": "Dotted path into the context, e.g. event.data.contactId or steps.contact.status"
+                      },
+                      "op": {
+                        "type": "string",
+                        "enum": [
+                          "equals",
+                          "notEquals",
+                          "in",
+                          "notIn",
+                          "exists",
+                          "notExists",
+                          "gt",
+                          "gte",
+                          "lt",
+                          "lte",
+                          "contains"
+                        ]
+                      },
+                      "value": {
+                        "description": "Compared with (templates allowed). Not for exists."
+                      }
+                    },
+                    "required": [
+                      "path",
+                      "op"
+                    ]
+                  }
+                }
+              },
+              "required": [
+                "type",
+                "conditions"
+              ]
+            },
+            {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "description": "Name for this step so later steps can use its output: {{steps.<id>.…}}",
+                  "type": "string",
+                  "pattern": "^[a-z][a-zA-Z0-9]{0,39}$"
+                },
+                "label": {
+                  "description": "What it does, for people",
+                  "type": "string",
+                  "maxLength": 120
+                },
+                "type": {
+                  "type": "string",
+                  "const": "notifyStaff"
+                },
+                "permission": {
+                  "default": "admin.access",
+                  "description": "Everyone whose role has this permission gets it",
+                  "type": "string",
+                  "enum": [
+                    "admin.access",
+                    "users.read",
+                    "users.manage",
+                    "roles.manage",
+                    "activity.read",
+                    "errors.manage",
+                    "api_keys.manage",
+                    "settings.manage",
+                    "docs.internal",
+                    "automations.manage",
+                    "notifications.manage",
+                    "system.manage"
+                  ]
+                },
+                "title": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 150
+                },
+                "body": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 1000
+                },
+                "url": {
+                  "description": "Link, e.g. /admin/contacts/{{event.data.contactId}}",
+                  "type": "string",
+                  "maxLength": 500
+                },
+                "channels": {
+                  "description": "Only these channels (email = Resend, sms = Quo, push). Default: every channel the person gets. Preferences, SMS consent, opt-outs and quiet hours still apply.",
+                  "minItems": 1,
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "enum": [
+                      "email",
+                      "sms",
+                      "push"
+                    ]
+                  }
+                }
+              },
+              "required": [
+                "type",
+                "title",
+                "body"
+              ]
+            },
+            {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "description": "Name for this step so later steps can use its output: {{steps.<id>.…}}",
+                  "type": "string",
+                  "pattern": "^[a-z][a-zA-Z0-9]{0,39}$"
+                },
+                "label": {
+                  "description": "What it does, for people",
+                  "type": "string",
+                  "maxLength": 120
+                },
+                "type": {
+                  "type": "string",
+                  "const": "notifyContact"
+                },
+                "contactId": {
+                  "type": "string",
+                  "description": "The contact, e.g. {{event.data.contactId}}"
+                },
+                "title": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 150
+                },
+                "body": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 1000
+                },
+                "sms": {
+                  "description": "Text message version (default: the body). Only sent with SMS consent.",
+                  "type": "string",
+                  "maxLength": 320
+                },
+                "url": {
+                  "type": "string",
+                  "maxLength": 500
+                },
+                "channels": {
+                  "description": "Only these channels (email = Resend, sms = Quo, push). Default: every channel the person gets. Preferences, SMS consent, opt-outs and quiet hours still apply.",
+                  "minItems": 1,
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "enum": [
+                      "email",
+                      "sms",
+                      "push"
+                    ]
+                  }
+                }
+              },
+              "required": [
+                "type",
+                "contactId",
+                "title",
+                "body"
+              ]
+            },
+            {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "description": "Name for this step so later steps can use its output: {{steps.<id>.…}}",
+                  "type": "string",
+                  "pattern": "^[a-z][a-zA-Z0-9]{0,39}$"
+                },
+                "label": {
+                  "description": "What it does, for people",
+                  "type": "string",
+                  "maxLength": 120
+                },
+                "type": {
+                  "type": "string",
+                  "const": "sendEmail"
+                },
+                "contactId": {
+                  "type": "string",
+                  "description": "The contact, e.g. {{event.data.contactId}}"
+                },
+                "subject": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 150
+                },
+                "body": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 5000,
+                  "description": "Starts after “Hi <first name>,”"
+                },
+                "url": {
+                  "description": "Button link, e.g. /account",
+                  "type": "string",
+                  "maxLength": 500
+                }
+              },
+              "required": [
+                "type",
+                "contactId",
+                "subject",
+                "body"
+              ]
+            },
+            {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "description": "Name for this step so later steps can use its output: {{steps.<id>.…}}",
+                  "type": "string",
+                  "pattern": "^[a-z][a-zA-Z0-9]{0,39}$"
+                },
+                "label": {
+                  "description": "What it does, for people",
+                  "type": "string",
+                  "maxLength": 120
+                },
+                "type": {
+                  "type": "string",
+                  "const": "sendText"
+                },
+                "contactId": {
+                  "type": "string",
+                  "description": "The contact, e.g. {{event.data.contactId}}"
+                },
+                "text": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 320,
+                  "description": "The text message (keep it under 160 characters for one SMS)"
+                }
+              },
+              "required": [
+                "type",
+                "contactId",
+                "text"
+              ]
+            },
+            {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "description": "Name for this step so later steps can use its output: {{steps.<id>.…}}",
+                  "type": "string",
+                  "pattern": "^[a-z][a-zA-Z0-9]{0,39}$"
+                },
+                "label": {
+                  "description": "What it does, for people",
+                  "type": "string",
+                  "maxLength": 120
+                },
+                "type": {
+                  "type": "string",
+                  "const": "webhook"
+                },
+                "url": {
+                  "type": "string",
+                  "format": "uri",
+                  "description": "HTTPS address that receives a signed POST (Zapier, n8n, your own service)"
+                },
+                "body": {
+                  "description": "JSON to send (templates allowed). Default: the event."
+                }
+              },
+              "required": [
+                "type",
+                "url"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "description": "Name for this step so later steps can use its output: {{steps.<id>.…}}",
+              "type": "string",
+              "pattern": "^[a-z][a-zA-Z0-9]{0,39}$"
+            },
+            "label": {
+              "description": "What it does, for people",
+              "type": "string",
+              "maxLength": 120
+            },
+            "type": {
+              "type": "string",
+              "const": "branch"
+            },
+            "match": {
+              "default": "all",
+              "description": "all = every condition must hold (AND); any = at least one (OR)",
+              "type": "string",
+              "enum": [
+                "all",
+                "any"
+              ]
+            },
+            "conditions": {
+              "minItems": 1,
+              "maxItems": 20,
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "path": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z_][\\w]*(\\.[\\w-]+)*$",
+                    "description": "Dotted path into the context, e.g. event.data.contactId or steps.contact.status"
+                  },
+                  "op": {
+                    "type": "string",
+                    "enum": [
+                      "equals",
+                      "notEquals",
+                      "in",
+                      "notIn",
+                      "exists",
+                      "notExists",
+                      "gt",
+                      "gte",
+                      "lt",
+                      "lte",
+                      "contains"
+                    ]
+                  },
+                  "value": {
+                    "description": "Compared with (templates allowed). Not for exists."
+                  }
+                },
+                "required": [
+                  "path",
+                  "op"
+                ]
+              }
+            },
+            "then": {
+              "default": [],
+              "description": "Steps when the conditions hold",
+              "maxItems": 50,
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/__schema0"
+              }
+            },
+            "else": {
+              "default": [],
+              "description": "Steps when they don’t",
+              "maxItems": 50,
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/__schema0"
+              }
+            }
+          },
+          "required": [
+            "type",
+            "conditions"
+          ]
+        }
+      ]
+    }
+  }
+}
+```
+
+### automations.update
+
+**Edit an automation** — Replace an automation’s definition and/or turn it on or off. Runs already going keep the steps they started with; new runs use the new version. Send the whole definition (get it with automations.get, change it, send it back).
+
+- Who: `automations.manage`
+- Changes data: yes (written to the activity log)
+- Returns: The automation
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid",
+      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+    },
+    "definition": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 2000
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "tags": {
+          "description": "Labels for finding and grouping automations, e.g. [\"rentals\", \"follow-up\"]",
+          "default": [],
+          "maxItems": 20,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 40,
+            "pattern": "^[^,]+$"
+          }
+        },
+        "trigger": {
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "const": "event"
+                },
+                "event": {
+                  "type": "string",
+                  "description": "Event name, e.g. contact.created (see automations.reference)"
+                }
+              },
+              "required": [
+                "type",
+                "event"
+              ]
+            },
+            {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "const": "schedule"
+                },
+                "everyMinutes": {
+                  "description": "Run every N minutes (at least 5)",
+                  "type": "integer",
+                  "minimum": 5,
+                  "maximum": 10080
+                },
+                "dailyAt": {
+                  "description": "Run once a day at this time in the app’s time zone (APP_TIME_ZONE), e.g. 08:30",
+                  "type": "string",
+                  "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+                },
+                "weekdays": {
+                  "description": "With dailyAt: only these days (1 = Monday … 7 = Sunday)",
+                  "minItems": 1,
+                  "type": "array",
+                  "items": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 7
+                  }
+                }
+              },
+              "required": [
+                "type"
+              ]
+            }
+          ]
+        },
+        "conditions": {
+          "default": [],
+          "description": "All must hold for a run to start (checked against the trigger event)",
+          "maxItems": 20,
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "path": {
+                "type": "string",
+                "pattern": "^[A-Za-z_][\\w]*(\\.[\\w-]+)*$",
+                "description": "Dotted path into the context, e.g. event.data.contactId or steps.contact.status"
+              },
+              "op": {
+                "type": "string",
+                "enum": [
+                  "equals",
+                  "notEquals",
+                  "in",
+                  "notIn",
+                  "exists",
+                  "notExists",
+                  "gt",
+                  "gte",
+                  "lt",
+                  "lte",
+                  "contains"
+                ]
+              },
+              "value": {
+                "description": "Compared with (templates allowed). Not for exists."
+              }
+            },
+            "required": [
+              "path",
+              "op"
+            ]
+          }
+        },
+        "steps": {
+          "minItems": 1,
+          "maxItems": 100,
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/__schema0"
+          }
+        },
+        "cancelOn": {
+          "default": [],
+          "description": "Events that stop a run that is still going",
+          "maxItems": 10,
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "event": {
+                "type": "string",
+                "description": "e.g. role.revoked"
+              },
+              "match": {
+                "description": "e.g. { field: \"data.orderId\", equals: \"{{event.data.contactId}}\" }",
+                "type": "object",
+                "properties": {
+                  "field": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z_][\\w]*(\\.[\\w-]+)*$",
+                    "description": "Dotted path into the context, e.g. event.data.contactId or steps.contact.status"
+                  },
+                  "equals": {}
+                },
+                "required": [
+                  "field",
+                  "equals"
+                ]
+              }
+            },
+            "required": [
+              "event"
+            ]
+          }
+        },
+        "concurrencyKey": {
+          "description": "Template, e.g. {{event.data.contactId}}: while a run with the same value is active, new ones are skipped",
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 200
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "name",
+        "trigger",
+        "steps"
+      ]
+    },
+    "enabled": {
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "id"
+  ],
+  "$defs": {
+    "__schema0": {
+      "oneOf": [
+        {
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "description": "Name for this step so later steps can use its output: {{steps.<id>.…}}",
+                  "type": "string",
+                  "pattern": "^[a-z][a-zA-Z0-9]{0,39}$"
+                },
+                "label": {
+                  "description": "What it does, for people",
+                  "type": "string",
+                  "maxLength": 120
+                },
+                "type": {
+                  "type": "string",
+                  "const": "action"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "An action name, e.g. contacts.addTags (see GET /api/v1/actions)"
+                },
+                "input": {
+                  "default": {},
+                  "description": "Its input (templates allowed)",
+                  "type": "object",
+                  "propertyNames": {
+                    "type": "string"
+                  },
+                  "additionalProperties": {}
+                },
+                "continueOnError": {
+                  "default": false,
+                  "description": "Keep going if the action refuses (not_found, conflict …). Default: stop the run.",
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "type",
+                "action"
+              ]
+            },
+            {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "description": "Name for this step so later steps can use its output: {{steps.<id>.…}}",
+                  "type": "string",
+                  "pattern": "^[a-z][a-zA-Z0-9]{0,39}$"
+                },
+                "label": {
+                  "description": "What it does, for people",
+                  "type": "string",
+                  "maxLength": 120
+                },
+                "type": {
+                  "type": "string",
+                  "const": "wait"
+                },
+                "for": {
+                  "type": "string",
+                  "pattern": "^\\d{1,4}(m|h|d|w)$",
+                  "description": "How long to pause, e.g. 3d"
+                }
+              },
+              "required": [
+                "type",
+                "for"
+              ]
+            },
+            {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "description": "Name for this step so later steps can use its output: {{steps.<id>.…}}",
+                  "type": "string",
+                  "pattern": "^[a-z][a-zA-Z0-9]{0,39}$"
+                },
+                "label": {
+                  "description": "What it does, for people",
+                  "type": "string",
+                  "maxLength": 120
+                },
+                "type": {
+                  "type": "string",
+                  "const": "waitForEvent"
+                },
+                "event": {
+                  "type": "string",
+                  "description": "The event to wait for, e.g. role.revoked"
+                },
+                "match": {
+                  "description": "Only an event whose field (e.g. data.itemId) equals this value (templates allowed)",
+                  "type": "object",
+                  "properties": {
+                    "field": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z_][\\w]*(\\.[\\w-]+)*$",
+                      "description": "Dotted path into the context, e.g. event.data.contactId or steps.contact.status"
+                    },
+                    "equals": {}
+                  },
+                  "required": [
+                    "field",
+                    "equals"
+                  ]
+                },
+                "timeout": {
+                  "type": "string",
+                  "pattern": "^\\d{1,4}(m|h|d|w)$",
+                  "description": "Give up waiting after this long"
+                },
+                "onTimeout": {
+                  "default": "continue",
+                  "type": "string",
+                  "enum": [
+                    "continue",
+                    "stop"
+                  ]
+                }
+              },
+              "required": [
+                "type",
+                "event",
+                "timeout"
+              ]
+            },
+            {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "description": "Name for this step so later steps can use its output: {{steps.<id>.…}}",
+                  "type": "string",
+                  "pattern": "^[a-z][a-zA-Z0-9]{0,39}$"
+                },
+                "label": {
+                  "description": "What it does, for people",
+                  "type": "string",
+                  "maxLength": 120
+                },
+                "type": {
+                  "type": "string",
+                  "const": "condition"
+                },
+                "match": {
+                  "default": "all",
+                  "description": "all = every condition must hold (AND); any = at least one (OR)",
+                  "type": "string",
+                  "enum": [
+                    "all",
+                    "any"
+                  ]
+                },
+                "conditions": {
+                  "minItems": 1,
+                  "maxItems": 20,
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "path": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z_][\\w]*(\\.[\\w-]+)*$",
+                        "description": "Dotted path into the context, e.g. event.data.contactId or steps.contact.status"
+                      },
+                      "op": {
+                        "type": "string",
+                        "enum": [
+                          "equals",
+                          "notEquals",
+                          "in",
+                          "notIn",
+                          "exists",
+                          "notExists",
+                          "gt",
+                          "gte",
+                          "lt",
+                          "lte",
+                          "contains"
+                        ]
+                      },
+                      "value": {
+                        "description": "Compared with (templates allowed). Not for exists."
+                      }
+                    },
+                    "required": [
+                      "path",
+                      "op"
+                    ]
+                  }
+                }
+              },
+              "required": [
+                "type",
+                "conditions"
+              ]
+            },
+            {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "description": "Name for this step so later steps can use its output: {{steps.<id>.…}}",
+                  "type": "string",
+                  "pattern": "^[a-z][a-zA-Z0-9]{0,39}$"
+                },
+                "label": {
+                  "description": "What it does, for people",
+                  "type": "string",
+                  "maxLength": 120
+                },
+                "type": {
+                  "type": "string",
+                  "const": "notifyStaff"
+                },
+                "permission": {
+                  "default": "admin.access",
+                  "description": "Everyone whose role has this permission gets it",
+                  "type": "string",
+                  "enum": [
+                    "admin.access",
+                    "users.read",
+                    "users.manage",
+                    "roles.manage",
+                    "activity.read",
+                    "errors.manage",
+                    "api_keys.manage",
+                    "settings.manage",
+                    "docs.internal",
+                    "automations.manage",
+                    "notifications.manage",
+                    "system.manage"
+                  ]
+                },
+                "title": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 150
+                },
+                "body": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 1000
+                },
+                "url": {
+                  "description": "Link, e.g. /admin/contacts/{{event.data.contactId}}",
+                  "type": "string",
+                  "maxLength": 500
+                },
+                "channels": {
+                  "description": "Only these channels (email = Resend, sms = Quo, push). Default: every channel the person gets. Preferences, SMS consent, opt-outs and quiet hours still apply.",
+                  "minItems": 1,
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "enum": [
+                      "email",
+                      "sms",
+                      "push"
+                    ]
+                  }
+                }
+              },
+              "required": [
+                "type",
+                "title",
+                "body"
+              ]
+            },
+            {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "description": "Name for this step so later steps can use its output: {{steps.<id>.…}}",
+                  "type": "string",
+                  "pattern": "^[a-z][a-zA-Z0-9]{0,39}$"
+                },
+                "label": {
+                  "description": "What it does, for people",
+                  "type": "string",
+                  "maxLength": 120
+                },
+                "type": {
+                  "type": "string",
+                  "const": "notifyContact"
+                },
+                "contactId": {
+                  "type": "string",
+                  "description": "The contact, e.g. {{event.data.contactId}}"
+                },
+                "title": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 150
+                },
+                "body": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 1000
+                },
+                "sms": {
+                  "description": "Text message version (default: the body). Only sent with SMS consent.",
+                  "type": "string",
+                  "maxLength": 320
+                },
+                "url": {
+                  "type": "string",
+                  "maxLength": 500
+                },
+                "channels": {
+                  "description": "Only these channels (email = Resend, sms = Quo, push). Default: every channel the person gets. Preferences, SMS consent, opt-outs and quiet hours still apply.",
+                  "minItems": 1,
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "enum": [
+                      "email",
+                      "sms",
+                      "push"
+                    ]
+                  }
+                }
+              },
+              "required": [
+                "type",
+                "contactId",
+                "title",
+                "body"
+              ]
+            },
+            {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "description": "Name for this step so later steps can use its output: {{steps.<id>.…}}",
+                  "type": "string",
+                  "pattern": "^[a-z][a-zA-Z0-9]{0,39}$"
+                },
+                "label": {
+                  "description": "What it does, for people",
+                  "type": "string",
+                  "maxLength": 120
+                },
+                "type": {
+                  "type": "string",
+                  "const": "sendEmail"
+                },
+                "contactId": {
+                  "type": "string",
+                  "description": "The contact, e.g. {{event.data.contactId}}"
+                },
+                "subject": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 150
+                },
+                "body": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 5000,
+                  "description": "Starts after “Hi <first name>,”"
+                },
+                "url": {
+                  "description": "Button link, e.g. /account",
+                  "type": "string",
+                  "maxLength": 500
+                }
+              },
+              "required": [
+                "type",
+                "contactId",
+                "subject",
+                "body"
+              ]
+            },
+            {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "description": "Name for this step so later steps can use its output: {{steps.<id>.…}}",
+                  "type": "string",
+                  "pattern": "^[a-z][a-zA-Z0-9]{0,39}$"
+                },
+                "label": {
+                  "description": "What it does, for people",
+                  "type": "string",
+                  "maxLength": 120
+                },
+                "type": {
+                  "type": "string",
+                  "const": "sendText"
+                },
+                "contactId": {
+                  "type": "string",
+                  "description": "The contact, e.g. {{event.data.contactId}}"
+                },
+                "text": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 320,
+                  "description": "The text message (keep it under 160 characters for one SMS)"
+                }
+              },
+              "required": [
+                "type",
+                "contactId",
+                "text"
+              ]
+            },
+            {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "description": "Name for this step so later steps can use its output: {{steps.<id>.…}}",
+                  "type": "string",
+                  "pattern": "^[a-z][a-zA-Z0-9]{0,39}$"
+                },
+                "label": {
+                  "description": "What it does, for people",
+                  "type": "string",
+                  "maxLength": 120
+                },
+                "type": {
+                  "type": "string",
+                  "const": "webhook"
+                },
+                "url": {
+                  "type": "string",
+                  "format": "uri",
+                  "description": "HTTPS address that receives a signed POST (Zapier, n8n, your own service)"
+                },
+                "body": {
+                  "description": "JSON to send (templates allowed). Default: the event."
+                }
+              },
+              "required": [
+                "type",
+                "url"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "description": "Name for this step so later steps can use its output: {{steps.<id>.…}}",
+              "type": "string",
+              "pattern": "^[a-z][a-zA-Z0-9]{0,39}$"
+            },
+            "label": {
+              "description": "What it does, for people",
+              "type": "string",
+              "maxLength": 120
+            },
+            "type": {
+              "type": "string",
+              "const": "branch"
+            },
+            "match": {
+              "default": "all",
+              "description": "all = every condition must hold (AND); any = at least one (OR)",
+              "type": "string",
+              "enum": [
+                "all",
+                "any"
+              ]
+            },
+            "conditions": {
+              "minItems": 1,
+              "maxItems": 20,
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "path": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z_][\\w]*(\\.[\\w-]+)*$",
+                    "description": "Dotted path into the context, e.g. event.data.contactId or steps.contact.status"
+                  },
+                  "op": {
+                    "type": "string",
+                    "enum": [
+                      "equals",
+                      "notEquals",
+                      "in",
+                      "notIn",
+                      "exists",
+                      "notExists",
+                      "gt",
+                      "gte",
+                      "lt",
+                      "lte",
+                      "contains"
+                    ]
+                  },
+                  "value": {
+                    "description": "Compared with (templates allowed). Not for exists."
+                  }
+                },
+                "required": [
+                  "path",
+                  "op"
+                ]
+              }
+            },
+            "then": {
+              "default": [],
+              "description": "Steps when the conditions hold",
+              "maxItems": 50,
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/__schema0"
+              }
+            },
+            "else": {
+              "default": [],
+              "description": "Steps when they don’t",
+              "maxItems": 50,
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/__schema0"
+              }
+            }
+          },
+          "required": [
+            "type",
+            "conditions"
+          ]
+        }
+      ]
+    }
+  }
+}
+```
+
+### automations.archive
+
+**Archive an automation** — Turn an automation off for good and hide it from the list. Runs still going are cancelled. Its history is kept.
+
+- Who: `automations.manage`
+- Changes data: yes (written to the activity log)
+- Returns: { id, cancelledRuns }
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid",
+      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+    }
+  },
+  "required": [
+    "id"
+  ]
+}
+```
+
+### automations.duplicate
+
+**Duplicate an automation** — Copy an automation (trigger, conditions, steps, tags) as a new one named “Copy of …”. The copy starts OFF and has no runs.
+
+- Who: `automations.manage`
+- Changes data: yes (written to the activity log)
+- Returns: The new automation
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid",
+      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+    },
+    "name": {
+      "description": "Default: “Copy of <name>”",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 120
+    }
+  },
+  "required": [
+    "id"
+  ]
+}
+```
+
+### automations.run
+
+**Run an automation now** — Start a run right now (even if the automation is off) — to test it, or to do it by hand. For an event trigger, `data` is the pretend event’s data (default: the event’s example, whose ids don’t exist). Conditions still apply. Steps REALLY run (messages are sent, records change), so test with real records you own.
+
+- Who: `automations.manage`
+- Changes data: yes (written to the activity log)
+- Returns: { status: started | skipped | conditions, runId?, reason? }
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid",
+      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+    },
+    "data": {
+      "description": "Event data for the run",
+      "type": "object",
+      "propertyNames": {
+        "type": "string"
+      },
+      "additionalProperties": {}
+    }
+  },
+  "required": [
+    "id"
+  ]
+}
+```
+
+### automations.listRuns
+
+**List automation runs** — Automation runs, newest first, across all automations or one: status (running, waiting, completed, failed, cancelled, skipped), the step it is on, what it is waiting for, and errors.
+
+- Who: `automations.manage`
+- Changes data: no
+- Returns: [{ id, automationId, automationName, status, currentStep, wakeAt, waitingEvent, note, error, createdAt, finishedAt }]
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "automationId": {
+      "type": "string",
+      "format": "uuid",
+      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+    },
+    "status": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "running",
+          "waiting",
+          "completed",
+          "failed",
+          "cancelled",
+          "skipped"
+        ]
+      }
+    },
+    "limit": {
+      "default": 50,
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 200
+    }
+  }
+}
+```
+
+### automations.getRun
+
+**Get an automation run** — One run in full: what triggered it, each step (its definition, status, output or error) and where it is now.
+
+- Who: `automations.manage`
+- Changes data: no
+- Returns: { run, automation: { id, name }, steps: [{ index, step, status, output, error, startedAt, finishedAt }] } — steps are flattened: a branch step has elseAt/endAt (its yes steps are index+1 … elseAt-1, its no steps elseAt … endAt-1); status “skipped” = on the branch arm that wasn’t taken.
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid",
+      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+    }
+  },
+  "required": [
+    "id"
+  ]
+}
+```
+
+### automations.cancelRun
+
+**Cancel an automation run** — Stop a run that is still going or waiting. Steps already done are not undone.
+
+- Who: `automations.manage`
+- Changes data: yes (written to the activity log)
+- Returns: { id, status }
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid",
+      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+    }
+  },
+  "required": [
+    "id"
+  ]
+}
+```
+
+### automations.retryRun
+
+**Retry a failed run** — Resume a failed run at the step that failed. Steps that already finished are NOT repeated. Fix the cause first (see the run’s error).
+
+- Who: `automations.manage`
+- Changes data: yes (written to the activity log)
+- Returns: { id, status }
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid",
+      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+    }
+  },
+  "required": [
+    "id"
+  ]
+}
+```
+
+### notifications.list
+
+**My notifications** — The signed-in person’s notification inbox, newest first, with the unread count and how many urgent ones are unread. `view`: all, unread, or attention (urgent types, e.g. error spikes). Dismissed ones are left out. Page with `before`.
+
+- Who: `authenticated`
+- Changes data: no
+- Returns: { items: [{ id, type, urgent, title, body, url, action, createdAt, readAt }], unread, attention }
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "view": {
+      "default": "all",
+      "type": "string",
+      "enum": [
+        "all",
+        "unread",
+        "attention"
+      ]
+    },
+    "before": {
+      "anyOf": [
+        {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+        },
+        {
+          "type": "string",
+          "format": "date",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+        }
+      ]
+    },
+    "limit": {
+      "default": 30,
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 100
+    }
+  }
+}
+```
+
+### notifications.unreadCount
+
+**Unread notifications** — How many unread notifications the signed-in person has in the inbox (dismissed ones are not counted).
+
+- Who: `authenticated`
+- Changes data: no
+- Returns: { unread: number, attention: number }
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {}
+}
+```
+
+### notifications.markRead
+
+**Mark notifications read** — Mark some (ids) or all of the signed-in person’s notifications as read. read=false marks the given ids unread again (ids required).
+
+- Who: `authenticated`
+- Changes data: yes (written to the activity log)
+- Returns: { updated: number }
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "ids": {
+      "description": "Omit to mark all read.",
+      "maxItems": 200,
+      "type": "array",
+      "items": {
+        "type": "string",
+        "format": "uuid",
+        "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+      }
+    },
+    "read": {
+      "default": true,
+      "type": "boolean"
+    }
+  }
+}
+```
+
+### notifications.dismiss
+
+**Clear notifications** — Clear some (ids) or all of the signed-in person’s inbox notifications: they leave the inbox for good (and count as read). Emails, texts and pushes already sent are unaffected.
+
+- Who: `authenticated`
+- Changes data: yes (written to the activity log)
+- Returns: { dismissed: number }
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "ids": {
+      "description": "Omit to clear everything in the inbox.",
+      "maxItems": 200,
+      "type": "array",
+      "items": {
+        "type": "string",
+        "format": "uuid",
+        "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+      }
+    }
+  }
+}
+```
+
+### notifications.open
+
+**Open a notification** — Mark one of the signed-in person’s notifications read and return where it links to.
+
+- Who: `authenticated`
+- Changes data: yes (written to the activity log)
+- Returns: { url: string | null }
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid",
+      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+    }
+  },
+  "required": [
+    "id"
+  ]
+}
+```
+
+### notifications.preferences
+
+**My notification settings** — What the signed-in person is notified about and how: per type, which of email / SMS / push are on (and which can’t be turned off), plus their email and texting status and the devices that get push notifications.
+
+- Who: `authenticated`
+- Changes data: no
+- Returns: { types, email, sms, devices, smsConsentText }
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {}
+}
+```
+
+### notifications.setPreference
+
+**Change a notification setting** — Turn one channel (email, sms, push) on or off for one notification type, for the signed-in person. Email for required types (receipts, security) can’t be turned off. Turning SMS on does nothing until the person has agreed to texts (notifications.setSmsConsent).
+
+- Who: `authenticated`
+- Changes data: yes (written to the activity log)
+- Returns: { type, channel, enabled }
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "type": {
+      "type": "string"
+    },
+    "channel": {
+      "type": "string",
+      "enum": [
+        "email",
+        "sms",
+        "push"
+      ]
+    },
+    "enabled": {
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "type",
+    "channel",
+    "enabled"
+  ]
+}
+```
+
+### notifications.setSmsConsent
+
+**Text message consent** — Record that a person agreed (consent=true) or no longer agrees (consent=false) to automated texts. Without it nobody is ever texted. For yourself: optionally also set your mobile number. For someone else (they agreed in person or on the phone): needs users.manage and is recorded as given to staff. The exact wording agreed to is stored with the consent.
+
+- Who: `authenticated`
+- Changes data: yes (written to the activity log)
+- Returns: { consentAt, phone }
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "contactId": {
+      "description": "Someone else (staff only). Omit for yourself.",
+      "type": "string",
+      "format": "uuid",
+      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+    },
+    "consent": {
+      "type": "boolean"
+    },
+    "phone": {
+      "description": "Set this mobile number at the same time.",
+      "type": "string"
+    }
+  },
+  "required": [
+    "consent"
+  ]
+}
+```
+
+### notifications.unsubscribe
+
+**Unsubscribe from an email** — Public: turn off emails of one notification type using the signed token from the email’s unsubscribe link.
+
+- Who: `public`
+- Changes data: yes (written to the activity log)
+- Rate limit: 30 per 3600s per caller
+- Returns: { label }
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "token": {
+      "type": "string",
+      "maxLength": 500
+    }
+  },
+  "required": [
+    "token"
+  ]
+}
+```
+
+### notifications.sendTest
+
+**Send me a test notification** — Send the signed-in person a test notification on every channel they can receive (or just one), to check their settings work. Ignores quiet hours. Texts only go out with recorded consent.
+
+- Who: `authenticated`
+- Changes data: yes (written to the activity log)
+- Returns: { channels: string[] } (what was queued: inbox always, then email / sms / push)
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "channel": {
+      "type": "string",
+      "enum": [
+        "email",
+        "sms",
+        "push"
+      ]
+    }
+  }
+}
+```
+
+### notifications.deliveries
+
+**Notification delivery log** — Every email, text and push sent (or not) to anyone, newest first: to whom, which type, the status (pending, sent, delivered, failed, skipped) and why it failed or was skipped. Filter by contact to see what one person was sent.
+
+- Who: `notifications.manage`
+- Changes data: no
+- Returns: [{ id, channel, status, to, attempts, lastError, sentAt, deliveredAt, nextAttemptAt, type, title, contactId, contactName, createdAt }]
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "contactId": {
+      "type": "string",
+      "format": "uuid",
+      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "sending",
+        "sent",
+        "delivered",
+        "failed",
+        "skipped"
+      ]
+    },
+    "channel": {
+      "type": "string",
+      "enum": [
+        "email",
+        "sms",
+        "push"
+      ]
+    },
+    "type": {
+      "type": "string"
+    },
+    "before": {
+      "anyOf": [
+        {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+        },
+        {
+          "type": "string",
+          "format": "date",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+        }
+      ]
+    },
+    "limit": {
+      "default": 100,
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 200
+    }
+  }
+}
+```
+
+### notifications.retry
+
+**Retry a notification** — Send a failed or skipped email / text / push again now (e.g. after fixing a setting). It gets a fresh set of retries. A text is still only sent if the person’s consent is on record.
+
+- Who: `notifications.manage`
+- Changes data: yes (written to the activity log)
+- Returns: { id, status }
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid",
+      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+    }
+  },
+  "required": [
+    "id"
+  ]
+}
+```
+
+### notifications.recordSuppression
+
+**Stop messaging an address** — System only: record that an email address or phone number must not be messaged (hard bounce, spam complaint, a reply of STOP). Called by the provider webhooks. A STOP also withdraws that phone’s recorded SMS consent.
+
+- Who: `system`
+- Changes data: yes (written to the activity log)
+- Returns: { channel, address }
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "channel": {
+      "type": "string",
+      "enum": [
+        "email",
+        "sms"
+      ]
+    },
+    "address": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 320
+    },
+    "reason": {
+      "type": "string",
+      "enum": [
+        "bounce",
+        "complaint",
+        "stop",
+        "manual"
+      ]
+    },
+    "detail": {
+      "type": "string",
+      "maxLength": 500
+    }
+  },
+  "required": [
+    "channel",
+    "address",
+    "reason"
+  ]
+}
+```
+
+### files.requestUpload
+
+**Start a file upload** — Step 1 of uploading a photo or document to a record: checks the type and size, and returns `uploadUrl`. PUT the raw bytes there with the same Content-Type header (within 2 hours), then call files.confirm. Needs permission to add files of that purpose to that record.
+
+- Who: `authenticated`
+- Changes data: yes (written to the activity log)
+- Rate limit: 120 per 3600s per caller
+- Returns: { fileId, uploadUrl, method: "PUT", headers }
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "purpose": {
+      "type": "string",
+      "enum": [
+        "avatar",
+        "contact_document"
+      ],
+      "description": "What the file is: avatar (a contact’s public profile photo; only yourself or staff with users.manage) or contact_document (private paperwork on a contact; users.manage to add, users.read to see)."
+    },
+    "subjectId": {
+      "type": "string",
+      "format": "uuid",
+      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+      "description": "The record the file belongs to (a contact id for avatar / contact_document)."
+    },
+    "filename": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "contentType": {
+      "type": "string"
+    },
+    "sizeBytes": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 9007199254740991
+    },
+    "caption": {
+      "type": "string",
+      "maxLength": 500
+    }
+  },
+  "required": [
+    "purpose",
+    "subjectId",
+    "filename",
+    "contentType",
+    "sizeBytes"
+  ]
+}
+```
+
+### files.confirm
+
+**Finish a file upload** — Step 2: confirm the bytes arrived and match the declared type and size limit. Returns the file with its URL — or `rejected` saying why the stored file was refused (and removed).
+
+- Who: `authenticated`
+- Changes data: yes (written to the activity log)
+- Returns: { file: FileView | null, rejected: string | null }
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "fileId": {
+      "type": "string",
+      "format": "uuid",
+      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+    }
+  },
+  "required": [
+    "fileId"
+  ]
+}
+```
+
+### files.list
+
+**List files** — Photos and documents attached to a record, newest first, each with a `url` (private files: a signed link that works for an hour). Only files you may see are returned; ask for one purpose at a time.
+
+- Who: `authenticated`
+- Changes data: no
+- Returns: [FileView]
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "purpose": {
+      "type": "string",
+      "enum": [
+        "avatar",
+        "contact_document"
+      ],
+      "description": "What the file is: avatar (a contact’s public profile photo; only yourself or staff with users.manage) or contact_document (private paperwork on a contact; users.manage to add, users.read to see)."
+    },
+    "subjectId": {
+      "type": "string",
+      "format": "uuid",
+      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+      "description": "The record, e.g. a contact id."
+    }
+  },
+  "required": [
+    "purpose",
+    "subjectId"
+  ]
+}
+```
+
+### files.delete
+
+**Delete a file** — Remove a photo or document from a record. The record of the upload stays in the history; the bytes are deleted in the background (job files.deleteObject).
+
+- Who: `authenticated`
+- Changes data: yes (written to the activity log)
+- Returns: { id }
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "fileId": {
+      "type": "string",
+      "format": "uuid",
+      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+    }
+  },
+  "required": [
+    "fileId"
+  ]
+}
+```
+
+### docs.list
+
+**List docs** — The in-app docs: short how-tos (public) and, for staff, runbooks and rules (internal: how to use Admin → Errors, brand rules …). Returns only the docs the caller may read. Search with `query`; read one with docs.get. Check here before guessing how something works or how the brand should look.
+
+- Who: `public`
+- Changes data: no
+- Returns: { sections: [{ id, title }], docs: [{ slug, section, title, summary, audience }] }
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "query": {
+      "description": "Words to search for (all must match).",
+      "type": "string",
+      "maxLength": 200
+    },
+    "section": {
+      "description": "Only docs in this section id.",
+      "type": "string",
+      "maxLength": 50
+    }
+  }
+}
+```
+
+### docs.get
+
+**Read a doc** — One doc as Markdown, by slug (from docs.list, e.g. `start/getting-started`). Internal docs are only returned to staff; for anyone else they are "not found".
+
+- Who: `public`
+- Changes data: no
+- Returns: { slug, section, title, summary, audience, url, markdown }
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "slug": {
+      "type": "string",
+      "maxLength": 120,
+      "description": "The doc slug, e.g. `start/getting-started` (also accepts `/docs/start/getting-started`)."
+    }
+  },
+  "required": [
+    "slug"
   ]
 }
 ```

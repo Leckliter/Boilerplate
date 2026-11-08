@@ -3,6 +3,7 @@ import { z } from 'zod';
 
 import { PERMISSIONS, type Permission } from '../../access';
 import { generateApiKey } from '../../api-keys';
+import { emit } from '../../events/emit';
 import { ActionError, defineAction } from '../define';
 
 const publicColumns = {
@@ -68,6 +69,12 @@ export const createApiKey = defineAction({
           : null,
       })
       .returning(publicColumns);
+    await emit(tx, 'api_key.created', {
+      contactId: actor.contactId,
+      apiKeyId: row!.id,
+      name: input.name,
+      restricted: input.permissions !== undefined,
+    });
     log({ subjectType: 'api_key', subjectId: row!.id, summary: `Created API key "${input.name}"` });
     return { key, apiKey: row! };
   },

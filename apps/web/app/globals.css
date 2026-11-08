@@ -1,0 +1,4 @@
+/* All tokens and base styles live in the shared UI package. */
+@import '@app/ui/globals.css';
+@source '../app';
+@source '../components';

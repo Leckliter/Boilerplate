@@ -15,17 +15,26 @@
     "./jobs": "./src/jobs/index.ts",
     "./health": "./src/health.ts",
     "./maintenance": "./src/maintenance.ts",
-    "./modules": "./src/modules.ts"
+    "./modules": "./src/modules.ts",
+    "./events": "./src/events/api.ts",
+    "./automations": "./src/automations/api.ts",
+    "./notifications": "./src/notifications/api.ts",
+    "./messaging": "./src/messaging/index.ts",
+    "./files": "./src/files/api.ts",
+    "./docs": "./src/docs/api.ts"
   },
   "scripts": {
     "actions:docs": "tsx scripts/generate-action-docs.ts",
     "actions:tests": "tsx scripts/check-action-tests.ts",
     "typecheck": "tsc --noEmit",
     "lint": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "docs:build": "tsx scripts/build-docs.ts"
   },
   "dependencies": {
     "@app/db": "workspace:*",
+    "@aws-sdk/client-s3": "^3.1164.0",
+    "@aws-sdk/s3-request-presigner": "^3.1164.0",
     "zod": "^4.6.7"
   },
   "devDependencies": {

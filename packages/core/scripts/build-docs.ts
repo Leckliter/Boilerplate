@@ -1,0 +1,157 @@
+/**
+ * Builds packages/core/src/docs/docs.generated.ts from the Markdown files in
+ * apps/web/content/docs/<section>/<name>.md, and checks every doc on the way:
+ *
+ * - front matter has a `title`, a one-sentence `summary` and an `audience` (`public` or
+ *   `internal`) — there is no default, every doc says who it is for; `order` (a whole number)
+ *   is optional
+ * - the folder is a section listed in packages/core/src/docs/sections.ts
+ * - docs stay short (MAX_WORDS, not counting code blocks)
+ * - every /docs/... link points at a doc that exists, and public docs never link to internal ones
+ *
+ * The Markdown is rendered here, once, into plain data blocks (no raw HTML is ever interpreted:
+ * see src/docs/markdown.ts), so the web app only maps blocks to components.
+ *
+ *   pnpm docs:build           # regenerate
+ *   pnpm docs:build --check   # CI: validate, and fail if the generated file is out of date
+ */
+import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
+import { join, relative } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+import { parseMarkdown } from '../src/docs/markdown';
+import { DOC_SECTIONS } from '../src/docs/sections';
+import type { Doc, DocAudience } from '../src/docs/types';
+
+const MAX_WORDS = 350;
+const MAX_SUMMARY = 160;
+
+const root = fileURLToPath(new URL('../../../', import.meta.url));
+const contentDir = join(root, 'apps/web/content/docs');
+const out = fileURLToPath(new URL('../src/docs/docs.generated.ts', import.meta.url));
+
+const readOr = (path: string) => {
+  try {
+    return readFileSync(path, 'utf8');
+  } catch {
+    // Expected: the generated file does not exist yet (first build).
+    return '';
+  }
+};
+
+const problems: string[] = [];
+const docs: Doc[] = [];
+const sectionIds = new Set(DOC_SECTIONS.map((s) => s.id));
+
+function parseDoc(path: string, section: string, name: string, source: string): Doc | null {
+  const match = /^---\n([\s\S]*?)\n---\n([\s\S]*)$/.exec(source.replace(/\r\n/g, '\n'));
+  if (!match) {
+    problems.push(`${path}: must start with front matter between --- lines`);
+    return null;
+  }
+  const meta = Object.fromEntries(
+    match[1]!
+      .split('\n')
+      .filter((l) => l.trim())
+      .map((l) => {
+        const i = l.indexOf(':');
+        return [l.slice(0, i).trim(), l.slice(i + 1).trim()];
+      }),
+  );
+  const markdown = match[2]!.trim();
+
+  if (!/^[a-z0-9-]+$/.test(name)) problems.push(`${path}: file names are lowercase-with-dashes`);
+  if (!meta.title) problems.push(`${path}: needs a title`);
+  if (!meta.summary) problems.push(`${path}: needs a one-sentence summary`);
+  else if (meta.summary.length > MAX_SUMMARY) {
+    problems.push(`${path}: summary is over ${MAX_SUMMARY} characters — one short sentence`);
+  }
+  if (meta.audience !== 'public' && meta.audience !== 'internal') {
+    problems.push(`${path}: audience must be "public" or "internal"`);
+  }
+  if (meta.order !== undefined && !/^\d+$/.test(meta.order)) {
+    problems.push(`${path}: order must be a whole number`);
+  }
+  if (/^#\s/m.test(markdown.replace(/```[\s\S]*?```/g, ''))) {
+    problems.push(`${path}: don't use "# " — the title is the heading`);
+  }
+  const words = markdown
+    .replace(/```[\s\S]*?```/g, '')
+    .split(/\s+/)
+    .filter(Boolean).length;
+  if (words > MAX_WORDS) {
+    problems.push(`${path}: ${words} words — keep docs under ${MAX_WORDS} (split it into two)`);
+  }
+
+  return {
+    slug: `${section}/${name}`,
+    section,
+    title: meta.title ?? '',
+    summary: meta.summary ?? '',
+    audience: meta.audience as DocAudience,
+    order: meta.order ? Number(meta.order) : 100,
+    markdown,
+    blocks: parseMarkdown(markdown),
+    words,
+  };
+}
+
+if (existsSync(contentDir)) {
+  for (const section of readdirSync(contentDir).sort()) {
+    const dir = join(contentDir, section);
+    if (!statSync(dir).isDirectory()) continue;
+    if (!sectionIds.has(section)) {
+      problems.push(`${relative(root, dir)}/: not a section — add it to src/docs/sections.ts`);
+      continue;
+    }
+    for (const file of readdirSync(dir).sort()) {
+      if (!file.endsWith('.md')) continue;
+      const doc = parseDoc(
+        relative(root, join(dir, file)),
+        section,
+        file.slice(0, -3),
+        readFileSync(join(dir, file), 'utf8'),
+      );
+      if (doc) docs.push(doc);
+    }
+  }
+}
+
+// Links between docs.
+const bySlug = new Map(docs.map((d) => [d.slug, d]));
+for (const d of docs) {
+  for (const [, target] of d.markdown.matchAll(/\]\(\/docs\/([^)#?\s]+)/g)) {
+    const linked = bySlug.get(target!);
+    if (!linked) problems.push(`${d.slug}: links to /docs/${target}, which doesn't exist`);
+    else if (d.audience === 'public' && linked.audience === 'internal') {
+      problems.push(`${d.slug}: a public doc links to the internal doc /docs/${target}`);
+    }
+  }
+}
+
+if (problems.length) {
+  console.error(`Docs have problems:\n${problems.map((p) => `  - ${p}`).join('\n')}`);
+  process.exit(1);
+}
+
+const generated = `// GENERATED by \`pnpm docs:build\` from apps/web/content/docs. Do not edit by hand.
+import type { Doc } from './types';
+
+export const DOCS: readonly Doc[] = ${JSON.stringify(docs, null, 2)};
+`;
+
+if (process.argv.includes('--check')) {
+  if (readOr(out) !== generated) {
+    console.error(
+      'packages/core/src/docs/docs.generated.ts is out of date. Run `pnpm docs:build`.',
+    );
+    process.exit(1);
+  }
+  console.log(`Docs are up to date (${docs.length} docs).`);
+} else {
+  writeFileSync(out, generated);
+  const internal = docs.filter((d) => d.audience === 'internal').length;
+  console.log(
+    `Wrote ${docs.length} docs (${docs.length - internal} public, ${internal} internal).`,
+  );
+}

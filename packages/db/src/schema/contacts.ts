@@ -32,6 +32,14 @@ export const contacts = app
       /** Where the contact came from: website, admin, api, mcp, import, seed. */
       source: text('source').notNull().default('admin'),
       notes: text('notes'),
+      /**
+       * Recorded consent to automated texts (notifications module). No consent = nobody is ever
+       * texted. `sms_consent_text` is the exact wording they agreed to, `sms_consent_source` where
+       * (account, staff, api …). Cleared when they withdraw consent.
+       */
+      smsConsentAt: timestamp('sms_consent_at', { withTimezone: true }),
+      smsConsentSource: text('sms_consent_source'),
+      smsConsentText: text('sms_consent_text'),
       createdAt: createdAt(),
       updatedAt: updatedAt(),
     },

@@ -3,6 +3,7 @@ import { z } from 'zod';
 
 import { canGrantRole, ROLE_DESCRIPTIONS, ROLE_PERMISSIONS } from '../../access';
 import { getContactOrThrow, withTagsAndRoles } from '../contacts/shared';
+import { emit } from '../../events/emit';
 import { ActionError, defineAction } from '../define';
 
 const roleField = z.enum(appRole.enumValues).describe(
@@ -68,10 +69,18 @@ export const grantRole = defineAction({
       throw new ActionError('forbidden', `Only an owner can grant the ${input.role} role.`);
     }
     const c = await getContactOrThrow(tx, input.contactId);
-    await tx
+    const granted = await tx
       .insert(contactRoles)
       .values({ contactId: c.id, role: input.role, grantedBy: actor.contactId })
-      .onConflictDoNothing();
+      .onConflictDoNothing()
+      .returning({ role: contactRoles.role });
+    if (granted.length) {
+      await emit(tx, 'role.granted', {
+        contactId: c.id,
+        displayName: c.displayName,
+        role: input.role,
+      });
+    }
     log({
       subjectType: 'contact',
       subjectId: c.id,
@@ -108,9 +117,17 @@ export const revokeRole = defineAction({
       }
     }
     const c = await getContactOrThrow(tx, input.contactId);
-    await tx
+    const removed = await tx
       .delete(contactRoles)
-      .where(and(eq(contactRoles.contactId, c.id), eq(contactRoles.role, input.role)));
+      .where(and(eq(contactRoles.contactId, c.id), eq(contactRoles.role, input.role)))
+      .returning({ role: contactRoles.role });
+    if (removed.length) {
+      await emit(tx, 'role.revoked', {
+        contactId: c.id,
+        displayName: c.displayName,
+        role: input.role,
+      });
+    }
     log({
       subjectType: 'contact',
       subjectId: c.id,
