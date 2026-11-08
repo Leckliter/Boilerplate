@@ -6,7 +6,7 @@ import { Fragment, createContext, useContext, type PropsWithChildren, type React
 import { inputVariants, type InputSize } from './input';
 import { cn } from '../lib/utils';
 import { Field, type FieldErrorMatch } from './label';
-import { usePortalContainer, type PortalContainer } from './kumo-context';
+import { usePortalContainer, type PortalContainer } from './ui-context';
 
 // Context to pass size and error state down to sub-components
 const ComboboxContext = createContext<{
@@ -14,10 +14,10 @@ const ComboboxContext = createContext<{
   hasError: boolean;
 }>({ size: 'base', hasError: false });
 
-export type KumoComboboxSize = InputSize;
-export type KumoComboboxInputSide = 'right' | 'top';
+export type UiComboboxSize = InputSize;
+export type UiComboboxInputSide = 'right' | 'top';
 
-export interface KumoComboboxVariantsProps {
+export interface UiComboboxVariantsProps {
   /**
    * Size of the combobox trigger. Matches Input component sizes.
    * - `"xs"` — Extra small for compact UIs (h-5 / 20px)
@@ -26,18 +26,18 @@ export interface KumoComboboxVariantsProps {
    * - `"lg"` — Large for prominent fields (h-10 / 40px)
    * @default "base"
    */
-  size?: KumoComboboxSize;
+  size?: UiComboboxSize;
   /**
    * Position of the text input relative to chips in multi-select mode.
    * - `"right"` — Input inline to the right of chips
    * - `"top"` — Input above chips
    * @default "right"
    */
-  inputSide?: KumoComboboxInputSide;
+  inputSide?: UiComboboxInputSide;
 }
 
-export type ComboboxInputSide = KumoComboboxInputSide;
-export type ComboboxSize = KumoComboboxSize;
+export type ComboboxInputSide = UiComboboxInputSide;
+export type ComboboxSize = UiComboboxSize;
 
 export type ComboboxRootProps<
   Value = unknown,
@@ -77,7 +77,7 @@ export type ComboboxRootProps<
  * </Combobox>
  * ```
  */
-export interface ComboboxProps extends KumoComboboxVariantsProps {
+export interface ComboboxProps extends UiComboboxVariantsProps {
   /** Array of items to display in the dropdown */
   items: unknown[];
   /** Currently selected value(s) */
@@ -117,7 +117,7 @@ function Root<Value, Multiple extends boolean | undefined = false>({
   labelTooltip?: ReactNode;
   description?: ReactNode;
   error?: string | { message: ReactNode; match: FieldErrorMatch };
-  size?: KumoComboboxSize;
+  size?: UiComboboxSize;
 }) {
   const comboboxControl = (
     <ComboboxContext.Provider value={{ size, hasError: Boolean(error) }}>
@@ -220,7 +220,7 @@ function Content({
 
 // Size-dependent styles for TriggerValue icon
 const triggerValueIconStyles: Record<
-  KumoComboboxSize,
+  UiComboboxSize,
   { padding: string; iconSize: number; iconRight: string }
 > = {
   xs: { padding: 'pr-5', iconSize: 12, iconRight: 'right-1' },
@@ -268,7 +268,7 @@ function TriggerValue({
 
 // Size-dependent styles for TriggerInput icons
 const triggerInputIconStyles: Record<
-  KumoComboboxSize,
+  UiComboboxSize,
   { padding: string; iconSize: number; clearRight: string; caretRight: string }
 > = {
   xs: {
@@ -469,7 +469,7 @@ function Chip({
 }
 
 // Map size to min-height class for TriggerMultipleWithInput
-const sizeToMinHeight: Record<KumoComboboxSize, string> = {
+const sizeToMinHeight: Record<UiComboboxSize, string> = {
   xs: 'min-h-5',
   sm: 'min-h-6.5',
   base: 'min-h-9',

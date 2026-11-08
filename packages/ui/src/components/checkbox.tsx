@@ -4,7 +4,7 @@ import { cn } from '../lib/utils';
 import { CheckIcon, MinusIcon } from './icons';
 
 /**
- * A checkbox in Cloudflare Kumo's (MIT) look — a 16px box with a hairline ring that fills with
+ * A checkbox in house style — a 16px box with a hairline ring that fills with
  * the contrast colour when checked. It is still a real <input type="checkbox"> (works in plain
  * forms, `defaultChecked`, `onChange`, keyboard and screen readers); `className` styles the box.
  * `variant="error"` rings it red. Pair it with a label — `<CheckboxField>` does that.

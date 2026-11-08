@@ -7,7 +7,7 @@ function Card({ className, ...props }: React.ComponentProps<'div'>) {
     <div
       data-slot="card"
       className={cn(
-        // Kumo's Surface / LayerCard look: a card colour, a 1px ring and a hint of shadow.
+        // Surface / LayerCard look: a card colour, a 1px ring and a hint of shadow.
         'flex flex-col rounded-lg bg-card text-card-foreground shadow-xs ring ring-border',
         className,
       )}

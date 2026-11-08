@@ -50,12 +50,12 @@ function hasLayerCardSections(children: ReactNode): boolean {
  * @example
  * ```tsx
  * <LayerCard className="p-4">
- *   Get started with Kumo
+ *   Get started
  * </LayerCard>
  *
  * <LayerCard>
  *   <LayerCard.Secondary>Next Steps</LayerCard.Secondary>
- *   <LayerCard.Primary>Get started with Kumo</LayerCard.Primary>
+ *   <LayerCard.Primary>Get started</LayerCard.Primary>
  * </LayerCard>
  * ```
  */

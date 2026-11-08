@@ -10,7 +10,7 @@ type CheckProps = {
   indeterminate?: boolean;
   /** Called with the new checked state. */
   onCheckedChange?: (checked: boolean) => void;
-  /** @deprecated Kumo name for `onCheckedChange`. */
+  /** @deprecated old name for `onCheckedChange`. */
   onValueChange?: (checked: boolean) => void;
   /** Accessible name of the checkbox. */
   label?: string;

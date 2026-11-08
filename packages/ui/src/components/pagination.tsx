@@ -64,7 +64,7 @@ export interface PaginationVariantsProps {
   controls?: PaginationControlsMode;
 }
 
-/** A native select that looks like a Kumo Select (the page-size and page-number pickers). */
+/** A native select that looks like a Select (the page-size and page-number pickers). */
 function PagerSelect({
   className,
   children,
@@ -88,7 +88,7 @@ function PagerSelect({
   );
 }
 
-/** Buttons and the page input joined into one control (Kumo's InputGroup look). */
+/** Buttons and the page input joined into one control (InputGroup look). */
 function PagerGroup({ children }: { children: ReactNode }) {
   return (
     <div

@@ -11,7 +11,7 @@ import { LinkButton as UILinkButton, type LinkButtonProps } from './link-button'
 
 const SIZES = { xs: 'text-xs', sm: 'text-xs', base: 'text-base', lg: 'text-base' } as const;
 
-/** @deprecated Kumo is removing toolbar size customisation: omit `size`. */
+/** @deprecated toolbar size customisation is going away: omit `size`. */
 export type ToolbarSize = keyof typeof SIZES;
 
 export interface ToolbarProps extends Omit<ToolbarBase.Root.Props, 'children'> {

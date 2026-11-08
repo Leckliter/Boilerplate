@@ -3,23 +3,23 @@
 import { Slider as BaseSlider } from '@base-ui/react/slider';
 import { type ReactNode } from 'react';
 import { cn } from '../lib/utils';
-export type KumoSliderSize = 'sm' | 'base';
-const SLIDER_SIZE_CLASSES: Record<KumoSliderSize, string> = {
+export type UiSliderSize = 'sm' | 'base';
+const SLIDER_SIZE_CLASSES: Record<UiSliderSize, string> = {
   sm: 'h-6 rounded-md',
   base: 'h-8 rounded-lg',
 };
 
-export interface KumoSliderVariantsProps {
+export interface UiSliderVariantsProps {
   /**
    * Height of the slider track.
    * - `"sm"` — Compact slider for dense layouts
    * - `"base"` — Default slider size
    * @default "base"
    */
-  size?: KumoSliderSize;
+  size?: UiSliderSize;
 }
 
-export function sliderVariants({ size = 'base' }: KumoSliderVariantsProps = {}) {
+export function sliderVariants({ size = 'base' }: UiSliderVariantsProps = {}) {
   return cn(
     'bg-recessed p-[3px] ring ring-border',
     SLIDER_SIZE_CLASSES[size] ?? SLIDER_SIZE_CLASSES.base,
@@ -38,7 +38,7 @@ type SliderValue = number | readonly number[];
  * ```
  */
 export interface SliderProps<Value extends SliderValue = SliderValue>
-  extends Omit<BaseSlider.Root.Props<Value>, 'children' | 'orientation'>, KumoSliderVariantsProps {
+  extends Omit<BaseSlider.Root.Props<Value>, 'children' | 'orientation'>, UiSliderVariantsProps {
   /** Label displayed above the slider track. */
   label?: ReactNode;
   /**

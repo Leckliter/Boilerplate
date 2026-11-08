@@ -4,9 +4,9 @@ import { cn } from '../lib/utils';
 import { Banner, bannerVariants, type BannerVariant } from './banner';
 
 /**
- * A coloured notice: "needs attention", "late payment", "you don't have access".
+ * A coloured notice: "needs attention", "payment failed", "you don't have access".
  * Use `<Callout>` for a box, or `calloutVariants()` to style a Link the same way.
- * `shape="banner"` is a full-width strip across the top of a page. Built on Kumo's Banner.
+ * `shape="banner"` is a full-width strip across the top of a page. Built on Banner.
  */
 type CalloutTone = 'warning' | 'danger' | 'info' | 'success' | 'loud';
 type CalloutShape = 'box' | 'banner' | 'strip';

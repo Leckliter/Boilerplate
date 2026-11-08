@@ -3,7 +3,7 @@ import type { ComponentPropsWithoutRef } from 'react';
 
 import { cn } from '../lib/utils';
 
-/* Cloudflare Kumo's Meter (MIT): a labelled value bar (storage used, quota). Base UI Meter. */
+/* Meter: a labelled value bar (storage used, quota). Base UI Meter. */
 
 type MeterProps = ComponentPropsWithoutRef<typeof BaseMeter.Root> & {
   /** The words above the bar. */

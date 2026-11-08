@@ -14,7 +14,7 @@ import {
 import type { InputSize } from './input';
 import type { FieldError } from './label';
 
-type KumoInputSize = InputSize;
+type UiInputSize = InputSize;
 type FieldProps = {
   label?: ReactNode;
   description?: ReactNode;
@@ -63,7 +63,7 @@ export interface InputGroupSizeTokens {
   iconSize: number;
 }
 
-export const INPUT_GROUP_SIZE: Record<KumoInputSize, InputGroupSizeTokens> = {
+export const INPUT_GROUP_SIZE: Record<UiInputSize, InputGroupSizeTokens> = {
   xs: {
     inputOuter: 'px-1.5',
     addonOuterStart: 'pl-1.5',
@@ -108,7 +108,7 @@ export const INPUT_GROUP_SIZE: Record<KumoInputSize, InputGroupSizeTokens> = {
 
 // Build the has-[] container classes that reduce input padding when addons
 // are present. These are static strings so Tailwind JIT can detect them.
-export const INPUT_GROUP_HAS_CLASSES: Record<KumoInputSize, string> = {
+export const INPUT_GROUP_HAS_CLASSES: Record<UiInputSize, string> = {
   xs: [
     'has-[[data-slot=input-group-addon-start]]:[&_input]:pl-1',
     'has-[[data-slot=input-group-addon-end]]:[&_input]:pr-1',
@@ -137,7 +137,7 @@ export interface InputGroupRootPropsInternal
   extends
     HTMLAttributes<HTMLElement>,
     Partial<Pick<FieldProps, 'label' | 'description' | 'error' | 'required' | 'labelTooltip'>> {
-  size?: KumoInputSize | undefined;
+  size?: UiInputSize | undefined;
   disabled?: boolean;
 }
 
@@ -145,7 +145,7 @@ export interface InputGroupRootPropsInternal
 export type InputGroupRootProps = InputGroupRootPropsInternal;
 
 export interface InputGroupContextValue {
-  size?: KumoInputSize;
+  size?: UiInputSize;
   focusMode: 'container' | 'individual' | 'hybrid';
   disabled: boolean;
   error?: FieldProps['error'];

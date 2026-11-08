@@ -5,18 +5,18 @@ import { useState } from 'react';
 import type * as React from 'react';
 
 import {
-  centralMinutes,
+  minutesInAppZone,
   formatDayShort,
   formatShortTime,
   formatTime,
-  todayInCentral,
+  todayInAppZone,
   weekdayOfDay,
 } from '../lib/dates';
 import { cn } from '../lib/utils';
 import { focusRing } from './link';
 
 /**
- * Calendar views (Central time): an agenda list, a day/week time grid and a month grid.
+ * Calendar views (app time zone): an agenda list, a day/week time grid and a month grid.
  * Presentational — the app gives the events and handles clicks and drops:
  *
  *   <CalendarWeek days={['2026-11-01', …]} events={events}
@@ -64,7 +64,7 @@ export type CalendarEvent = {
 
 export type CalendarDropTarget = {
   day: string;
-  /** Minutes after midnight (Central) in the time grid; null when dropped on a whole day. */
+  /** Minutes after midnight (app zone) in the time grid; null when dropped on a whole day. */
   minutes: number | null;
 };
 
@@ -74,7 +74,7 @@ export type RenderEventLink = (
   props: { className: string; children: React.ReactNode },
 ) => React.ReactNode;
 
-const DRAG_TYPE = 'application/x-rskc-calendar';
+const DRAG_TYPE = 'application/x-app-calendar';
 
 /** Props that make anything draggable onto a calendar, carrying `id`. */
 export function calendarDragProps(id: string) {
@@ -202,14 +202,14 @@ function EventChip({
   );
 }
 
-/** Events that touch a Kansas City day. */
+/** Events that touch an app-zone day. */
 function eventsOn(events: CalendarEvent[], day: string) {
   return events.filter((e) => {
-    const first = todayInCentral(e.start);
+    const first = todayInAppZone(e.start);
     if (first === day) return true;
     if (!e.end) return false;
     // Multi-day (busy all week): every day it spans, ending exclusive at midnight.
-    const last = todayInCentral(new Date(e.end.getTime() - 1));
+    const last = todayInAppZone(new Date(e.end.getTime() - 1));
     return first < day && day <= last;
   });
 }
@@ -235,7 +235,7 @@ function CalendarAgenda({
   emptyText?: string;
   className?: string;
 }) {
-  const today = todayInCentral();
+  const today = todayInAppZone();
   const shown = days
     .map((day) => ({ day, list: eventsOn(events, day).sort(byStart) }))
     .filter((d) => emptyDays === 'show' || d.list.length || d.day === today);
@@ -268,7 +268,7 @@ function CalendarAgenda({
                     children: (
                       <>
                         <span className="w-16 shrink-0 pt-px text-xs text-muted-foreground tabular-nums">
-                          {e.allDay || todayInCentral(e.start) !== day
+                          {e.allDay || todayInAppZone(e.start) !== day
                             ? 'All day'
                             : formatTime(e.start)}
                         </span>
@@ -306,10 +306,10 @@ const SNAP = 15;
 function layoutDay(list: CalendarEvent[], dayStart: number, dayEnd: number) {
   const items = list
     .map((e) => {
-      const top = Math.max(dayStart, centralMinutes(e.start));
+      const top = Math.max(dayStart, minutesInAppZone(e.start));
       const endMin =
-        e.end && todayInCentral(e.end) === todayInCentral(e.start)
-          ? centralMinutes(e.end)
+        e.end && todayInAppZone(e.end) === todayInAppZone(e.start)
+          ? minutesInAppZone(e.end)
           : top + 30;
       const bottom = Math.min(dayEnd, Math.max(endMin, top + 30));
       return { e, top: Math.min(top, dayEnd - 30), bottom };
@@ -363,7 +363,7 @@ function CalendarWeek({
   onDrop?: (id: string, target: CalendarDropTarget) => void;
   className?: string;
 }) {
-  const today = todayInCentral();
+  const today = todayInAppZone();
   const [hover, setHover] = useState<{ day: string; minutes: number } | null>(null);
   const dayStart = startHour * 60;
   const dayEnd = endHour * 60;
@@ -376,7 +376,7 @@ function CalendarWeek({
   };
   const cols = `3rem repeat(${days.length}, minmax(0, 1fr))`;
   const allDay = days.map((day) =>
-    eventsOn(events, day).filter((e) => e.allDay || todayInCentral(e.start) !== day),
+    eventsOn(events, day).filter((e) => e.allDay || todayInAppZone(e.start) !== day),
   );
 
   return (
@@ -446,10 +446,10 @@ function CalendarWeek({
         </div>
         {days.map((day) => {
           const timed = eventsOn(events, day).filter(
-            (e) => !e.allDay && todayInCentral(e.start) === day,
+            (e) => !e.allDay && todayInAppZone(e.start) === day,
           );
           const placed = layoutDay(timed, dayStart, dayEnd);
-          const nowMin = day === today ? centralMinutes(new Date()) : null;
+          const nowMin = day === today ? minutesInAppZone(new Date()) : null;
           return (
             <div
               key={day}
@@ -563,7 +563,7 @@ function CalendarMonth({
   onDrop?: (id: string, target: CalendarDropTarget) => void;
   className?: string;
 }) {
-  const today = todayInCentral();
+  const today = todayInAppZone();
   const [over, setOver] = useState<string | null>(null);
   return (
     <div data-slot="calendar-month" className={cn('min-w-0 text-sm', className)}>

@@ -6,7 +6,7 @@ import { cn } from '../lib/utils';
  * Long-form text: docs, policies, help pages. Styles plain HTML (headings,
  * lists, tables, code, links) with the design tokens, so Markdown rendered to
  * HTML looks like the rest of the app. Pass `html` for trusted, pre-rendered
- * HTML (our own docs), or children.
+ * HTML (your own docs), or children.
  */
 function Prose({
   html,

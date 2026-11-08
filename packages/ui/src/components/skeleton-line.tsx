@@ -5,7 +5,7 @@ import { useId, type CSSProperties } from 'react';
 import { cn } from '../lib/utils';
 
 /*
- * Cloudflare Kumo's SkeletonLine (MIT): a loading bar with a sliding shimmer, random width
+ * SkeletonLine: a loading bar with a sliding shimmer, random width
  * so a stack of them looks like text. Needs the `shimmer` keyframes in globals.css.
  */
 

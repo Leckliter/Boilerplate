@@ -11,13 +11,13 @@ import {
 import { cn } from '../lib/utils';
 
 /*
- * Cloudflare Kumo's Text (MIT): the typography primitive. Pick a `variant`, optionally a `size`.
+ * Text: the typography primitive. Pick a `variant`, optionally a `size`.
  * Escape hatches are named DANGEROUS_className / DANGEROUS_style on purpose; prefer a variant.
  */
 
 const VARIANTS = {
   heading: 'text-lg font-semibold',
-  /** Deprecated (use `heading`): kept for Kumo parity. */
+  /** Deprecated (use `heading`): kept for API parity. */
   heading1: 'text-3xl font-semibold',
   heading2: 'text-2xl font-semibold',
   heading3: 'text-lg font-semibold',

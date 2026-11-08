@@ -13,8 +13,8 @@ import { cn } from '../lib/utils';
 import { Button, type ButtonProps } from './button';
 
 /*
- * Cloudflare Kumo's Banner (MIT): a tinted notice with an optional icon, title,
- * description and action. `success` is our own addition (Kumo has no green banner).
+ * Banner: a tinted notice with an optional icon, title,
+ * description and action. `success` is our own addition.
  * For the plain "needs attention" box used across the screens, see `Callout`.
  */
 

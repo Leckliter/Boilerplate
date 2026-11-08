@@ -1,7 +1,7 @@
 'use client';
 
 /**
- * Switch — an on/off toggle. Cloudflare Kumo (MIT) `switch` on Base UI Switch.
+ * Switch — an on/off toggle. the `switch` pattern on Base UI Switch.
  *
  * Compound component: `<Switch>` (pass `label` for a built-in Field), `Switch.Group` (a fieldset
  * of switches with a legend, description and error), `Switch.Item`, `Switch.Legend`.
@@ -91,7 +91,7 @@ type SwitchProps = Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'children'> &
     controlFirst?: boolean;
   };
 
-/** The Base UI switch drawn as a Kumo track + thumb. */
+/** The Base UI switch drawn as a track + thumb. */
 function renderSwitch(
   {
     size = 'base',

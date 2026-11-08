@@ -7,7 +7,7 @@ import { cn } from '../lib/utils';
  * `./link-component`; a link that looks like a button is `LinkButton` in `./link-button`.
  */
 
-/** The focus ring every interactive thing uses (Kumo: thin, neutral). */
+/** The focus ring every interactive thing uses (thin, neutral). */
 export const focusRing =
   'outline-none focus-visible:ring-[1.5px] focus-visible:ring-ring focus-visible:rounded-sm';
 
@@ -22,8 +22,8 @@ const toneVariants = cva(`underline-offset-4 transition-colors ${focusRing}`, {
   defaultVariants: { tone: 'primary' },
 });
 
-/** Kumo's own link variants (used by the `Link` component and `linkVariants({ variant })`). */
-const KUMO_LINK = {
+/** Link variants (used by the `Link` component and `linkVariants({ variant })`). */
+const LINK_VARIANTS = {
   /** Inline text link that flows with content. */
   inline:
     'text-link underline underline-offset-[0.15em] decoration-[0.0625em] decoration-[color-mix(in_oklch,currentColor_35%,transparent)] hover:decoration-current transition-colors',
@@ -34,16 +34,16 @@ const KUMO_LINK = {
   plain: 'text-link hover:text-link/70 transition-colors',
 } as const;
 
-export type KumoLinkVariant = keyof typeof KUMO_LINK;
+export type UiLinkVariant = keyof typeof LINK_VARIANTS;
 
 /**
  * Text links. Put the classes on Next's <Link> (or an <a>):
  *   <Link href="/docs" className={linkVariants()}>Help</Link>
- * `tone` (our app style):
+ * `tone` (app style):
  * - primary: brand colour, the default for a link in running text or a value.
  * - inherit: same colour as the text around it, underlines on hover (names in lists).
  * - muted: grey, darkens on hover (back links, secondary meta).
- * `variant` (Kumo's): inline | current | plain, as used by the `Link` component.
+ * `variant`: inline | current | plain, as used by the `Link` component.
  */
 export function linkVariants({
   tone,
@@ -51,10 +51,10 @@ export function linkVariants({
   className,
 }: {
   tone?: 'primary' | 'inherit' | 'muted' | null;
-  variant?: KumoLinkVariant;
+  variant?: UiLinkVariant;
   className?: string;
 } = {}) {
-  if (variant) return cn(KUMO_LINK[variant], focusRing, className);
+  if (variant) return cn(LINK_VARIANTS[variant], focusRing, className);
   return toneVariants({ tone, className });
 }
 

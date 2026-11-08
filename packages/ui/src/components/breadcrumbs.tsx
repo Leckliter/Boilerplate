@@ -13,7 +13,7 @@ import { useCopyFeedback } from '../lib/use-copy-feedback';
 import { cn } from '../lib/utils';
 import { Button } from './button';
 import { CheckIcon, CopyIcon } from './icons';
-import { useLinkComponent } from './kumo-context';
+import { useLinkComponent } from './ui-context';
 
 const SIZES = {
   sm: 'h-10 gap-0.5 text-sm',

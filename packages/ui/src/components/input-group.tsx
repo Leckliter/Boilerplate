@@ -2,7 +2,7 @@
 
 /**
  * InputGroup: an input with icons, text addons, an inline suffix and action buttons in one
- * box. Cloudflare Kumo (MIT) `input-group`: `InputGroup`, `InputGroup.Input`, `.Addon`,
+ * box. the `input-group` pattern: `InputGroup`, `InputGroup.Input`, `.Addon`,
  * `.Suffix`, `.Button`. Size, disabled and error come from the group. Pass `label` /
  * `description` / `error` to wrap it in a field.
  *
@@ -46,7 +46,7 @@ import {
 import { Field } from './label';
 import { Tooltip } from './tooltip';
 
-type KumoInputSize = InputSize;
+type UiInputSize = InputSize;
 
 // ── Addon
 
@@ -244,7 +244,7 @@ export const Suffix = forwardRef<HTMLDivElement, InputGroupSuffixProps>(
 Suffix.displayName = 'InputGroup.Suffix';
 
 // ── Button
-const COMPACT_BUTTON: Record<KumoInputSize, string> = {
+const COMPACT_BUTTON: Record<UiInputSize, string> = {
   xs: 'h-4 gap-1 rounded-sm px-1 text-xs',
   sm: 'h-5 gap-1 rounded px-1.5 text-xs',
   base: 'h-6.5 gap-1 rounded-md px-2 text-sm',
@@ -427,7 +427,7 @@ const Root = forwardRef<HTMLElement, PropsWithChildren<InputGroupRootPropsIntern
       className,
     );
 
-    // Data attributes drive CSS selectors in kumo-binding.css (focus outline)
+    // Data attributes drive CSS selectors in the input-group styles (focus outline)
     // and enable child components to query their parent's state.
     const dataProps = {
       'data-slot': 'input-group' as const,

@@ -102,7 +102,7 @@ export type MenuBarProps = {
 };
 
 /**
- * Horizontal icon-button bar with arrow-key navigation and tooltips. Kumo has deprecated
+ * Horizontal icon-button bar with arrow-key navigation and tooltips. the old API deprecated
  * it in favour of `Tabs` with the segmented look; kept here for parity.
  */
 export function MenuBar({ className, isActive, options, optionIds = false }: MenuBarProps) {

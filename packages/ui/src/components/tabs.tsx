@@ -1,7 +1,7 @@
 'use client';
 
 /**
- * Tabs with a sliding indicator — Kumo's Tabs (cloudflare/kumo, MIT) on Base UI, with our tokens.
+ * Tabs with a sliding indicator — on Base UI, with our tokens.
  * `segmented` is a pill that slides between tabs; `underline` is a line under the active one.
  * A row that doesn't fit scrolls (drag, swipe or the arrow buttons) instead of widening the page.
  *
@@ -35,7 +35,7 @@ const DEFAULT_LABELS: Required<TabsLabels> = {
   scrollEnd: 'Scroll tabs right',
 };
 
-export interface KumoTabsVariantsProps {
+export interface UiTabsVariantsProps {
   /**
    * Tab style.
    * - `"segmented"` — Pill-shaped indicator on a filled track
@@ -87,7 +87,7 @@ export type TabsItem = {
  * />
  * ```
  */
-export type TabsProps = KumoTabsVariantsProps & {
+export type TabsProps = UiTabsVariantsProps & {
   /** Array of tab items to render. */
   tabs?: TabsItem[];
   /** Controlled value. When set, component becomes controlled. */
@@ -194,7 +194,7 @@ export function Tabs({
         data-overflow-end={canScrollEnd ? '' : undefined}
         {...bindDrag()}
         className={cn(
-          'kumo-tabs-list relative flex min-w-0 shrink scroll-px-(--scroll-fade-width) items-stretch overflow-x-auto overflow-y-hidden [--scroll-fade-width:3rem]',
+          'ui-tabs-list relative flex min-w-0 shrink scroll-px-(--scroll-fade-width) items-stretch overflow-x-auto overflow-y-hidden [--scroll-fade-width:3rem]',
           isSegmented && 'rounded-lg bg-recessed px-0.5',
           isSegmented && (isSm ? 'h-6.5 rounded-md' : 'h-9'),
           isOverflowing && 'cursor-grab active:cursor-grabbing',
@@ -206,8 +206,8 @@ export function Tabs({
         {items.map((tab) => (
           <TabsPrimitive.Tab
             key={tab.value}
-            data-kumo-component="Tabs"
-            data-kumo-part="tab"
+            data-ui-component="Tabs"
+            data-ui-part="tab"
             value={tab.value}
             render={tab.render}
             nativeButton={tab.nativeButton}
@@ -301,8 +301,8 @@ function TabsOverflowControl({
   return (
     <button
       type="button"
-      data-kumo-component="Tabs"
-      data-kumo-part="overflow-control"
+      data-ui-component="Tabs"
+      data-ui-part="overflow-control"
       data-side={side}
       aria-label={label}
       aria-hidden={!visible}
@@ -345,7 +345,7 @@ function scrollTabs(ref: React.RefObject<HTMLElement | null>, direction: 'start'
   const el = ref.current;
   if (!el) return;
 
-  const tabEls = Array.from(el.querySelectorAll<HTMLElement>('[data-kumo-part="tab"]'));
+  const tabEls = Array.from(el.querySelectorAll<HTMLElement>('[data-ui-part="tab"]'));
   const distance = getTabsScrollSize(el.clientWidth, tabEls);
 
   el.scrollBy({

@@ -13,7 +13,7 @@ import { Field } from './label';
 
 /*
  * Confirmations and quick questions ("Delete this note?", "Why is it
- * cancelled?"). Kumo's alert dialog (Base UI AlertDialog: no close X, no
+ * cancelled?"). Alert dialog (Base UI AlertDialog: no close X, no
  * click-outside dismiss, sits near the top) with shadcn/ui part names.
  *
  * Most code doesn't need the parts: mount <DialogsHost /> once (root layout)
@@ -80,7 +80,7 @@ function AlertDialogDescription({ className, ...props }: AlertDialogPrimitive.De
   );
 }
 
-/** Closes the dialog. Secondary button by default (Kumo: Cancel comes first). */
+/** Closes the dialog. Secondary button by default (Cancel comes first). */
 function AlertDialogCancel({
   children = 'Cancel',
   ...props

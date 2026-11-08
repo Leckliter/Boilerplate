@@ -4,11 +4,11 @@ import { Popover as PopoverBase } from '@base-ui/react/popover';
 import type { ComponentPropsWithoutRef, ReactNode } from 'react';
 
 import { cn } from '../lib/utils';
-import { usePortalContainer, type PortalContainer } from './kumo-context';
+import { usePortalContainer, type PortalContainer } from './ui-context';
 import { ArrowSvg } from './tooltip';
 
 /*
- * Cloudflare Kumo's Popover (MIT), on Base UI. Use `<Popover.Content>` for the common case
+ * Popover, on Base UI. Use `<Popover.Content>` for the common case
  * (portal + positioner + popup + arrow), or the parts (`Portal`, `Positioner`, `Popup`, `Arrow`)
  * when you need control.
  *

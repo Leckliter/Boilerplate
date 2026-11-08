@@ -3,9 +3,9 @@ import type * as React from 'react';
 import { cn } from '../lib/utils';
 
 /**
- * Pick one of a few options shown as cards (delivery method, rental plan) — Kumo's (MIT)
+ * Pick one of a few options shown as cards (delivery method, plan), in the
  * `Radio` card look. Real radio inputs, so plain forms, `required` and keyboard arrows just
- * work. For a Base UI radio group with Kumo's own API see `Radio`.
+ * work. For a Base UI radio group with its own API see `Radio`.
  *
  *   <RadioCardGroup legend="Getting it to you">
  *     <RadioCard name="how" value="pickup" label="Pickup" detail="Free" />

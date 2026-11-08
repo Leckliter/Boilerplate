@@ -3,8 +3,8 @@ import type * as React from 'react';
 import { cn } from '../lib/utils';
 
 /*
- * Cloudflare Kumo's Badge (MIT), kept compatible with our tag colours.
- * Use `variant` (Kumo's names) or `color` (our tag-colour keys, which map onto Kumo's variants).
+ * Badge, kept compatible with our tag colours.
+ * Use `variant` (variant names) or `color` (tag-colour keys, which map onto variants).
  */
 
 /** Colour keys a tag can use (stored on the tag row in the database). */
@@ -23,7 +23,7 @@ export type TagColor = (typeof TAG_COLORS)[number];
 const BASE =
   'inline-flex w-fit flex-none shrink-0 items-center justify-self-start gap-1 rounded-full px-2 py-0.5 text-xs font-medium whitespace-nowrap [a:hover_&]:ring [a:hover_&]:ring-current';
 
-/** Kumo's badge variants → classes. */
+/** Badge variants → classes. */
 const VARIANTS = {
   primary: 'bg-badge-inverted text-badge-inverted-foreground',
   secondary: 'bg-fill text-badge-neutral-subtle',
@@ -55,7 +55,7 @@ const DOT_COLORS: Partial<Record<BadgeVariant, string>> = {
   neutral: 'bg-badge-neutral',
 };
 
-/** Our tag-colour keys → Kumo variants. */
+/** Tag-colour keys → variants. */
 const COLOR_TO_VARIANT = {
   neutral: 'secondary',
   brand: 'primary',
@@ -86,7 +86,7 @@ function badgeVariants({
 }
 
 type BadgeProps = Omit<React.ComponentProps<'span'>, 'color'> & {
-  /** Kumo's variant. Wins over `color`. Default `primary` (inverted) unless `color` is given. */
+  /** Variant. Wins over `color`. Default `primary` (inverted) unless `color` is given. */
   variant?: BadgeVariant;
   /** Our tag-colour keys (neutral, brand, blue, green, amber, red, purple, teal, solid, outline). */
   color?: BadgeColor;
@@ -105,7 +105,7 @@ function Badge({
   children,
   ...props
 }: BadgeProps) {
-  // No colour at all = the quiet neutral badge our screens have always used.
+  // No colour at all = the quiet neutral badge.
   const resolved: BadgeVariant =
     variant && variant in VARIANTS
       ? variant

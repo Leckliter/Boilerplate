@@ -9,7 +9,7 @@ import { Button } from './button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './card';
 
 /** Fired when a card opens for editing, so other open cards with no changes close. */
-const OPEN_EVENT = 'rskc:editable-card-open';
+const OPEN_EVENT = 'app:editable-card-open';
 
 /**
  * One section of a record (contact info, product details…). Shows `view`

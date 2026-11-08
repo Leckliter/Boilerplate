@@ -1,12 +1,16 @@
 /*
- * RSKC design tokens — THE single source of truth for colour, radius, type
- * and shadow. Components only ever use these tokens (bg-primary, text-muted-foreground,
- * border-border …), never raw colours. Change the brand here and the whole app follows.
+ * Design tokens — THE single source of truth for colour, radius, type and shadow.
+ * Components only ever use these tokens (bg-primary, text-muted-foreground,
+ * border-border …), never raw colours.
  *
- * Look & feel: Cloudflare Kumo (crisp neutral greys, hairline borders, rounded-lg
- * controls, rounded-xl surfaces, soft shadows, 100ms transitions) with the
- * RSKC Cardinal Orange brand. Token NAMES follow shadcn/ui so AI tools and docs
- * work out of the box. See docs/design-system.md.
+ * RE-BRAND by changing the --brand-* ramp only (50 lightest … 900 darkest).
+ * `--primary` is brand-500 in light mode. In dark mode `--primary` moves to a LIGHTER
+ * step (brand-400) and `--primary-foreground` flips to a dark ink, so accent text,
+ * links and buttons stay readable on dark surfaces. When you pick a new ramp, check
+ * both modes. Light/dark pairs use `light-dark()` (driven by `html.dark`'s color-scheme).
+ *
+ * Look: crisp neutral greys, hairline borders, rounded-lg controls, rounded-xl
+ * surfaces, soft shadows, 100ms transitions. Token NAMES follow shadcn/ui.
  */
 @import 'tailwindcss';
 @import 'tw-animate-css';
@@ -16,19 +20,19 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-  /* Brand — Cardinal Orange */
-  --brand-50: oklch(0.962 0.028 45);
-  --brand-100: oklch(0.925 0.045 44);
-  --brand-200: oklch(0.885 0.06 45);
-  --brand-300: oklch(0.8 0.1 42);
-  --brand-400: oklch(0.7 0.18 39);
-  --brand-500: #e5542f;
-  --brand-600: #c4431f;
-  --brand-700: oklch(0.515 0.165 38);
-  --brand-800: oklch(0.44 0.13 36);
-  --brand-900: oklch(0.38 0.1 36);
+  /* Brand — neutral indigo default. Change ONLY this ramp to re-brand. */
+  --brand-50: oklch(0.962 0.018 277);
+  --brand-100: oklch(0.93 0.034 277);
+  --brand-200: oklch(0.87 0.065 277);
+  --brand-300: oklch(0.79 0.11 277);
+  --brand-400: oklch(0.7 0.16 277);
+  --brand-500: oklch(0.585 0.2 277);
+  --brand-600: oklch(0.51 0.21 277);
+  --brand-700: oklch(0.45 0.19 277);
+  --brand-800: oklch(0.38 0.15 277);
+  --brand-900: oklch(0.32 0.11 277);
 
-  /* Surfaces (Kumo: canvas → base → elevated) */
+  /* Surfaces (canvas → base → elevated) */
   --background: oklch(0.9875 0 0); /* page canvas */
   --foreground: oklch(0.21 0.006 285.9);
   --card: oklch(1 0 0); /* panels, cards, inputs */
@@ -59,19 +63,17 @@
   --info: oklch(0.424 0.199 265.6);
 
   /* Lines */
-  --border: oklch(0.145 0 0 / 0.1); /* Kumo "line" */
+  --border: oklch(0.145 0 0 / 0.1); /* the standard line */
   --hairline: oklch(0.935 0 0);
   --input: oklch(0.145 0 0 / 0.12);
-  --ring: oklch(0.15 0 0 / 0.5); /* Kumo focus ring: neutral, not brand */
+  --ring: oklch(0.15 0 0 / 0.5); /* focus ring: neutral, not brand */
 
   --radius: 0.625rem;
   --shadow-color: oklch(0 0 0 / 0.08);
 
   /*
-   * Kumo's extra surfaces, text and status tints (cloudflare/kumo, MIT), under shadcn-style
-   * names. light-dark() follows html.dark's color-scheme, so one line per token covers both modes.
-   * kumo-base → card · kumo-canvas → background · kumo-subtle → muted-foreground ·
-   * kumo-line → border · kumo-brand → primary · kumo-danger → destructive.
+   * Extra surfaces, text and status tints. light-dark() follows html.dark's color-scheme,
+   * so one line per token covers both modes.
    */
   --elevated: light-dark(oklch(0.98 0 0), oklch(0.12 0 0));
   --recessed: light-dark(oklch(0.96 0 0), oklch(0.15 0 0));
@@ -107,53 +109,6 @@
   --arrow-edge: light-dark(oklch(0.145 0 0 / 0.1), transparent);
   --arrow-stroke: light-dark(transparent, oklch(0.32 0 0));
 
-  /*
-   * Payment cards (<PaymentCard>) — the face of each card network, so a saved
-   * card looks like the real thing. Same in light and dark mode, like a real card.
-   */
-  --pay-visa-from: oklch(0.46 0.19 277);
-  --pay-visa-to: oklch(0.24 0.12 268);
-  --pay-mastercard-from: oklch(0.33 0.01 260);
-  --pay-mastercard-to: oklch(0.16 0.005 260);
-  --pay-amex-from: oklch(0.62 0.11 232);
-  --pay-amex-to: oklch(0.4 0.12 250);
-  --pay-discover-from: oklch(0.36 0.02 55);
-  --pay-discover-to: oklch(0.19 0.01 55);
-  --pay-diners-from: oklch(0.52 0.04 245);
-  --pay-diners-to: oklch(0.3 0.04 250);
-  --pay-jcb-from: oklch(0.5 0.11 165);
-  --pay-jcb-to: oklch(0.3 0.07 175);
-  --pay-unionpay-from: oklch(0.5 0.16 25);
-  --pay-unionpay-to: oklch(0.3 0.1 20);
-  --pay-cb-from: oklch(0.48 0.09 215);
-  --pay-cb-to: oklch(0.28 0.07 230);
-  --pay-interac-from: oklch(0.34 0.02 95);
-  --pay-interac-to: oklch(0.18 0.01 95);
-  --pay-eftpos-from: oklch(0.42 0.06 300);
-  --pay-eftpos-to: oklch(0.24 0.04 300);
-  --pay-link-from: oklch(0.55 0.14 158);
-  --pay-link-to: oklch(0.33 0.09 165);
-  --pay-generic-from: oklch(0.42 0 0);
-  --pay-generic-to: oklch(0.2 0 0);
-  /* Logo + detail colours on a card face */
-  --pay-ink: oklch(1 0 0);
-  --pay-sheen: oklch(1 0 0 / 0.16);
-  --pay-stripe: oklch(0.12 0 0);
-  --pay-signature: oklch(0.95 0.01 90);
-  --pay-chip: oklch(0.82 0.12 85);
-  --pay-chip-line: oklch(0.6 0.1 75);
-  --pay-mc-red: oklch(0.6 0.23 28);
-  --pay-mc-yellow: oklch(0.8 0.17 75);
-  --pay-mc-orange: oklch(0.7 0.21 48);
-  --pay-amex-blue: oklch(0.55 0.15 245);
-  --pay-discover-orange: oklch(0.7 0.19 50);
-  --pay-jcb-blue: oklch(0.45 0.15 255);
-  --pay-jcb-red: oklch(0.55 0.2 25);
-  --pay-jcb-green: oklch(0.55 0.15 150);
-  --pay-unionpay-red: oklch(0.55 0.21 27);
-  --pay-unionpay-blue: oklch(0.42 0.15 255);
-  --pay-unionpay-teal: oklch(0.55 0.1 195);
-  --pay-interac-yellow: oklch(0.85 0.17 90);
 }
 
 .dark {
@@ -166,9 +121,10 @@
   --sidebar: oklch(0.12 0 0);
   --sidebar-foreground: var(--foreground);
 
+  /* Lighter accent in dark mode, with dark ink on it, so text stays readable. */
   --primary: var(--brand-400);
-  --primary-hover: var(--brand-500);
-  --primary-foreground: oklch(1 0 0);
+  --primary-hover: var(--brand-300);
+  --primary-foreground: oklch(0.16 0.03 277);
   --secondary: oklch(0.269 0 0);
   --secondary-foreground: oklch(0.985 0 0);
   --accent: oklch(0.269 0 0);
@@ -310,21 +266,21 @@
   }
 }
 
-/* Kumo Tabs: a row that overflows scrolls sideways without a scrollbar or page bounce. */
-.kumo-tabs-list {
+/* Tabs: a row that overflows scrolls sideways without a scrollbar or page bounce. */
+.ui-tabs-list {
   overscroll-behavior-x: contain;
 }
 @supports (animation-timeline: scroll()) {
-  .kumo-tabs-list {
+  .ui-tabs-list {
     scrollbar-width: none;
     -ms-overflow-style: none;
   }
-  .kumo-tabs-list::-webkit-scrollbar {
+  .ui-tabs-list::-webkit-scrollbar {
     display: none;
   }
 }
 
-/* Kumo motion: skeleton shimmer, toast bump on update, bounce-in tick. */
+/* Motion: skeleton shimmer, toast bump on update, bounce-in tick. */
 @keyframes shimmer {
   from {
     transform: translateX(-100%);

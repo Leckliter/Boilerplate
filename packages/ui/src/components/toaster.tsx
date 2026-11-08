@@ -2,14 +2,14 @@
 
 import type { ReactNode } from 'react';
 
-import { createKumoToastManager, Toasty, type KumoToastVariant } from './toast';
+import { createUiToastManager, Toasty, type UiToastVariant } from './toast';
 
 /*
- * The app-wide toast helper, on Kumo's Toast. Mount <Toaster /> once in the root layout,
+ * The app-wide toast helper, on the Toast. Mount <Toaster /> once in the root layout,
  * then call `toast.success('Saved')` / `toast.error(…)` from any client code (events, effects, callbacks).
  */
 
-const manager = createKumoToastManager();
+const manager = createUiToastManager();
 
 type ToastOptions = {
   /** Second line, smaller. */
@@ -22,7 +22,7 @@ type ToastOptions = {
   action?: { label: string; onClick: () => void };
 };
 
-function show(variant: KumoToastVariant, message: ReactNode, opts: ToastOptions = {}) {
+function show(variant: UiToastVariant, message: ReactNode, opts: ToastOptions = {}) {
   return manager.add({
     id: opts.id,
     title: message,

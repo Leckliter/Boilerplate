@@ -21,7 +21,7 @@ import { DropdownMenu } from './dropdown-menu';
 import { Button } from './button';
 import { Text } from './text';
 import { cn } from '../lib/utils';
-import { useLocale, usePortalContainer, type PortalContainer } from './kumo-context';
+import { useLocale, usePortalContainer, type PortalContainer } from './ui-context';
 
 const SIZE_CLASSES = {
   sm: 'sm:max-w-md',
@@ -35,8 +35,8 @@ const VERTICAL_ALIGN_CLASSES = {
   center: 'sm:items-center sm:py-6',
 } as const;
 
-export type KumoLayerDialogSize = keyof typeof SIZE_CLASSES;
-export type KumoLayerDialogVerticalAlign = keyof typeof VERTICAL_ALIGN_CLASSES;
+export type UiLayerDialogSize = keyof typeof SIZE_CLASSES;
+export type UiLayerDialogVerticalAlign = keyof typeof VERTICAL_ALIGN_CLASSES;
 
 const DesktopContext = createContext(false);
 const DismissDisabledContext = createContext(false);
@@ -158,9 +158,9 @@ export interface LayerDialogContentProps {
    */
   container?: PortalContainer;
   /** Desktop-only width. Mobile dialogs always remain full-width. */
-  size?: KumoLayerDialogSize;
+  size?: UiLayerDialogSize;
   /** Desktop-only positioning. Mobile dialogs always remain bottom sheets. */
-  verticalAlign?: KumoLayerDialogVerticalAlign;
+  verticalAlign?: UiLayerDialogVerticalAlign;
   /**
    * Accessible name of the automatic X button. Overrides the `close`
    * translation from LocaleProvider.
@@ -262,7 +262,7 @@ function LayerDialogContent({
               sizeClasses,
             )}
           >
-            <div className="flex max-h-[85dvh] min-h-0 w-full flex-col overflow-hidden rounded-none bg-elevated p-1.5 shadow-[0_20px_25px_-5px_rgb(0_0_0/0.03),0_8px_10px_-6px_rgb(0_0_0/0.03)] ring ring-hairline max-sm:border-t max-sm:border-hairline max-sm:shadow-xs max-sm:ring-0 sm:max-h-full sm:rounded-xl">
+            <div className="flex max-h-[85dvh] min-h-0 w-full flex-col overflow-hidden rounded-none bg-elevated p-1.5 shadow-[0_20px_25px_-5px_var(--shadow-color),0_8px_10px_-6px_var(--shadow-color)] ring ring-hairline max-sm:border-t max-sm:border-hairline max-sm:shadow-xs max-sm:ring-0 sm:max-h-full sm:rounded-xl">
               {!isDesktop && !isAlert && (
                 <div aria-hidden className="flex justify-center pt-1.5 pb-3">
                   <div className="h-1 w-10 rounded-full bg-fill" />
@@ -474,13 +474,13 @@ export type LayerDialogActionProps = Omit<
    * an irreversible action such as a delete.
    * @default "primary"
    */
-  variant?: KumoLayerDialogPrimaryVariant;
+  variant?: UiLayerDialogPrimaryVariant;
 };
 
 /** @deprecated Use `LayerDialogActionProps` instead. */
 export type LayerDialogPrimaryProps = LayerDialogActionProps;
 
-export type KumoLayerDialogPrimaryVariant = 'primary' | 'destructive';
+export type UiLayerDialogPrimaryVariant = 'primary' | 'destructive';
 
 export interface LayerDialogActionsProps {
   /**

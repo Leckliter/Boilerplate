@@ -6,7 +6,7 @@ import { CircleNotchIcon, ArrowsClockwiseIcon, type Icon } from './icons';
 import { Tooltip } from './tooltip';
 
 /**
- * The one button (Kumo look). This file has no hooks and no 'use client', so server
+ * The one button (house look). This file has no hooks and no 'use client', so server
  * components can call `buttonVariants()` and render `<Button>` directly.
  * A link that looks like a button: `LinkButton` (./link-button) or `buttonVariants()` on <Link>.
  */
@@ -32,7 +32,7 @@ const COMPACT_SIZES = {
 } as const;
 
 const EMPHASIS =
-  'relative overflow-hidden bg-(--rskc-button-emphasis-bg) !text-white ring ring-(--rskc-button-emphasis-ring) focus:ring-(--rskc-button-emphasis-ring) focus-visible:ring-(--rskc-button-emphasis-ring) active:ring-(--rskc-button-emphasis-ring) disabled:opacity-50';
+  'relative overflow-hidden bg-(--ui-button-emphasis-bg) !text-white ring ring-(--ui-button-emphasis-ring) focus:ring-(--ui-button-emphasis-ring) focus-visible:ring-(--ui-button-emphasis-ring) active:ring-(--ui-button-emphasis-ring) disabled:opacity-50';
 
 const VARIANTS = {
   /** High-emphasis: the main action on a screen (one per screen). */
@@ -101,10 +101,10 @@ export function buttonVariants({
 
 // Lowercase text sits below its line box's centre: lift the content row to centre it optically.
 const TEXT_LIFT: Record<keyof typeof SIZES, string> = {
-  xs: 'pb-px [--rskc-button-text-lift:0.5px]',
-  sm: 'pb-px [--rskc-button-text-lift:0.5px]',
-  base: 'pb-0.5 [--rskc-button-text-lift:1px]',
-  lg: 'pb-0.5 [--rskc-button-text-lift:1px]',
+  xs: 'pb-px [--ui-button-text-lift:0.5px]',
+  sm: 'pb-px [--ui-button-text-lift:0.5px]',
+  base: 'pb-0.5 [--ui-button-text-lift:1px]',
+  lg: 'pb-0.5 [--ui-button-text-lift:1px]',
 };
 
 // Icons carry whitespace inside their viewBox: trim the leading padding of icon + text buttons.
@@ -116,7 +116,7 @@ const ICON_LEADING_PADDING: Record<keyof typeof SIZES, string> = {
 };
 
 const ICON_CENTER =
-  '[&>svg:first-child]:translate-y-(--rskc-button-text-lift) [&>span.relative>svg:first-child]:translate-y-(--rskc-button-text-lift)';
+  '[&>svg:first-child]:translate-y-(--ui-button-text-lift) [&>span.relative>svg:first-child]:translate-y-(--ui-button-text-lift)';
 
 /** Extra classes the Button / LinkButton add on top of `buttonVariants` for the text lift. */
 export function buttonTextClasses(
@@ -160,10 +160,10 @@ export function buttonEmphasisStyle(variant: ButtonVariant) {
   const token = emphasisColor(variant);
   if (!token) return undefined;
   return {
-    '--rskc-button-emphasis-ring': `color-mix(in oklch, ${token}, black 10%)`,
-    '--rskc-button-emphasis-bg': `color-mix(in oklch, ${token}, white 30%)`,
-    '--rskc-button-emphasis-gradient-start': `color-mix(in oklch, ${token}, white 15%)`,
-    '--rskc-button-emphasis-gradient-end': token,
+    '--ui-button-emphasis-ring': `color-mix(in oklch, ${token}, black 10%)`,
+    '--ui-button-emphasis-bg': `color-mix(in oklch, ${token}, white 30%)`,
+    '--ui-button-emphasis-gradient-start': `color-mix(in oklch, ${token}, white 15%)`,
+    '--ui-button-emphasis-gradient-end': token,
   } satisfies React.CSSProperties & Record<`--${string}`, string>;
 }
 
@@ -186,7 +186,7 @@ export function renderButtonContent(
     <>
       <span
         aria-hidden="true"
-        className="absolute inset-0 rounded-[inherit] bg-linear-to-b from-(--rskc-button-emphasis-gradient-start) to-(--rskc-button-emphasis-gradient-end) shadow-[inset_0_1px_0_0_var(--rskc-button-emphasis-bg)] group-hover:from-(--rskc-button-emphasis-bg)"
+        className="absolute inset-0 rounded-[inherit] bg-linear-to-b from-(--ui-button-emphasis-gradient-start) to-(--ui-button-emphasis-gradient-end) shadow-[inset_0_1px_0_0_var(--ui-button-emphasis-bg)] group-hover:from-(--ui-button-emphasis-bg)"
       />
       <span className="relative flex items-center gap-1.5">
         {iconNode}
@@ -289,6 +289,20 @@ function Button({
   return button;
 }
 
+/**
+ * An icon-only button. `aria-label` is REQUIRED by the type (no visible text, so it is the
+ * only accessible name); it also shows as the tooltip unless `title` is given.
+ */
+export type IconButtonProps = Omit<ButtonProps, 'children' | 'icon' | 'shape' | 'aria-label'> & {
+  icon: Icon | React.ReactNode;
+  'aria-label': string;
+  shape?: 'square' | 'circle';
+};
+
+function IconButton({ icon, shape = 'square', title, ...props }: IconButtonProps) {
+  return <Button icon={icon} shape={shape} title={title ?? props['aria-label']} {...props} />;
+}
+
 /** Square button with a rotating-arrows icon, for "refresh the data". */
 function RefreshButton({
   'aria-label': ariaLabel = 'Refresh',
@@ -310,4 +324,4 @@ function RefreshButton({
   );
 }
 
-export { Button, RefreshButton };
+export { Button, IconButton, RefreshButton };

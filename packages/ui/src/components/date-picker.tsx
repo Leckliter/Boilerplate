@@ -128,7 +128,7 @@ type RangeRequiredProps = BaseProps &
 
 /**
  * DatePicker props - discriminated union based on `mode`.
- * Uses `onChange` instead of `onSelect` for Kumo consistency.
+ * Uses `onChange` instead of `onSelect` for consistency.
  * Full type inference is preserved via the discriminated union.
  */
 export type DatePickerProps =
@@ -142,7 +142,7 @@ export type DatePickerProps =
 /**
  * DatePicker — a date selection calendar.
  *
- * Built on [react-day-picker](https://daypicker.dev) with Kumo styling.
+ * Built on [react-day-picker](https://daypicker.dev) with house styling.
  * Supports three selection modes: single, multiple, and range.
  * Outside-month dates are hidden by default in multi-month views to avoid duplicates.
  * Set `showOutsideDays` to override this behavior.

@@ -1,9 +1,9 @@
 'use client';
 
 /**
- * Label + Field, rebuilt on Cloudflare Kumo's (MIT) `label` and `field`.
+ * Label + Field, built on `label` and `field`.
  *
- * `Field` keeps our props (`label`, `hint`, `error`, `htmlFor`) and also takes Kumo's
+ * `Field` keeps its props (`label`, `hint`, `error`, `htmlFor`) and also takes the
  * (`description`, `required={false}` → "(optional)", `labelTooltip`, `controlFirst`,
  * `hideLabel`, and `error={{ message, match }}`). It is Base UI's Field underneath, so
  * a control inside gets its label, hint and error wired up for screen readers.
@@ -14,7 +14,7 @@ import { createContext, isValidElement, useContext, useId } from 'react';
 
 import { cn } from '../lib/utils';
 import { InfoIcon } from './icons';
-import { useLocale } from './kumo-context';
+import { useLocale } from './ui-context';
 import { Tooltip } from './tooltip';
 
 /* ── Label ─────────────────────────────────────────────────────────── */
@@ -99,7 +99,7 @@ type FieldErrorMatch =
   | 'valueMissing';
 
 type FieldErrorObject = { message: React.ReactNode; match: FieldErrorMatch };
-/** A message, or Kumo's `{ message, match }`. */
+/** A message, or `{ message, match }`. */
 type FieldError = React.ReactNode | FieldErrorObject;
 
 function isErrorObject(error: unknown): error is FieldErrorObject {
@@ -191,7 +191,7 @@ function Field({
   htmlFor?: string;
   /** Quiet help text under the control (hidden while there is an error). */
   hint?: React.ReactNode;
-  /** Same as `hint` (Kumo's name). */
+  /** Same as `hint` (alias). */
   description?: React.ReactNode;
   error?: FieldError;
   /** `false` adds a quiet "(optional)" after the label. */

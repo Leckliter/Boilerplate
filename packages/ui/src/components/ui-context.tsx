@@ -1,7 +1,7 @@
 'use client';
 
 /**
- * The three small context providers Kumo components read (cloudflare/kumo, MIT):
+ * The three small context providers our components read:
  *  - LinkProvider: which component renders links (mount with next/link once, in the root layout).
  *  - PortalProvider: where popups render (default: document.body).
  *  - LocaleProvider: words the components say themselves ("Close", "(optional)").

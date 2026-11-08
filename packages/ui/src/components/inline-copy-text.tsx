@@ -2,7 +2,7 @@
 
 /**
  * InlineCopyText — text that copies itself when clicked, with a copy icon that appears on
- * hover/focus and turns into a check for 1.5 s. Cloudflare Kumo (MIT) `inline-copy-text`.
+ * hover/focus and turns into a check for 1.5 s. the `inline-copy-text` pattern.
  *
  *   <InlineCopyText>ord_1Nx8Kq</InlineCopyText>
  *   <InlineCopyText variant="body" value="+18165550100">(816) 555-0100</InlineCopyText>

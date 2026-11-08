@@ -2,7 +2,7 @@
 
 /**
  * ClipboardText — a read-only value with a copy button (and, when `masked`, a reveal button).
- * Cloudflare Kumo (MIT) `clipboard-text`: sized like an Input, monospace text, buttons on the
+ * the `clipboard-text` pattern: sized like an Input, monospace text, buttons on the
  * right behind a hairline. The copy icon slides up into a check for 1.5 s after copying.
  *
  *   <ClipboardText text="sk_live_51Mx…" masked />

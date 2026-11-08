@@ -81,7 +81,7 @@ const TableOfContentsItem = forwardRef<HTMLAnchorElement, TableOfContentsItemPro
       ...props,
     };
 
-    // If a render prop is provided, clone it with our props
+    // If a render prop is provided, clone it with extra props
     if (render && isValidElement(render)) {
       return <li className="-ml-0.5">{cloneElement(render, sharedProps)}</li>;
     }

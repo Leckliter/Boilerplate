@@ -1,4 +1,4 @@
-// rules-ok: file-size — faithful port of Cloudflare Kumo's Sidebar: ~25 parts sharing one private context; splitting would diverge from upstream and make updates hard
+// rules-ok: file-size — faithful port of a sidebar pattern: ~25 parts sharing one private context; splitting would diverge from upstream and make updates hard
 'use client';
 
 import React, {
@@ -20,7 +20,7 @@ import { ScrollArea as ScrollAreaBase } from '@base-ui/react/scroll-area';
 
 import { CaretRightIcon, XIcon } from './icons';
 import { cn } from '../lib/utils';
-import { useLinkComponent } from './kumo-context';
+import { useLinkComponent } from './ui-context';
 import { Tooltip as TooltipPrimitive } from '@base-ui/react/tooltip';
 import { Button } from './button';
 import { TooltipProvider } from './tooltip';
@@ -951,7 +951,7 @@ const SidebarContent = forwardRef<HTMLDivElement, ComponentPropsWithoutRef<'div'
             'h-full px-[11px] py-3 group-not-data-[state=collapsed]/sidebar:px-3.5',
             'transition-[padding] duration-(--sidebar-animation-duration)',
             'overflow-x-hidden!',
-            // Hide the native scrollbar with Kumo's CSS rather than relying on
+            // Hide the native scrollbar with CSS rather than relying on
             // the <style> Base UI adds to <head>, which head-swapping client
             // routers and strict CSPs can drop.
             '[scrollbar-width:none] [&::-webkit-scrollbar]:hidden',
@@ -1037,7 +1037,7 @@ const SIDEBAR_LOADING_GROUPS: readonly (readonly string[])[] = [
 /**
  * Loading state for the whole sidebar nav: nav-item-shaped placeholder rows
  * (icon + label) grouped like the real nav, composed from `SkeletonLine` so it
- * shares Kumo's skeleton shimmer. Drop it in place of the nav content while
+ * shares the skeleton shimmer. Drop it in place of the nav content while
  * routes/permissions resolve. When collapsed only the icon squares remain.
  *
  * @example

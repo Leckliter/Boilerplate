@@ -5,8 +5,8 @@ import { useRender } from '@base-ui/react/use-render';
 import type { SVGProps } from 'react';
 
 import { cn } from '../lib/utils';
-import { useLinkComponent, type LinkComponentProps } from './kumo-context';
-import { linkVariants, type KumoLinkVariant } from './link';
+import { useLinkComponent, type LinkComponentProps } from './ui-context';
+import { linkVariants, type UiLinkVariant } from './link';
 
 /**
  * Marks a link that opens in a new tab:
@@ -35,11 +35,11 @@ function ExternalIcon(props: SVGProps<SVGSVGElement>) {
 export type LinkProps = useRender.ComponentProps<'a'> &
   LinkComponentProps & {
     /** inline (default, underlined), current (inherits colour) or plain (no underline). */
-    variant?: KumoLinkVariant;
+    variant?: UiLinkVariant;
   };
 
 /**
- * Kumo's inline text link. Renders through the app's `LinkProvider` (next/link),
+ *The inline text link. Renders through the app's `LinkProvider` (next/link),
  * or pass `render={<NextLink href="…" />}`. Presentational: routing lives in the provider.
  */
 function LinkBase({ className, variant = 'inline', render, ref, ...props }: LinkProps) {

@@ -10,7 +10,7 @@ import { cn } from '../lib/utils';
 const DIALOG_BACKDROP =
   'fixed inset-0 z-50 bg-recessed opacity-80 transition-all duration-150 data-ending-style:opacity-0 data-starting-style:opacity-0';
 
-/** Kumo's dialog widths (from sm:). Leave `size` off for the default fluid width (max 32rem). */
+/** Dialog widths (from sm:). Leave `size` off for the default fluid width (max 32rem). */
 const DIALOG_SIZES = {
   sm: 'sm:w-72',
   base: 'sm:w-96',
@@ -36,7 +36,7 @@ function DialogContent({
       <DialogPrimitive.Popup
         data-slot="dialog-content"
         className={cn(
-          // Kumo's dialog: near the top, ringed card, scales in and out.
+          // Dialog: near the top, ringed card, scales in and out.
           'fixed top-8 left-1/2 z-50 grid max-h-[calc(100dvh-4rem)] -translate-x-1/2 gap-4 overflow-x-hidden overflow-y-auto overscroll-contain rounded-xl bg-card p-6 text-foreground shadow-lg ring ring-border outline-none sm:top-16 sm:max-h-[calc(100dvh-6rem)]',
           size
             ? cn('w-full max-w-[calc(100vw-2rem)]', DIALOG_SIZES[size])

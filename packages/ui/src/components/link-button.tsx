@@ -15,7 +15,7 @@ import {
   type ButtonVariant,
 } from './button';
 import type { Icon } from './icons';
-import { useLinkComponent } from './kumo-context';
+import { useLinkComponent } from './ui-context';
 import { Tooltip } from './tooltip';
 
 export type LinkButtonProps = React.AnchorHTMLAttributes<HTMLAnchorElement> & {

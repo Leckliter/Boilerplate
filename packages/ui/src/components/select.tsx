@@ -8,11 +8,11 @@ import { cn } from '../lib/utils';
 import { Field, Label, type FieldErrorMatch } from './label';
 import { SkeletonLine } from './skeleton-line';
 import { inputVariants, type InputSize } from './input';
-import { usePortalContainer, type PortalContainer } from './kumo-context';
+import { usePortalContainer, type PortalContainer } from './ui-context';
 
-export type KumoSelectSize = InputSize;
+export type UiSelectSize = InputSize;
 
-export interface KumoSelectVariantsProps {
+export interface UiSelectVariantsProps {
   /**
    * Size of the select trigger. Matches Input component sizes.
    * - `"xs"` — Extra small for compact UIs (h-5 / 20px)
@@ -21,7 +21,7 @@ export interface KumoSelectVariantsProps {
    * - `"lg"` — Large for prominent fields (h-10 / 40px)
    * @default "base"
    */
-  size?: KumoSelectSize;
+  size?: UiSelectSize;
 }
 
 /** Base UI positioning controls forwarded to Select's popup. */
@@ -42,7 +42,7 @@ type SelectPositionerProps = Pick<
   | 'sticky'
 >;
 
-export function selectVariants({ size = 'base' }: KumoSelectVariantsProps = {}) {
+export function selectVariants({ size = 'base' }: UiSelectVariantsProps = {}) {
   return cn(
     inputVariants({ size }),
     'inline-flex w-full min-w-0 cursor-pointer items-center justify-between shadow-xs',
@@ -147,7 +147,7 @@ type SelectPropsGeneric<T, Multiple extends boolean | undefined = false> = Omit<
   SelectBase.Root.Props<T, Multiple>,
   'items'
 > &
-  KumoSelectVariantsProps & {
+  UiSelectVariantsProps & {
     multiple?: Multiple;
     /**
      * A function that returns a `ReactNode` to format the selected value.
@@ -235,7 +235,7 @@ export interface SelectProps extends SelectPositionerProps {
   /** Replaces the trigger element while preserving Select behavior. */
   render?: SelectBase.Trigger.Props['render'];
   /** Size of the select trigger. Matches Input component sizes. */
-  size?: KumoSelectSize;
+  size?: UiSelectSize;
   /**
    * Label content for the select.
    * When provided, enables the Field wrapper with a visible label above the select.
@@ -290,7 +290,7 @@ export interface SelectOptionProps {
 
 /**
  * Dropdown for selecting a value from a list of options.
- * Wraps Base UI Select with Kumo styling and optional Field integration.
+ * Wraps Base UI Select with house styling and optional Field integration.
  *
  * @example
  * ```tsx
@@ -342,7 +342,7 @@ export function Select<T, Multiple extends boolean | undefined = false>({
   // Deprecation warning for hideLabel
   if (process.env.NODE_ENV !== 'production' && hideLabel !== undefined) {
     console.warn(
-      '[Kumo Select]: `hideLabel` is deprecated. For hidden labels, use `aria-label` instead of `label` + `hideLabel={true}`.\n' +
+      '[Select]: `hideLabel` is deprecated. For hidden labels, use `aria-label` instead of `label` + `hideLabel={true}`.\n' +
         '  Migration:\n' +
         '  - For visible labels: <Select label="Country" /> (hideLabel no longer needed)\n' +
         '  - For hidden labels: <Select aria-label="Select a country" /> (remove label and hideLabel)',
@@ -381,7 +381,7 @@ export function Select<T, Multiple extends boolean | undefined = false>({
         }
 
         // Cast through `any` as a deliberate type boundary: Base UI passes `unknown`,
-        // but our renderValue expects the generic T (or T[] for multiple)
+        // but renderValue expects the generic T (or T[] for multiple)
         const rendered = renderValue(value as any);
 
         if (rendered == null) {
@@ -392,7 +392,7 @@ export function Select<T, Multiple extends boolean | undefined = false>({
       }
     : undefined;
 
-  // Exclude Kumo-extended `items` from Base UI spread — we pass `normalizedItems` instead
+  // Exclude the extended `items` from Base UI spread — we pass `normalizedItems` instead
   const { items: _items, ...baseProps } = props;
 
   // Use Base UI's Select.Label for accessible naming — avoids the

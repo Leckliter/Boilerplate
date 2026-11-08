@@ -21,7 +21,7 @@ function CopyButton({
   size?: 'xs' | 'sm' | 'md';
   className?: string;
 }) {
-  // Kumo's copy feedback: the tick stays 2 s after the latest successful copy.
+  // Copy feedback: the tick stays 2 s after the latest successful copy.
   const { copied, runCopy } = useCopyFeedback(2_000);
   return (
     <Button

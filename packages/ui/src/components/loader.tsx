@@ -1,6 +1,6 @@
 import { cn } from '../lib/utils';
 
-/* Cloudflare Kumo's Loader (MIT): a self-animating SVG spinner (no CSS needed). */
+/* Loader: a self-animating SVG spinner (no CSS needed). */
 
 const SIZES = { sm: 16, base: 24, lg: 32 } as const;
 type LoaderSize = keyof typeof SIZES;

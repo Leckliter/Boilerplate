@@ -101,7 +101,7 @@ export const SensitiveInput = forwardRef<HTMLInputElement, SensitiveInputProps>(
     // Deprecation warning for variant="error"
     if (process.env.NODE_ENV !== 'production' && variantProp === 'error') {
       console.warn(
-        '[Kumo SensitiveInput]: variant="error" is deprecated. ' +
+        '[SensitiveInput]: variant="error" is deprecated. ' +
           'Error styling is now automatically applied when the `error` prop is truthy. ' +
           'Simply remove the variant prop and pass an error message instead.',
       );

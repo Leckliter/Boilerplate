@@ -5,11 +5,11 @@ import * as React from 'react';
 
 import { cn } from '../lib/utils';
 import { CaretRightIcon, CheckIcon, type Icon } from './icons';
-import { usePortalContainer, type PortalContainer } from './kumo-context';
+import { usePortalContainer, type PortalContainer } from './ui-context';
 
 /**
- * Dropdown menu (Kumo look) on Base UI's Menu. The shadcn-style names
- * (`DropdownMenuItem` …) and Kumo's compound form (`DropdownMenu.Item` …) are both exported.
+ * Dropdown menu (house look) on Base UI's Menu. The shadcn-style names
+ * (`DropdownMenuItem` …) and the compound form (`DropdownMenu.Item` …) are both exported.
  * A `<DropdownMenuLabel>` must sit inside a `<DropdownMenuGroup>` (or RadioGroup).
  */
 

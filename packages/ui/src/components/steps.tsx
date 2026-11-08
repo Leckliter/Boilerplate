@@ -4,11 +4,11 @@ import type * as React from 'react';
 import { cn } from '../lib/utils';
 
 /**
- * Where someone is in a short step-by-step flow (checkout: details → agreement → payment).
+ * Where someone is in a short step-by-step flow (checkout: details → terms → payment).
  * Done steps get a tick and, with `onStepClick`, can be clicked to go back; later steps
  * can't be jumped to. Phones show the numbers with only the current step's label.
  *
- *   <Steps steps={['Your details', 'Rental agreement', 'Payment']} current={1} onStepClick={setStep} />
+ *   <Steps steps={['Your details', 'Agreement', 'Payment']} current={1} onStepClick={setStep} />
  */
 function Steps({
   steps,

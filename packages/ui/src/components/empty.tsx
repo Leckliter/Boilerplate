@@ -9,7 +9,7 @@ import { CheckIcon, CopyIcon } from './icons';
 import { Text } from './text';
 
 /*
- * Cloudflare Kumo's Empty (MIT): "nothing here yet" with an optional icon, a description,
+ * Empty: "nothing here yet" with an optional icon, a description,
  * a copyable command and free-form `contents` (buttons).
  */
 
@@ -112,4 +112,7 @@ function Empty({
 }
 
 export type { EmptyProps, EmptySize };
-export { Empty, emptyVariants };
+/** Alias: `<EmptyState>` and `<Empty>` are the same component. */
+const EmptyState = Empty;
+
+export { Empty, EmptyState, emptyVariants };

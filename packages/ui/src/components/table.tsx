@@ -4,14 +4,14 @@ import { cn } from '../lib/utils';
 import { TableCheckCell, TableCheckHead } from './table-check-cell';
 
 /**
- * Table (Kumo look): semantic HTML, striped rows, sticky header and columns.
- * Server-safe (no hooks). Shadcn names (`TableRow` …) and Kumo's (`Table.Row` …) both work.
+ * Table (house look): semantic HTML, striped rows, sticky header and columns.
+ * Server-safe (no hooks). Shadcn names (`TableRow` …) and compound (`Table.Row` …) both work.
  */
 
 const ROW_VARIANTS = {
   default:
-    'even:bg-elevated [--rskc-table-row-bg:var(--color-card)] even:[--rskc-table-row-bg:var(--color-elevated)]',
-  selected: 'bg-tint [--rskc-table-row-bg:var(--color-tint)]',
+    'even:bg-elevated [--ui-table-row-bg:var(--color-card)] even:[--ui-table-row-bg:var(--color-elevated)]',
+  selected: 'bg-tint [--ui-table-row-bg:var(--color-tint)]',
 } as const;
 
 export type TableRowVariant = keyof typeof ROW_VARIANTS;
@@ -33,11 +33,11 @@ function stickyColumnClasses(side: TableStickyColumn, element: 'head' | 'cell') 
     return cn(
       base,
       z,
-      'bg-(--rskc-table-row-bg)',
+      'bg-(--ui-table-row-bg)',
       fadeBase,
       fadePosition,
       dir,
-      'before:from-transparent before:to-(--rskc-table-row-bg)',
+      'before:from-transparent before:to-(--ui-table-row-bg)',
     );
   }
   return cn(
@@ -122,6 +122,7 @@ function TableRow({
 function TableHead({
   className,
   sticky,
+  scope,
   ...props
 }: React.ComponentProps<'th'> & {
   /** Pin this header cell to the left or right edge of the scroll container. */
@@ -130,6 +131,7 @@ function TableHead({
   return (
     <th
       data-slot="table-head"
+      scope={scope ?? 'col'}
       className={cn('group relative', sticky && stickyColumnClasses(sticky, 'head'), className)}
       {...props}
     />

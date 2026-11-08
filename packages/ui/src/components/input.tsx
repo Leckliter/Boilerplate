@@ -1,7 +1,7 @@
 'use client';
 
 /**
- * Text inputs, rebuilt on Cloudflare Kumo's (MIT) `input` and `input-area`.
+ * Text inputs, built on `input` and `input-area`.
  *
  * Sizes `xs | sm | base | lg`, a quiet ring instead of a border, a 1.5px focus ring and a
  * red ring for errors. Pass `label` / `description` / `error` for a ready-made field, or put

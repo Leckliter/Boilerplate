@@ -9,9 +9,9 @@ import {
 } from 'react';
 
 import { cn } from '../lib/utils';
-import { usePortalContainer, type PortalContainer } from './kumo-context';
+import { usePortalContainer, type PortalContainer } from './ui-context';
 
-/* Cloudflare Kumo's Tooltip (MIT): a card with an outline and an arrow, scales in. */
+/* Tooltip: a card with an outline and an arrow, scales in. */
 
 const TooltipProvider = TooltipPrimitive.Provider;
 

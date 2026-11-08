@@ -9,12 +9,12 @@ import { useFieldControlProps } from './label';
 
 /**
  * A text box that suggests values as you type — suggestions you load yourself
- * (e.g. Google address suggestions). Typing still works without picking one.
+ * (e.g. address suggestions). Typing still works without picking one.
  * Picking one calls `onSelect`; the text box keeps whatever `value` you set.
  *
  *   <Field label="Street address">
  *     <Autocomplete value={text} onValueChange={setText} items={found}
- *       itemToString={(s) => s.text} onSelect={fill} footer="Suggestions by Google Maps" />
+ *       itemToString={(s) => s.text} onSelect={fill} footer="Suggestions by your provider" />
  *   </Field>
  */
 function Autocomplete<T>({
