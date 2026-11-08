@@ -12,7 +12,8 @@ const keyField = z
 export const listSettings = defineAction({
   name: 'settings.list',
   title: 'List settings',
-  description: 'Every business setting (key → JSON value). Settings are plain configuration, never secrets.',
+  description:
+    'Every business setting (key → JSON value). Settings are plain configuration, never secrets.',
   audience: 'settings.manage',
   mutates: false,
   returns: '[{ key, value, updatedAt }]',
@@ -92,7 +93,10 @@ export const updateIntegration = defineAction({
   input: z.object({
     id: z.string().min(1).describe('Integration id, e.g. "email" or "sms".'),
     enabled: z.boolean().optional(),
-    config: z.record(z.string(), z.unknown()).optional().describe('Replaces the non-secret config.'),
+    config: z
+      .record(z.string(), z.unknown())
+      .optional()
+      .describe('Replaces the non-secret config.'),
   }),
   async run({ input, actor, tx, log }) {
     const known = integrationStatus().some((s) => s.id === input.id);

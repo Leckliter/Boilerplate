@@ -27,7 +27,10 @@ function pg(cmd, cmdArgs, opts = {}) {
   const bin = `${BIN}/${cmd}`;
   if (asRoot) {
     const line = [bin, ...cmdArgs].map((a) => `'${String(a).replace(/'/g, `'\\''`)}'`).join(' ');
-    return spawnSync('su', ['postgres', '-s', '/bin/bash', '-c', line], { encoding: 'utf8', ...opts });
+    return spawnSync('su', ['postgres', '-s', '/bin/bash', '-c', line], {
+      encoding: 'utf8',
+      ...opts,
+    });
   }
   return spawnSync(bin, cmdArgs, { encoding: 'utf8', ...opts });
 }
@@ -48,7 +51,14 @@ function start() {
     mkdirSync(DATA, { recursive: true });
     if (asRoot) {
       const { uid, gid } = JSON.parse(
-        execFileSync('node', ['-e', `const {execSync}=require('child_process');console.log(JSON.stringify({uid:+execSync('id -u postgres'),gid:+execSync('id -g postgres')}))`], { encoding: 'utf8' }),
+        execFileSync(
+          'node',
+          [
+            '-e',
+            `const {execSync}=require('child_process');console.log(JSON.stringify({uid:+execSync('id -u postgres'),gid:+execSync('id -g postgres')}))`,
+          ],
+          { encoding: 'utf8' },
+        ),
       );
       chownSync(DATA, uid, gid);
     }
@@ -56,15 +66,30 @@ function start() {
     if (init.status !== 0) throw new Error(`initdb failed: ${init.stderr}`);
   }
   const started = pg('pg_ctl', [
-    '-D', DATA, '-l', `${DATA}/server.log`, '-w', '-o',
+    '-D',
+    DATA,
+    '-l',
+    `${DATA}/server.log`,
+    '-w',
+    '-o',
     `-p ${PORT} -c listen_addresses=localhost -c fsync=off -c synchronous_commit=off -c full_page_writes=off`,
     'start',
   ]);
-  if (started.status !== 0) throw new Error(`pg_ctl start failed: ${started.stdout}${started.stderr}`);
+  if (started.status !== 0)
+    throw new Error(`pg_ctl start failed: ${started.stdout}${started.stderr}`);
 }
 
 function ensureDatabase() {
-  const has = pg('psql', ['-h', 'localhost', '-p', PORT, '-U', 'postgres', '-tAc', `SELECT 1 FROM pg_database WHERE datname = '${DB}'`]);
+  const has = pg('psql', [
+    '-h',
+    'localhost',
+    '-p',
+    PORT,
+    '-U',
+    'postgres',
+    '-tAc',
+    `SELECT 1 FROM pg_database WHERE datname = '${DB}'`,
+  ]);
   if (!has.stdout.includes('1')) {
     const made = pg('createdb', ['-h', 'localhost', '-p', PORT, '-U', 'postgres', DB]);
     if (made.status !== 0) throw new Error(`createdb failed: ${made.stderr}`);

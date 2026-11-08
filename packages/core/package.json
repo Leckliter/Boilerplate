@@ -22,7 +22,7 @@
     "actions:tests": "tsx scripts/check-action-tests.ts",
     "typecheck": "tsc --noEmit",
     "lint": "tsc --noEmit",
-    "test": "node ../db/scripts/test-db.mjs >/dev/null && DATABASE_URL=\"${DATABASE_URL:-$(node ../db/scripts/test-db.mjs)}\" vitest run"
+    "test": "vitest run"
   },
   "dependencies": {
     "@app/db": "workspace:*",

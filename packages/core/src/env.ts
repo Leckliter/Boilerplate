@@ -118,14 +118,7 @@ export const serverEnvSchema = z.object({
 export type ServerEnvKey = keyof z.output<typeof serverEnvSchema>;
 
 export type IntegrationId =
-  | 'database'
-  | 'auth'
-  | 'site-url'
-  | 'storage'
-  | 'email'
-  | 'sms'
-  | 'cron'
-  | 'human-check';
+  'database' | 'auth' | 'site-url' | 'storage' | 'email' | 'sms' | 'cron' | 'human-check';
 
 export type IntegrationStatus = {
   id: IntegrationId;
@@ -159,7 +152,8 @@ const INTEGRATIONS: IntegrationDef[] = [
   {
     id: 'auth',
     label: 'Sign-in',
-    description: 'Email-code sign-in (BACKEND=neon uses Neon Auth, BACKEND=supabase uses Supabase Auth).',
+    description:
+      'Email-code sign-in (BACKEND=neon uses Neon Auth, BACKEND=supabase uses Supabase Auth).',
     core: true,
     anyOf: [
       ['NEON_AUTH_BASE_URL', 'NEON_AUTH_COOKIE_SECRET'],
@@ -243,7 +237,9 @@ export function serverEnvProblems(env: Env = process.env): string[] {
   for (const key of invalidEnvKeys(env)) {
     const shape = serverEnvSchema.shape[key as ServerEnvKey];
     const check = shape?.safeParse(env[key]);
-    problems.push(`${key} ${check && !check.success ? check.error.issues[0]?.message : 'is invalid'}`);
+    problems.push(
+      `${key} ${check && !check.success ? check.error.issues[0]?.message : 'is invalid'}`,
+    );
   }
   if (getAppEnv() === 'production') {
     for (const s of integrationStatus(env)) {

@@ -36,10 +36,30 @@ const PEOPLE: {
 }[] = [
   { first: 'Olivia', last: 'Owner', email: ownerEmail, roles: ['owner'], tags: ['staff'] },
   { first: 'Adam', last: 'Admin', email: 'admin@example.com', roles: ['admin'], tags: ['staff'] },
-  { first: 'Maya', last: 'Manager', email: 'manager@example.com', roles: ['manager'], tags: ['staff'] },
+  {
+    first: 'Maya',
+    last: 'Manager',
+    email: 'manager@example.com',
+    roles: ['manager'],
+    tags: ['staff'],
+  },
   { first: 'Sam', last: 'Staff', email: 'staff@example.com', roles: ['staff'], tags: ['staff'] },
-  { first: 'Casey', last: 'Customer', email: 'casey@example.com', phone: '+18165550101', roles: [], tags: ['customer'] },
-  { first: 'Dana', last: 'Demo', email: 'dana@example.com', phone: '+18165550102', roles: [], tags: ['customer'] },
+  {
+    first: 'Casey',
+    last: 'Customer',
+    email: 'casey@example.com',
+    phone: '+18165550101',
+    roles: [],
+    tags: ['customer'],
+  },
+  {
+    first: 'Dana',
+    last: 'Demo',
+    email: 'dana@example.com',
+    phone: '+18165550102',
+    roles: [],
+    tags: ['customer'],
+  },
   { first: 'Lee', last: 'Lead', email: 'lee@example.com', roles: [], tags: ['lead'] },
 ];
 

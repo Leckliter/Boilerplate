@@ -1,4 +1,4 @@
-import { and, contactRoles, contacts, eq } from '@app/db';
+import { and, contactRoles, contacts, eq, inArray } from '@app/db';
 import { z } from 'zod';
 
 import { ActionError, defineAction } from '../define';
@@ -18,13 +18,27 @@ export const archiveContact = defineAction({
   input: z.object({ id: z.uuid() }),
   async run({ input, tx, log }) {
     const c = await getContactOrThrow(tx, input.id);
+    // Lock every owner row so two simultaneous archives can't both pass the check.
     const owners = await tx
       .select({ contactId: contactRoles.contactId })
       .from(contactRoles)
-      .innerJoin(contacts, eq(contacts.id, contactRoles.contactId))
-      .where(and(eq(contactRoles.role, 'owner'), eq(contacts.status, 'active')))
-      .for('update', { of: contactRoles });
-    if (owners.some((o) => o.contactId === c.id) && owners.length <= 1) {
+      .where(eq(contactRoles.role, 'owner'))
+      .for('update');
+    const active = owners.length
+      ? await tx
+          .select({ id: contacts.id })
+          .from(contacts)
+          .where(
+            and(
+              inArray(
+                contacts.id,
+                owners.map((o) => o.contactId),
+              ),
+              eq(contacts.status, 'active'),
+            ),
+          )
+      : [];
+    if (active.some((o) => o.id === c.id) && active.length <= 1) {
       throw new ActionError('conflict', 'This is the last owner; add another owner first.');
     }
     await tx.update(contacts).set({ status: 'archived' }).where(eq(contacts.id, input.id));
@@ -36,7 +50,8 @@ export const archiveContact = defineAction({
 export const restoreContact = defineAction({
   name: 'contacts.restore',
   title: 'Restore contact',
-  description: 'Un-archive a contact: they show in lists again and their login and API keys work again.',
+  description:
+    'Un-archive a contact: they show in lists again and their login and API keys work again.',
   audience: 'users.manage',
   mutates: true,
   returns: '{ id, status }',

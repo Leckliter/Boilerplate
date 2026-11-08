@@ -1,15 +1,4 @@
-import {
-  and,
-  contacts,
-  contactTags,
-  count,
-  desc,
-  eq,
-  exists,
-  ilike,
-  or,
-  tags,
-} from '@app/db';
+import { and, contacts, contactTags, count, desc, eq, exists, ilike, or, tags } from '@app/db';
 import { z } from 'zod';
 
 import { defineAction } from '../define';
@@ -34,9 +23,7 @@ export const listContacts = defineAction({
       .string()
       .trim()
       .optional()
-      .describe(
-        'Matches name, email, phone or company (partial, case-insensitive).',
-      ),
+      .describe('Matches name, email, phone or company (partial, case-insensitive).'),
     includeArchived: z.boolean().default(false),
     limit: z.number().int().min(1).max(200).default(50),
     offset: z.number().int().min(0).default(0),
