@@ -33,6 +33,7 @@ import { ActivityTimeline } from '@/components/admin/dashboard/activity-timeline
 import { GettingStarted, type SetupStep } from '@/components/admin/dashboard/getting-started';
 import { ErrorStatusBadge } from '@/components/admin/status-badges';
 import { OnboardingWizard } from '@/components/onboarding/onboarding-wizard';
+import { devLoginEnabled } from '@/lib/auth/dev';
 import { ONBOARDING_SETTING } from '@/lib/settings-keys';
 import { SITE } from '@/lib/site';
 import { countByDay, dayLabels, lastDays, withinHours } from '@/lib/admin-stats';
@@ -69,8 +70,13 @@ function TileLink({
  * notification deliveries and scheduled-job health, plus the owner's first-run checklist. Each block shows
  * only what the viewer may read, and every query is a small, capped list call.
  */
-export default async function AdminDashboard() {
+export default async function AdminDashboard({
+  searchParams,
+}: {
+  searchParams: Promise<{ welcome?: string }>;
+}) {
   const viewer = await requireViewer('admin.access', '/admin');
+  const { welcome } = await searchParams;
   const isOwner = viewer.roles.includes('owner');
   const [
     users,
@@ -197,7 +203,12 @@ export default async function AdminDashboard() {
       />
       <OnboardingWizard
         show={Boolean(
-          isOwner && settings?.ok && !settings.data.some((s) => s.key === ONBOARDING_SETTING),
+          isOwner &&
+          settings?.ok &&
+          !settings.data.some((s) => s.key === ONBOARDING_SETTING) &&
+          // Test sign-in (DEV_LOGIN, never on in production) skips the modal so the e2e specs and screenshots
+          // aren't covered by it; open /admin?welcome=1 to see it anyway.
+          (!devLoginEnabled() || welcome === '1'),
         )}
         appName={SITE.name}
       />
@@ -266,7 +277,8 @@ export default async function AdminDashboard() {
             <CardHeader>
               <CardTitle>Activity per day</CardTitle>
               <CardDescription>
-                From the latest {events.length} events (changes, sign-ins, API calls); the axis shows the day of the month.
+                From the latest {events.length} events (changes, sign-ins, API calls); the axis
+                shows the day of the month.
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -353,11 +365,17 @@ export default async function AdminDashboard() {
                         </span>
                       </span>
                       {c.stale ? (
-                        <Pill tone="danger" dot size="sm">Stale</Pill>
+                        <Pill tone="danger" dot size="sm">
+                          Stale
+                        </Pill>
                       ) : c.lastOkAt ? (
-                        <Pill tone="success" dot size="sm">Running</Pill>
+                        <Pill tone="success" dot size="sm">
+                          Running
+                        </Pill>
                       ) : (
-                        <Pill tone="neutral" dot size="sm">Unknown</Pill>
+                        <Pill tone="neutral" dot size="sm">
+                          Unknown
+                        </Pill>
                       )}
                     </li>
                   ))}
@@ -366,7 +384,9 @@ export default async function AdminDashboard() {
                     {failedJobs > 0 ? (
                       <Badge color="red">{failedJobs}</Badge>
                     ) : (
-                      <Pill tone="success" dot size="sm">None</Pill>
+                      <Pill tone="success" dot size="sm">
+                        None
+                      </Pill>
                     )}
                   </li>
                   {stale > 0 && (

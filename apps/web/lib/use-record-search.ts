@@ -50,17 +50,27 @@ export function useGlobalSearch(
         const res = await invokeAction('search.query', { q, limit: 24 });
         if (res.ok) {
           const hits = (res.data as { results: Hit[] }).results;
+          const toItem = (h: Hit, hint: string) => ({
+            id: h.href,
+            label: h.title,
+            description: h.subtitle,
+            hint,
+          });
           groups = SEARCH_GROUP_TYPES.map((type) => ({
             label: labels[type],
-            items: hits
-              .filter((h) => h.type === type)
-              .map((h) => ({
-                id: h.href,
-                label: h.title,
-                description: h.subtitle,
-                hint: labels[type],
-              })),
+            items: hits.filter((h) => h.type === type).map((h) => toItem(h, labels[type])),
           }));
+          // A kind the core adds later (a new search provider) still shows, under its own name.
+          const known = new Set<string>(SEARCH_GROUP_TYPES);
+          for (const type of new Set(
+            hits.map((h) => h.type as string).filter((t) => !known.has(t)),
+          )) {
+            const label = type.charAt(0).toUpperCase() + type.slice(1);
+            groups.push({
+              label,
+              items: hits.filter((h) => h.type === type).map((h) => toItem(h, label)),
+            });
+          }
         }
       } catch {
         // Expected: offline or a stale tab. The palette still works for pages; just no records.
