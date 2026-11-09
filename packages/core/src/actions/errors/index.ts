@@ -18,6 +18,8 @@ import { z } from 'zod';
 
 import { ActionError, defineAction } from '../define';
 
+export { errorOccurrences, resolveManyErrors } from './more';
+
 const REF = z
   .string()
   .trim()

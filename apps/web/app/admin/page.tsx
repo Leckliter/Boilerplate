@@ -24,7 +24,8 @@ import {
 import { PageHeader } from '@app/ui/components/page';
 import { StatTile } from '@app/ui/components/stat-tile';
 import { Pill } from '@app/ui/components/pill';
-import { formatDateTime } from '@app/ui/lib/dates';
+import { zonedTimeToDate } from '@app/ui/lib/dates';
+import { getServerDates } from '@/lib/dates-server';
 import Link from 'next/link';
 
 import { ActionError } from '@/components/action-error';
@@ -44,19 +45,11 @@ export const metadata = { title: 'Dashboard' };
 const DAYS = 14;
 
 /** A tile that links to where the number comes from. */
-function TileLink({
-  href,
-  label,
-  children,
-}: {
-  href: string;
-  label: string;
-  children: React.ReactNode;
-}) {
+function TileLink({ href, children }: { href: string; children: React.ReactNode }) {
+  // No aria-label: the link is named by the tile's own text, so what people see is what a screen reader says.
   return (
     <Link
       href={href}
-      aria-label={label}
       className="block rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-ring [&>[data-slot=stat-tile]]:h-full [&>[data-slot=stat-tile]]:transition-colors hover:[&>[data-slot=stat-tile]]:bg-tint"
     >
       {children}
@@ -75,9 +68,12 @@ export default async function AdminDashboard({
 }: {
   searchParams: Promise<{ welcome?: string }>;
 }) {
+  const { formatDateTime } = await getServerDates();
   const viewer = await requireViewer('admin.access', '/admin');
   const { welcome } = await searchParams;
   const isOwner = viewer.roles.includes('owner');
+  // The charts cover the last DAYS days: the activity list is asked for exactly that period.
+  const windowStart = zonedTimeToDate(lastDays(DAYS)[0]!);
   const [
     users,
     allUsers,
@@ -95,7 +91,9 @@ export default async function AdminDashboard({
       ? callAction(listContacts, { limit: 1, includeArchived: true }, viewer.actor)
       : null,
     viewer.can('users.read') ? callAction(listTags, {}, viewer.actor) : null,
-    viewer.can('activity.read') ? callAction(listActivity, { limit: 200 }, viewer.actor) : null,
+    viewer.can('activity.read')
+      ? callAction(listActivity, { from: windowStart.toISOString(), limit: 200 }, viewer.actor)
+      : null,
     viewer.can('errors.manage')
       ? callAction(listErrors, { status: 'open', sinceDays: 30, limit: 100 }, viewer.actor)
       : null,
@@ -216,7 +214,7 @@ export default async function AdminDashboard({
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {users?.ok && (
-          <TileLink href="/admin/users" label="Users">
+          <TileLink href="/admin/users">
             <StatTile
               label="Users"
               value={activeUsers}
@@ -226,7 +224,7 @@ export default async function AdminDashboard({
           </TileLink>
         )}
         {users?.ok && (
-          <TileLink href="/admin/users" label="New this week">
+          <TileLink href="/admin/users">
             <StatTile
               label="New this week"
               value={users.data.total > 200 && newThisWeek >= 200 ? '200+' : newThisWeek}
@@ -242,7 +240,7 @@ export default async function AdminDashboard({
           </TileLink>
         )}
         {errors?.ok && (
-          <TileLink href="/admin/errors" label="Open errors">
+          <TileLink href="/admin/errors">
             <StatTile
               label="Open errors"
               value={openErrors.length}
@@ -257,7 +255,7 @@ export default async function AdminDashboard({
           </TileLink>
         )}
         {activity?.ok && (
-          <TileLink href="/admin/activity" label="Activity">
+          <TileLink href="/admin/activity">
             <StatTile
               label="Events today"
               value={perDay.at(-1) ?? 0}

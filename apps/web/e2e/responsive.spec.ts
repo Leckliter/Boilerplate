@@ -5,7 +5,17 @@ import { CUSTOMER, OWNER, settle, signInAs } from './support/auth';
 /** docs/design-system.md: no page scrolls sideways at 320px (the narrowest phone we support). */
 test.use({ viewport: { width: 320, height: 700 } });
 
-const PUBLIC = ['/', '/login', '/pricing', '/about', '/privacy', '/terms', '/brand', '/docs'];
+const PUBLIC = [
+  '/',
+  '/login',
+  '/pricing',
+  '/about',
+  '/contact',
+  '/privacy',
+  '/terms',
+  '/brand',
+  '/docs',
+];
 const ADMIN = [
   '/admin',
   '/admin/users',
@@ -15,7 +25,10 @@ const ADMIN = [
   '/admin/errors',
   '/admin/system',
   '/admin/settings',
+  '/admin/settings?tab=flags',
+  '/admin/settings?tab=notifications',
   '/admin/settings/integrations',
+  '/admin/inquiries',
   '/admin/api-keys',
   '/admin/automations',
   '/admin/notifications',
@@ -26,6 +39,7 @@ const ACCOUNT = [
   '/account/security',
   '/account/notifications',
   '/account/preferences',
+  '/account/privacy',
 ];
 
 /** How many pixels the page is wider than the window, and the widest culprits if any. */

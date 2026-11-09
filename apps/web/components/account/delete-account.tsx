@@ -4,7 +4,7 @@ import { prompt } from '@app/ui/components/alert-dialog';
 import { Button } from '@app/ui/components/button';
 import { Callout } from '@app/ui/components/callout';
 import { TrashIcon } from '@app/ui/components/icons';
-import { formatDate } from '@app/ui/lib/dates';
+import { useDates } from '@app/ui/components/ui-context';
 
 import { useAction } from '@/lib/use-action';
 
@@ -23,6 +23,7 @@ export function DeleteAccount({
   pending: { scheduledFor: string } | null;
   graceDays: number;
 }) {
+  const { formatDate } = useDates();
   const { run, pending: busy } = useAction();
 
   async function ask() {

@@ -72,17 +72,28 @@ const PAIRS: [string, string, string][] = [
   ['placeholder', 'control', 'Input placeholder'],
 ];
 
-function Swatch({ token, mode, backdrop }: { token: Token; mode: Mode; backdrop: string }) {
+/** The swatch sits on the card colour of ITS mode, so its label uses that mode's secondary-text token too. */
+function Swatch({
+  token,
+  mode,
+  backdrop,
+  ink,
+}: {
+  token: Token;
+  mode: Mode;
+  backdrop: string;
+  ink: string;
+}) {
   return (
     <div
       className="flex min-w-0 items-center gap-2 rounded-md p-1.5"
-      style={{ background: backdrop }}
+      style={{ background: backdrop, color: ink }}
     >
       <span
         className="size-8 shrink-0 rounded-md ring-1 ring-border"
         style={{ background: token[mode] }}
       />
-      <span className="min-w-0 text-[10px] leading-tight break-all text-muted-foreground">
+      <span className="min-w-0 text-xs leading-tight break-all">
         {mode === 'light' ? 'Light' : 'Dark'}
       </span>
     </div>
@@ -157,6 +168,7 @@ export function ColorTokens() {
                       token={t}
                       mode={mode}
                       backdrop={byName.get('card')?.[mode] ?? 'transparent'}
+                      ink={byName.get('muted-foreground')?.[mode] ?? 'inherit'}
                     />
                   ))}
                 </div>

@@ -11,5 +11,12 @@ export {
   recentNotifications,
   unreadCount,
 } from './inbox';
-export { getPreferences, setPreference, setSmsConsent, unsubscribe } from './preferences';
+export {
+  getPreferences,
+  preferencesFor,
+  setPreference,
+  setSmsConsent,
+  typeDefaults,
+  unsubscribe,
+} from './preferences';
 export { listDeliveries, recordSuppression, retryDelivery, sendTest } from './deliveries';

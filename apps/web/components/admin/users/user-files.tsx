@@ -5,7 +5,7 @@ import { Button } from '@app/ui/components/button';
 import { Empty } from '@app/ui/components/empty';
 import { FileDrop } from '@app/ui/components/file-drop';
 import { DownloadSimpleIcon, FileTextIcon, TrashIcon } from '@app/ui/components/icons';
-import { formatDateTime } from '@app/ui/lib/dates';
+import { useDates } from '@app/ui/components/ui-context';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
@@ -44,6 +44,7 @@ export function UserFiles({
   files: FileRow[];
   canWrite: boolean;
 }) {
+  const { formatDateTime } = useDates();
   const router = useRouter();
   const { run } = useAction();
   const [state, setState] = useState<{

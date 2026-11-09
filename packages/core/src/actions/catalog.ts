@@ -25,7 +25,7 @@ import {
   restoreContact,
   updateContact,
 } from './contacts';
-import { getError, listErrors, resolveError } from './errors';
+import { errorOccurrences, getError, listErrors, resolveError, resolveManyErrors } from './errors';
 import { listFlags, setFeatureFlag } from './flags';
 import { registerActions } from './registry-store';
 import { search } from './search';
@@ -37,7 +37,7 @@ import {
   updateIntegration,
 } from './settings';
 import { systemIntegrations, whoami } from './system';
-import { cancelJob, listJobs, retryJob, systemHealth } from './system/jobs';
+import { cancelJob, listCronRuns, listJobs, retryJob, systemHealth } from './system/jobs';
 import { createTag, deleteTag, listTags } from './tags';
 
 registerActions(
@@ -72,6 +72,8 @@ registerActions(
   listErrors,
   getError,
   resolveError,
+  resolveManyErrors,
+  errorOccurrences,
   // API keys, settings, integrations
   listApiKeys,
   createApiKey,
@@ -89,6 +91,7 @@ registerActions(
   whoami,
   systemIntegrations,
   systemHealth,
+  listCronRuns,
   listJobs,
   retryJob,
   cancelJob,

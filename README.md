@@ -32,7 +32,7 @@ pnpm install
 createdb app && pnpm db:migrate && pnpm db:seed
 pnpm dev                        # http://localhost:3000
 pnpm check                      # typecheck, lint, rules, format, docs, tests — run before every push
-pnpm e2e                        # browser tests (Playwright) on a throw-away database
+pnpm e2e                        # browser tests (Playwright) on a throw-away database; starts a local S3 stand-in too
 docker compose up -d --build    # or: Postgres + the production image (docs/deploy.md)
 ```
 
@@ -48,6 +48,14 @@ packages/core ALL business logic: actions, permissions, logging, errors, events,
 ```
 
 `apps/web` never touches the database; it calls actions.
+
+## What is in the box
+
+Sign-in by emailed code, roles and permissions, users with tags, CSV import/export and bulk actions,
+activity log with before/after history, error references with an AI brief, notifications (inbox, email,
+SMS with consent, push), automations, file uploads and avatars, data export and account deletion, feature
+flags, settings, a contact form and newsletter with double opt-in, command palette search, dark mode and
+Spanish. Files without a bucket: `node scripts/dev-s3.mjs` ([docs/files.md](docs/files.md)).
 
 ## Dual backend (Neon or Supabase)
 

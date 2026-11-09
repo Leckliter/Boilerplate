@@ -80,6 +80,8 @@ function Sparkline({
   format = plain,
   series = 0,
   area = true,
+  width,
+  height,
   className,
 }: {
   data: number[];
@@ -89,10 +91,15 @@ function Sparkline({
   /** Which chart colour (0–5). */
   series?: number;
   area?: boolean;
+  /** Pixel width, or `'fill'` to take the whole width of the container. Default: up to 10rem wide. */
+  width?: number | 'fill';
+  /** Pixel height. With a pixel `width` the default keeps the 120 × 32 proportions. */
+  height?: number;
   className?: string;
 }) {
-  const W = 120;
-  const H = 32;
+  const fill = width === 'fill';
+  const W = typeof width === 'number' ? width : 120;
+  const H = height ?? (typeof width === 'number' ? Math.round((width * 32) / 120) : 32);
   const pad = 2;
   const min = Math.min(...data);
   const max = Math.max(...data);
@@ -112,7 +119,20 @@ function Sparkline({
       role="img"
       aria-label={`${label}. ${summarize(data, format)}`}
       viewBox={`0 0 ${W} ${H}`}
-      className={cn('block aspect-[120/32] h-auto w-full max-w-40 overflow-visible', className)}
+      {...(typeof width === 'number' && { width: W, height: H })}
+      {...(fill && height !== undefined && { height: H })}
+      preserveAspectRatio="none"
+      className={cn(
+        'block overflow-visible',
+        typeof width === 'number'
+          ? 'max-w-full'
+          : fill
+            ? height === undefined
+              ? 'aspect-[120/32] h-auto w-full'
+              : 'w-full'
+            : 'aspect-[120/32] h-auto w-full max-w-40',
+        className,
+      )}
     >
       {area && data.length > 1 && (
         <path

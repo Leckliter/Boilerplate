@@ -5,45 +5,11 @@ import { CUSTOMER, OWNER, settle, signInAs } from './support/auth';
 
 /**
  * Automated accessibility scan (axe-core, WCAG 2.0/2.1 A and AA) of the main screens in light and dark.
- * The bar is zero serious or critical violations. `KNOWN` lists rule ids that are still open on a page,
- * each with where it comes from and a TODO.md item: a NEW violation fails the test, and a fixed one
- * must be removed from the list (so the list can only shrink).
+ * The bar is zero serious or critical violations. `KNOWN` is the allow-list of rule ids still open on a page
+ * (each with where it comes from and a TODO.md item). It is EMPTY and must stay empty: fix the cause
+ * instead. (A fixed entry has to be removed, so the list can only shrink.)
  */
-const KNOWN: Record<string, { rules: string[]; why: string }> = {
-  '/': {
-    rules: ['label-content-name-mismatch', 'color-contrast'],
-    why: 'Logo link aria-label="App home" does not contain its visible text "App" (packages/ui logo / site header); hero paragraph on the brand colour is 4.35:1 (needs 4.5).',
-  },
-  '/login': {
-    rules: ['label-content-name-mismatch'],
-    why: 'The same Logo link: aria-label="App home" vs visible "App".',
-  },
-  '/brand': {
-    rules: [
-      'aria-meter-name',
-      'aria-progressbar-name',
-      'aria-prohibited-attr',
-      'aria-toggle-field-name',
-      'color-contrast',
-      'label',
-      'label-content-name-mismatch',
-      'nested-interactive',
-    ],
-    why: 'Demos without accessible names (meter, progress, radio, slider, masked input), aria-label on a plain span (Logo), 10px muted text on the colour tiles, calendar day labels.',
-  },
-  '/admin': {
-    rules: ['aria-required-children', 'label-content-name-mismatch'],
-    why: 'The "Open pages" tablist holds a "New tab" button (not a tab); the avatar button\'s aria-label "My account" does not contain its visible initials.',
-  },
-  '/admin/users': {
-    rules: ['aria-required-children', 'label-content-name-mismatch'],
-    why: 'Same two as /admin (shell: workspace tabs and user menu).',
-  },
-  '/account': {
-    rules: ['label-content-name-mismatch'],
-    why: 'The avatar button\'s aria-label "My account" does not contain its visible initials.',
-  },
-};
+const KNOWN: Record<string, { rules: string[]; why: string }> = {};
 
 type Screen = { name: string; path: string; as?: string };
 const SCREENS: Screen[] = [

@@ -95,7 +95,7 @@
   --banner-info: light-dark(oklch(0.932 0.032 255.6 / 0.7), oklch(0.379 0.146 265.5 / 0.5));
   --banner-warning: light-dark(oklch(0.973 0.071 103.2), oklch(0.554 0.135 66.4 / 0.5));
   --badge-red: light-dark(oklch(0.577 0.245 27.3), oklch(0.505 0.213 27.5));
-  --badge-green: light-dark(oklch(0.596 0.145 163.2), oklch(0.508 0.118 165.6));
+  --badge-green: light-dark(oklch(0.52 0.12 163.2), oklch(0.508 0.118 165.6));
   --badge-orange: oklch(0.815 0.197 76);
   --badge-purple: light-dark(oklch(0.558 0.288 302.3), oklch(0.496 0.265 301.9));
   --badge-teal: light-dark(oklch(0.549 0.096 184.6), oklch(0.511 0.096 186.4));

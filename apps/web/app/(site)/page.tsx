@@ -188,7 +188,7 @@ export default function HomePage() {
           <h2 id="cta" className="text-2xl font-semibold tracking-tight sm:text-3xl">
             Ready to build?
           </h2>
-          <p className="max-w-xl opacity-90">
+          <p className="max-w-xl">
             Sign in with an emailed code, open Admin, and make your first change through an action.
           </p>
           <div className="flex flex-wrap gap-3">

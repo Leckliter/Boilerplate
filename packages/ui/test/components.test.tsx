@@ -112,7 +112,7 @@ describe('InlineEdit', () => {
       .mockRejectedValueOnce(new Error('Name is taken'))
       .mockResolvedValue(undefined);
     render(<InlineEdit label="Project name" value="Alpha" onSave={onSave} />);
-    await user.click(screen.getByRole('button', { name: 'Edit Project name' }));
+    await user.click(screen.getByRole('button', { name: 'Edit Project name: Alpha' }));
     const input = screen.getByRole('textbox', { name: 'Project name' });
     await user.clear(input);
     await user.type(input, 'Beta{Enter}');
@@ -122,7 +122,7 @@ describe('InlineEdit', () => {
     await waitFor(() => expect(screen.queryByRole('textbox')).not.toBeInTheDocument());
     expect(onSave).toHaveBeenLastCalledWith('Beta2');
 
-    await user.click(screen.getByRole('button', { name: 'Edit Project name' }));
+    await user.click(screen.getByRole('button', { name: 'Edit Project name: Alpha' }));
     await user.type(screen.getByRole('textbox'), 'zzz{Escape}');
     expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
     expect(onSave).toHaveBeenCalledTimes(2);

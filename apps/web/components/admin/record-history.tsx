@@ -2,7 +2,9 @@ import { callAction, listActivity, listChanges } from '@app/core';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@app/ui/components/card';
 
 import { ActionError } from '@/components/action-error';
-import { actorLabel, timeFormat } from './activity-list';
+import { getServerDates } from '@/lib/dates-server';
+
+import { actorLabel } from './activity-list';
 import { ActivityTimeline } from './dashboard/activity-timeline';
 import { ChangeList } from './change-list';
 import type { Viewer } from '@/lib/viewer';
@@ -23,6 +25,7 @@ export async function RecordHistory({
   /** "this contact", "this order" … for the descriptions. */
   what: string;
 }) {
+  const { formatDateTime } = await getServerDates();
   if (!viewer.can('activity.read')) {
     return (
       <p className="text-sm text-muted-foreground">Your role can’t see the history of records.</p>
@@ -76,7 +79,7 @@ export async function RecordHistory({
                         apiKeyName: ch.apiKeyName,
                       })
                     : 'outside the app'
-                } · ${timeFormat.format(new Date(ch.occurredAt))}`,
+                } · ${formatDateTime(new Date(ch.occurredAt))}`,
               }))}
             />
           ) : (

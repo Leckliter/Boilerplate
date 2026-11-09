@@ -1,4 +1,4 @@
-import { and, desc, eq, inArray, jobs } from '@app/db';
+import { and, cronRuns, desc, eq, inArray, jobs } from '@app/db';
 import { z } from 'zod';
 
 import { cronHealth, healthReport, queueStats } from '../../health';
@@ -122,5 +122,39 @@ export const cancelJob = defineAction({
     if (!job) throw new ActionError('conflict', 'Only a waiting (pending) job can be cancelled.');
     log({ subjectType: 'job', subjectId: job.id, summary: `Cancelled job ${job.type}` });
     return { id: job.id, status: job.status };
+  },
+});
+
+export const listCronRuns = defineAction({
+  name: 'system.cronRuns',
+  title: 'Scheduled job history',
+  description:
+    'The history of the scheduled jobs (crons), newest first: which job, when it started and finished, whether ' +
+    'it worked, how long it took, a small summary and the error if it failed. Filter by `job` ' +
+    '(see `crons` in system.health for the names). Use it to see whether a cron has been running regularly.',
+  audience: 'system.manage',
+  mutates: false,
+  returns: '[{ id, job, startedAt, finishedAt, ok, durationMs, summary, error }]',
+  input: z.object({
+    job: z.string().trim().min(1).optional().describe('Only this job, e.g. "maintenance".'),
+    limit: z.number().int().min(1).max(500).default(50),
+  }),
+  async run({ input, tx }) {
+    const rows = await tx
+      .select()
+      .from(cronRuns)
+      .where(input.job ? eq(cronRuns.job, input.job) : undefined)
+      .orderBy(desc(cronRuns.startedAt))
+      .limit(input.limit);
+    return rows.map((r) => ({
+      id: r.id,
+      job: r.job,
+      startedAt: r.startedAt,
+      finishedAt: r.finishedAt,
+      ok: r.ok,
+      durationMs: r.finishedAt ? r.finishedAt.getTime() - r.startedAt.getTime() : null,
+      summary: r.summary,
+      error: r.error,
+    }));
   },
 });

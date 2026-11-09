@@ -109,7 +109,7 @@ export function KitDemos() {
           >
             {saving ? 'Saving…' : 'Save (loading)'}
           </Button>
-          <span className="relative inline-flex" aria-label="Notifications, 3 unread">
+          <span className="relative inline-flex" role="img" aria-label="Notifications, 3 unread">
             <BellIcon className="size-5" />
             <CountBadge count={3} className="absolute -top-1.5 -right-2" />
           </span>

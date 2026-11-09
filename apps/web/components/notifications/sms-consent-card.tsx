@@ -4,7 +4,7 @@ import { Button } from '@app/ui/components/button';
 import { Callout } from '@app/ui/components/callout';
 import { Input } from '@app/ui/components/input';
 import { Field } from '@app/ui/components/label';
-import { formatDateTime } from '@app/ui/lib/dates';
+import { useDates } from '@app/ui/components/ui-context';
 
 import { ActionForm } from '@/components/forms/action-form';
 import { useAction } from '@/lib/use-action';
@@ -24,6 +24,7 @@ export function SmsConsentCard({
   stopped: boolean;
   consentText: string;
 }) {
+  const { formatDateTime } = useDates();
   const { run, pending } = useAction();
   if (consentAt) {
     return (

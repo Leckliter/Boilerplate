@@ -51,11 +51,9 @@ export default async function ActivityPage({ searchParams }: { searchParams: Pro
   const to = params.to && DAY.test(params.to) ? params.to : undefined;
   const fromAt = from ? zonedTimeToDate(from) : undefined;
   const toAt = to ? new Date(zonedTimeToDate(addDaysToDay(to, 1)).getTime() - 1) : undefined;
-  // The list action pages backwards from an instant; its upper bound is "to" (or the paging cursor).
+  // The period is the action's own `from` / `to`; `before` is only the paging cursor inside it.
   const before =
-    params.before && (!toAt || new Date(params.before) < toAt)
-      ? params.before
-      : toAt?.toISOString();
+    params.before && (!toAt || new Date(params.before) < toAt) ? params.before : undefined;
 
   const [fetched, people] = await Promise.all([
     callAction(
@@ -65,6 +63,8 @@ export default async function ActivityPage({ searchParams }: { searchParams: Pro
         channel,
         failedOnly,
         q: params.q && params.q.trim().length >= 2 ? params.q : undefined,
+        from: fromAt?.toISOString(),
+        to: toAt?.toISOString(),
         before,
         actorContactId: params.actor || undefined,
         apiKeyId: params.key || undefined,
@@ -77,10 +77,7 @@ export default async function ActivityPage({ searchParams }: { searchParams: Pro
       ? callAction(listContacts, { tag: 'staff', limit: 100 }, viewer.actor)
       : null,
   ]);
-  // "From" is applied here (the action only takes an upper bound): rows older than it are dropped, and
-  // paging stops once the page reaches back past it.
-  const rows = fetched.ok ? fetched.data.filter((e) => !fromAt || e.occurredAt >= fromAt) : [];
-  const reachedFrom = fetched.ok && rows.length < fetched.data.length;
+  const rows = fetched.ok ? fetched.data : [];
   const href = (change: Partial<Params>) => {
     const next = { ...params, before: undefined, ...change };
     const qs = new URLSearchParams(
@@ -135,7 +132,7 @@ export default async function ActivityPage({ searchParams }: { searchParams: Pro
           )}
         </CardContent>
       </Card>
-      {last && fetched.ok && fetched.data.length === PAGE_SIZE && !reachedFrom && (
+      {last && fetched.ok && fetched.data.length === PAGE_SIZE && (
         <div className="mt-4 flex justify-end">
           <Link
             href={href({ before: new Date(last.occurredAt).toISOString() })}

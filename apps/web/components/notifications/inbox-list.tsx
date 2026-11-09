@@ -3,7 +3,7 @@
 import { Badge } from '@app/ui/components/badge';
 import { Button } from '@app/ui/components/button';
 import { CheckIcon, XIcon } from '@app/ui/components/icons';
-import { formatDateTime } from '@app/ui/lib/dates';
+import { useDates } from '@app/ui/components/ui-context';
 import { cn } from '@app/ui/lib/utils';
 import { useRouter } from 'next/navigation';
 
@@ -22,6 +22,7 @@ export type InboxItem = {
 
 /** The in-app inbox: open (marks read and goes to the link), mark all read, clear. */
 export function InboxList({ items }: { items: InboxItem[] }) {
+  const { formatDateTime } = useDates();
   const { run, pending } = useAction();
   const router = useRouter();
   const unread = items.some((i) => !i.readAt);

@@ -3,12 +3,12 @@ import { unsubscribeNewsletter } from '@app/core/newsletter';
 
 import { requestInfoFrom } from '@/lib/request-info';
 
-import { esc, page } from '../../_lib/page';
+import { esc, page, publicOrigin } from '../../_lib/page';
 
 /**
  * The unsubscribe link in newsletters (`/api/v1/newsletter/unsubscribe?t=<token>`, see
- * `newsletterUnsubscribeUrl`). GET shows a button; POST (also what mail apps’ one-click
- * List-Unsubscribe sends) unsubscribes.
+ * `newsletterUnsubscribeUrl`). GET shows a button; POST unsubscribes: a person's click
+ * is redirected (303) to /newsletter/unsubscribed; the one-click List-Unsubscribe POST gets JSON.
  */
 export async function GET(req: Request) {
   const token = new URL(req.url).searchParams.get('t') ?? '';
@@ -19,6 +19,9 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
+  // Mail apps' one-click unsubscribe (RFC 8058) posts `List-Unsubscribe=One-Click`: they want a
+  // plain answer, not a redirect to a web page.
+  const oneClick = (await req.clone().text()).includes('List-Unsubscribe=One-Click');
   const token = new URL(req.url).searchParams.get('t') ?? '';
   const actor = withRequest(
     guestActor('web'),
@@ -26,5 +29,6 @@ export async function POST(req: Request) {
   );
   const result = await callAction(unsubscribeNewsletter, { token }, actor);
   if (!result.ok) return page('That link isn’t valid', `<p>${esc(result.error.message)}</p>`, 400);
-  return page('You’re unsubscribed', '<p>You will no longer get our newsletter.</p>');
+  if (oneClick) return Response.json({ ok: true });
+  return Response.redirect(new URL('/newsletter/unsubscribed', publicOrigin(req)), 303);
 }

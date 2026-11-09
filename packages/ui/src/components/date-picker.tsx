@@ -3,6 +3,7 @@
 import { CaretDownIcon, CaretLeftIcon, CaretRightIcon, CaretUpIcon } from './icons';
 import { useMemo, type ReactElement } from 'react';
 import {
+  DateLib,
   DayPicker,
   getDefaultClassNames,
   type CustomComponents,
@@ -30,6 +31,23 @@ const CHEVRON_ICONS = {
 const Chevron: CustomComponents['Chevron'] = ({ className, orientation = 'left' }) => {
   const Icon = CHEVRON_ICONS[orientation];
   return <Icon size={16} className={className} aria-hidden />;
+};
+
+/**
+ * A day button shows just its number, so its accessible name starts with that number (WCAG 2.5.3 Label in
+ * Name: someone who says "click 3" must hit the 3): "3 Tuesday, November 2026", plus "Today," / ", selected".
+ */
+const dayButtonLabel: NonNullable<NonNullable<PropsBase['labels']>['labelDayButton']> = (
+  date,
+  modifiers,
+  options,
+  dateLib,
+) => {
+  const lib = dateLib ?? new DateLib(options);
+  let label = `${lib.format(date, 'd')} ${lib.format(date, 'EEEE, MMMM yyyy')}`;
+  if (modifiers.today) label = `Today, ${label}`;
+  if (modifiers.selected) label = `${label}, selected`;
+  return label;
 };
 
 /**
@@ -184,6 +202,7 @@ export function DatePicker({
       animate
       {...props}
       onSelect={onChange as never}
+      labels={{ labelDayButton: dayButtonLabel, ...props.labels }}
       classNames={{
         // Days are --cell-size squares centered in --cell-width columns, so
         // they get a little air on each side while the nav buttons, weekday

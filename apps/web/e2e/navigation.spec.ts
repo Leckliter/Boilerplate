@@ -95,8 +95,6 @@ test.describe('keyboard only', () => {
   test('the quick-search button opens the palette too, and Escape returns focus to it', async ({
     page,
   }) => {
-    // KNOWN BUG (TODO.md): after Escape, focus is not returned to the button that opened the palette.
-    test.fixme(true, 'the command palette does not return focus to its opener (WCAG 2.4.3)');
     await signInAs(page, OWNER, '/admin');
     await settle(page);
     const trigger = page.getByRole('button', { name: /Quick search/ });

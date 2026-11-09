@@ -6,8 +6,10 @@ import {
   contacts,
   desc,
   eq,
+  gte,
   ilike,
   lt,
+  lte,
   ne,
   or,
 } from '@app/db';
@@ -47,7 +49,7 @@ export const listActivity = defineAction({
     'The audit trail, newest first: every change (successful or not), every sign-in/sign-out and password event, ' +
     'every denied attempt, and every API/MCP call including reads — who (person, API key/AI, system), which ' +
     'channel (web, api, mcp, system), from which IP, what, and whether it worked. Filter by subject to see one ' +
-    'record’s history, by actor or API key to see what someone (or an AI) did. Page with `before` = the ' +
+    'record’s history, by actor or API key to see what someone (or an AI) did. Narrow to a period with `from` / `to`. Page with `before` = the ' +
     'occurredAt of the last row. Use activity.get for one entry’s field-level changes.',
   audience: 'activity.read',
   mutates: false,
@@ -75,10 +77,14 @@ export const listActivity = defineAction({
       .describe('Only failures (denied, invalid input, errors).'),
     q: z.string().trim().min(2).optional().describe('Search the summary and action name.'),
     before: instantField.optional().describe('Only entries older than this (for paging).'),
+    from: instantField.optional().describe('Only entries at or after this moment (inclusive).'),
+    to: instantField.optional().describe('Only entries at or before this moment (inclusive).'),
     limit: z.number().int().min(1).max(200).default(50),
   }),
   async run({ input, tx }) {
     const filters = [
+      input.from ? gte(activityLog.occurredAt, input.from) : undefined,
+      input.to ? lte(activityLog.occurredAt, input.to) : undefined,
       input.subjectId ? eq(activityLog.subjectId, input.subjectId) : undefined,
       input.actorContactId ? eq(activityLog.actorContactId, input.actorContactId) : undefined,
       input.apiKeyId ? eq(activityLog.apiKeyId, input.apiKeyId) : undefined,

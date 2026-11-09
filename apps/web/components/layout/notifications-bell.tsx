@@ -8,7 +8,9 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
+import { onDataChanged } from '@/lib/data-changed';
 import { invokeAction } from '@/lib/invoke';
+import { useNotificationListLabels } from '@/lib/ui-labels';
 
 type Recent = {
   items: {
@@ -35,6 +37,7 @@ const POLL_MS = 60_000;
  */
 export function NotificationsBell() {
   const t = useTranslations('bell');
+  const listLabels = useNotificationListLabels();
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [data, setData] = useState<Recent | null>(null);
@@ -66,7 +69,10 @@ export function NotificationsBell() {
     const wake = () => void refresh();
     document.addEventListener('visibilitychange', wake);
     window.addEventListener('focus', wake);
+    // Something was just done in this tab (a test message sent to yourself …): look again now.
+    const stopListening = onDataChanged(wake);
     return () => {
+      stopListening();
       clearInterval(timer);
       document.removeEventListener('visibilitychange', wake);
       window.removeEventListener('focus', wake);
@@ -164,6 +170,7 @@ export function NotificationsBell() {
               onMarkRead={markRead}
               onMarkAllRead={markAll}
               emptyText={t('empty')}
+              labels={listLabels}
             />
           )}
         </div>

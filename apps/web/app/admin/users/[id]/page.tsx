@@ -1,13 +1,13 @@
 import { callAction, getContact, listRoles, listTags } from '@app/core';
 import { listFiles, storageConfigured } from '@app/core/files';
-import { listDeliveries } from '@app/core/notifications';
+import { listDeliveries, preferencesFor } from '@app/core/notifications';
 import { Avatar } from '@app/ui/components/avatar';
 import { Callout } from '@app/ui/components/callout';
 import { Badge } from '@app/ui/components/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@app/ui/components/card';
 import { DetailItem, DetailList } from '@app/ui/components/detail-list';
 import { RecordHeader } from '@app/ui/components/page';
-import { formatDate } from '@app/ui/lib/dates';
+import { getServerDates } from '@/lib/dates-server';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
@@ -32,6 +32,7 @@ export default async function UserPage({
   params: Promise<{ id: string }>;
   searchParams: Promise<{ tab?: string }>;
 }) {
+  const { formatDate } = await getServerDates();
   const { id } = await params;
   const raw = (await searchParams).tab;
   const tab = (['history', 'files', 'notifications'] as const).find((t) => t === raw) ?? 'overview';
@@ -56,10 +57,13 @@ export default async function UserPage({
     tab === 'files' && storageReady
       ? await callAction(listFiles, { purpose: 'contact_document', subjectId: c.id }, viewer.actor)
       : null;
-  const deliveries =
+  const [deliveries, preferences] =
     tab === 'notifications' && viewer.can('notifications.manage')
-      ? await callAction(listDeliveries, { contactId: c.id, limit: 20 }, viewer.actor)
-      : null;
+      ? await Promise.all([
+          callAction(listDeliveries, { contactId: c.id, limit: 20 }, viewer.actor),
+          callAction(preferencesFor, { contactId: c.id }, viewer.actor),
+        ])
+      : [null, null];
 
   return (
     <div className="grid gap-6">
@@ -140,6 +144,7 @@ export default async function UserPage({
           contact={c}
           canSeeLog={viewer.can('notifications.manage')}
           deliveries={deliveries?.ok ? deliveries.data : null}
+          preferences={preferences?.ok ? preferences.data : null}
         />
       ) : (
         <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_20rem]">

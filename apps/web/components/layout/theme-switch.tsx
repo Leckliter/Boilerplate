@@ -66,7 +66,8 @@ export function ThemeSwitch({ compact = false }: { compact?: boolean }) {
           compact ? (
             <Button variant="ghost" shape="square" aria-label={t('theme')} title={t('theme')} />
           ) : (
-            <Button aria-label={t('theme')} />
+            // The button shows the current choice, so the name starts with it (WCAG 2.5.3): "System" → "Theme: System".
+            <Button aria-label={`${t('theme')}: ${t(theme)}`} />
           )
         }
       >

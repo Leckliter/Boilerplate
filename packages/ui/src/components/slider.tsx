@@ -113,7 +113,9 @@ export function Slider<Value extends SliderValue = SliderValue>({
       thumbAlignment={thumbAlignment}
       // The track, badges, and range labels are laid out for a horizontal slider only.
       orientation="horizontal"
-      className={cn('flex w-full flex-col gap-2 data-disabled:opacity-50', className)}
+      // A disabled slider dims its track and thumb line (below), never its words: dimmed text drops under
+      // the 4.5:1 contrast bar, and the value badge switches to the neutral `fill` colours instead.
+      className={cn('flex w-full flex-col gap-2', className)}
     >
       {label ? (
         <BaseSlider.Label className={cn('font-medium text-foreground', textSize)}>
@@ -132,7 +134,7 @@ export function Slider<Value extends SliderValue = SliderValue>({
                 // stretches it over the whole thumb, so it fills the track at
                 // either end of the range. `box-content` is forced because global
                 // `* { box-sizing: border-box }` resets would otherwise win.
-                'box-content! bg-overlay pr-2 shadow-sm ring ring-border',
+                'box-content! bg-overlay pr-2 shadow-sm ring ring-border in-data-disabled:opacity-50',
                 isRange && '-ml-2 pl-2',
                 innerRadius,
               )}
@@ -149,7 +151,7 @@ export function Slider<Value extends SliderValue = SliderValue>({
               >
                 <span
                   aria-hidden
-                  className="absolute top-1/2 left-1/2 h-1/2 w-0.5 -translate-1/2 rounded-full bg-contrast/25"
+                  className="absolute top-1/2 left-1/2 h-1/2 w-0.5 -translate-1/2 rounded-full bg-contrast/25 in-data-disabled:opacity-50"
                 />
                 <span
                   aria-hidden

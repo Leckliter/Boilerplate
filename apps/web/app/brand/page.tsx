@@ -28,7 +28,7 @@ import {
   TableHeader,
   TableRow,
 } from '@app/ui/components/table';
-import { AlarmIcon, PlusIcon, TrashIcon, TrayIcon, WarningIcon } from '@app/ui/components/icons';
+import { AlarmIcon, PlusIcon, TrashIcon, InboxIcon, WarningIcon } from '@app/ui/components/icons';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
@@ -228,12 +228,8 @@ export default function BrandPage() {
               <Field label="Name" htmlFor="demo-name" hint="As it appears on the driver’s licence.">
                 <Input id="demo-name" placeholder="Avery Stone" />
               </Field>
-              <Field
-                label="Email"
-                htmlFor="demo-email"
-                error="That doesn’t look like an email address."
-              >
-                <Input id="demo-email" aria-invalid defaultValue="avery@" />
+              <Field label="Email" error="That doesn’t look like an email address.">
+                <Input defaultValue="avery@" />
               </Field>
               <Field label="Contact type" htmlFor="demo-type">
                 <NativeSelect id="demo-type">
@@ -306,7 +302,7 @@ export default function BrandPage() {
               </Card>
               <Card>
                 <Empty
-                  icon={<TrayIcon />}
+                  icon={<InboxIcon />}
                   title="Empty state"
                   description="Say what will appear here and how to make it appear."
                 />
@@ -378,7 +374,10 @@ export default function BrandPage() {
                     <TableRow key={row.name}>
                       <TableCell>
                         <span className="flex items-center gap-3">
-                          <Avatar name={row.name} />
+                          <Avatar
+                            name={row.name}
+                            src={row.name === 'Avery Stone' ? '/icon.svg' : null}
+                          />
                           <span className="font-medium">{row.name}</span>
                         </span>
                       </TableCell>

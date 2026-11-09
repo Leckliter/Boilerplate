@@ -19,6 +19,11 @@ Built in: `account.message`, `system.test`, `newsletter.confirm`, `account.expor
 `hidden: true` (one-off confirmations) is not listed in the person's settings. `registerErrorAlerts` sends the two error types to
 everyone with `errors.manage`.
 
+Staff (`notifications.manage`) can read the catalogue with `notifications.typeDefaults` (every type, who it is for
+and its channel defaults; Settings → Notifications) and one person's current switches with
+`notifications.preferencesFor { contactId }` (read-only; the Notifications tab of a user). Only the person
+changes their own switches.
+
 ## What decides who gets what
 
 1. The person's **preferences** (`notification_preferences`), else the type's defaults.

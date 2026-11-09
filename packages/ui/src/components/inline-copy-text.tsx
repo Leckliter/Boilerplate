@@ -80,6 +80,8 @@ const InlineCopyText = forwardRef<HTMLButtonElement, InlineCopyTextProps>(
   ) => {
     const { copied, runCopy } = useCopyFeedback(COPIED_FEEDBACK_MS);
     const valueToCopy = resolveCopyValue(children, value);
+    const visibleText =
+      typeof children === 'string' || typeof children === 'number' ? String(children) : valueToCopy;
 
     const copy = useCallback(async () => {
       const done = await runCopy(
@@ -104,7 +106,8 @@ const InlineCopyText = forwardRef<HTMLButtonElement, InlineCopyTextProps>(
           onClick?.(event);
           if (!event.defaultPrevented) void copy();
         }}
-        aria-label={copied ? copiedLabel : copyAction}
+        // The visible text is the value, so the name contains it (WCAG 2.5.3): "Copy to clipboard: E-1234".
+        aria-label={copied ? copiedLabel : `${copyAction}: ${visibleText}`}
       >
         <As
           className={cn(

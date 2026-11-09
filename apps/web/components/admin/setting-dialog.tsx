@@ -1,3 +1,5 @@
+'use client';
+
 import { PlusIcon } from '@app/ui/components/icons';
 import { Input, Textarea } from '@app/ui/components/input';
 import { Field } from '@app/ui/components/label';

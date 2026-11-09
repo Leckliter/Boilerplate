@@ -69,9 +69,12 @@ export type EmittedEvent = { type: string; data: Record<string, unknown> };
  *   if (emitted) expect(emitted).toHaveLength(1);
  */
 export async function eventsIfEnabled(type?: string): Promise<EmittedEvent[] | null> {
-  const table = (schema as unknown as { events?: typeof schema.events }).events;
+  // Untyped on purpose: with the events module deleted there is no `schema.events` to name a type after.
+  const table = (schema as unknown as { events?: unknown }).events;
   if (!table || !getAction('events.list')) return null;
-  const rows = await getDb().select().from(table);
+  const rows = (await getDb()
+    .select()
+    .from(table as never)) as unknown as { type: string; data: unknown }[];
   return rows
     .filter((e) => !type || e.type === type)
     .map((e) => ({ type: e.type, data: e.data as Record<string, unknown> }));

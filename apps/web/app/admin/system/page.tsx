@@ -1,4 +1,4 @@
-import { callAction, listJobs, systemHealth } from '@app/core';
+import { callAction, listCronRuns, listJobs, systemHealth } from '@app/core';
 import { Badge } from '@app/ui/components/badge';
 import { Sparkline } from '@app/ui/components/charts';
 import { Callout } from '@app/ui/components/callout';
@@ -14,7 +14,7 @@ import {
   TableHeader,
   TableRow,
 } from '@app/ui/components/table';
-import { formatDateTime } from '@app/ui/lib/dates';
+import { getServerDates } from '@/lib/dates-server';
 import Link from 'next/link';
 
 import { ActionError } from '@/components/action-error';
@@ -33,8 +33,6 @@ const STATUSES = [
   { value: 'done', label: 'Done' },
 ] as const;
 
-const when = (d: Date | null) => (d ? formatDateTime(d) : '—');
-
 /** Health, scheduled jobs (crons) and the background-job queue, with retry / cancel. */
 export default async function SystemPage({
   searchParams,
@@ -42,33 +40,33 @@ export default async function SystemPage({
   searchParams: Promise<{ status?: string }>;
 }) {
   const viewer = await requireViewer('system.manage', '/admin/system');
+  const { formatDateTime } = await getServerDates();
+  const when = (d: Date | null) => (d ? formatDateTime(d) : '—');
   const { status: raw } = await searchParams;
   const status = STATUSES.find((s) => s.value === raw)?.value ?? 'all';
-  const [health, jobs, recent] = await Promise.all([
+  const [health, jobs, runs] = await Promise.all([
     callAction(systemHealth, {}, viewer.actor),
     callAction(
       listJobs,
       { status: status === 'all' ? undefined : [status], limit: 50 },
       viewer.actor,
     ),
-    callAction(listJobs, { limit: 200 }, viewer.actor),
+    callAction(listCronRuns, { limit: 500 }, viewer.actor),
   ]);
-  // The "health history": there is no cron-run history action in core, so the trend is the background job
-  // queue itself (every cron run does its work through jobs): jobs finished and failed per hour, last 24 h.
-  const hours = Array.from({ length: 24 }, () => 0);
-  /** 0 = the latest hour … 23 = 23 hours ago; -1 = older or not finished. */
-  const hoursAgo = (at: Date | null) => {
-    const h = at ? Math.floor((Date.now() - new Date(at).getTime()) / 3_600_000) : -1;
+  // The health history: the scheduled jobs' own run log (system.cronRuns), counted per hour for the last 24 h.
+  /** 0 = 23 hours ago … 23 = the latest hour; -1 = older. */
+  const hourBucket = (at: Date) => {
+    const h = Math.floor((Date.now() - new Date(at).getTime()) / 3_600_000);
     return h >= 0 && h < 24 ? 23 - h : -1;
   };
-  const finished = hours.map(() => 0);
-  const failed = hours.map(() => 0);
-  if (recent.ok) {
-    for (const j of recent.data) {
-      const i = hoursAgo(j.finishedAt);
-      if (i < 0) continue;
-      if (j.status === 'failed') failed[i]!++;
-      else if (j.status === 'done') finished[i]!++;
+  const finished = Array.from({ length: 24 }, () => 0);
+  const failed = Array.from({ length: 24 }, () => 0);
+  if (runs.ok) {
+    for (const r of runs.data) {
+      const i = hourBucket(r.startedAt);
+      if (i < 0 || r.ok === null) continue; // still running (or crashed): neither yet
+      if (r.ok) finished[i]!++;
+      else failed[i]!++;
     }
   }
 
@@ -126,36 +124,35 @@ export default async function SystemPage({
             <CardHeader>
               <CardTitle>Health history</CardTitle>
               <CardDescription>
-                Background jobs finished and failed per hour over the last 24 hours (the latest{' '}
-                {recent.ok ? recent.data.length : 0} jobs). A flat line means the jobs cron is not
-                running.
+                Scheduled job runs per hour over the last 24 hours, from the run log. A flat line
+                means the scheduler is not calling the cron routes.
               </CardDescription>
             </CardHeader>
             <CardContent className="grid gap-4 sm:grid-cols-2">
               <div className="grid gap-1">
                 <p className="text-sm font-medium">
-                  Finished{' '}
+                  Runs that worked{' '}
                   <span className="text-muted-foreground tabular-nums">
                     · {finished.reduce((a, b) => a + b, 0)}
                   </span>
                 </p>
                 <Sparkline
                   data={finished}
-                  label="Background jobs finished per hour, last 24 hours"
+                  label="Scheduled job runs that worked, per hour, last 24 hours"
                   series={1}
                   className="h-12 w-full"
                 />
               </div>
               <div className="grid gap-1">
                 <p className="text-sm font-medium">
-                  Failed{' '}
+                  Runs that failed{' '}
                   <span className="text-muted-foreground tabular-nums">
                     · {failed.reduce((a, b) => a + b, 0)}
                   </span>
                 </p>
                 <Sparkline
                   data={failed}
-                  label="Background jobs failed per hour, last 24 hours"
+                  label="Scheduled job runs that failed, per hour, last 24 hours"
                   series={3}
                   className="h-12 w-full"
                 />
@@ -208,6 +205,50 @@ export default async function SystemPage({
               </Table>
             </CardContent>
           </Card>
+          {runs.ok && runs.data.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Recent runs</CardTitle>
+                <CardDescription>The last scheduled job runs, newest first.</CardDescription>
+              </CardHeader>
+              <CardContent className="p-0">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Job</TableHead>
+                      <TableHead>Started</TableHead>
+                      <TableHead className="hidden sm:table-cell">Took</TableHead>
+                      <TableHead>Result</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {runs.data.slice(0, 10).map((r) => (
+                      <TableRow key={r.id}>
+                        <TableCell>
+                          <code className="text-xs">{r.job}</code>
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">{when(r.startedAt)}</TableCell>
+                        <TableCell className="hidden text-muted-foreground tabular-nums sm:table-cell">
+                          {r.durationMs === null ? '—' : `${r.durationMs} ms`}
+                        </TableCell>
+                        <TableCell>
+                          {r.ok === null ? (
+                            <Badge color="outline">Running or crashed</Badge>
+                          ) : r.ok ? (
+                            <Badge color="green">OK</Badge>
+                          ) : (
+                            <Badge color="red" title={r.error ?? undefined}>
+                              Failed
+                            </Badge>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          )}
         </>
       )}
 

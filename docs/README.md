@@ -11,9 +11,16 @@ Start with [architecture.md](architecture.md), [actions.md](actions.md) and
 | [actions.generated.md](actions.generated.md)   | Every action, permission and input schema (generated)                                       |
 | [ai-workflow.md](ai-workflow.md)               | How AI builds here: rule checks, hooks, skills, review                                      |
 | [logging.md](logging.md)                       | The activity log and field-level change history                                             |
-| [errors.md](errors.md)                         | Error references, diagnosis, fixing errors with an AI agent                                 |
+| [errors.md](errors.md)                         | Error references, diagnosis, per-day occurrences, fixing errors with an AI agent            |
+| [events.md](events.md)                         | `emit()`, the event catalogue, how automations react                                        |
+| [events.generated.md](events.generated.md)     | Every event type and its data (generated)                                                   |
+| [automations.md](automations.md)               | Triggers, waits, steps and the run log                                                      |
+| [notifications.md](notifications.md)           | `notify()`, message types and their defaults, consent, quiet hours, push, delivery log      |
+| [files.md](files.md)                           | S3 uploads, purposes, avatars, data exports, and the local S3 stand-in for dev and tests    |
+| [rest-and-mcp.md](rest-and-mcp.md)             | The REST API and MCP server over the same actions                                           |
+| [docs-system.md](docs-system.md)               | The in-app `/docs` (public help and staff-only pages)                                       |
 | [choosing-a-backend.md](choosing-a-backend.md) | Neon vs Supabase: what differs, exact provider setup, how to remove one                     |
-| [design-system.md](design-system.md)           | Tokens, brand-by-one-token, dark mode, the 13 UI rules, components                          |
+| [design-system.md](design-system.md)           | Tokens, brand-by-one-token, dark mode, the 13 UI rules, components, translated `labels`     |
 | [testing.md](testing.md)                       | Real-Postgres tests, the "works + refused" rule, web unit tests, Playwright e2e             |
 | [deploy.md](deploy.md)                         | Vercel, Docker, env vars, preview databases, migrations on deploy, cron, releases, rollback |
 | [decisions.md](decisions.md)                   | Why things are the way they are                                                             |

@@ -5,7 +5,7 @@ import { CodeBlock } from '@app/ui/components/code-block';
 import { DetailItem, DetailList } from '@app/ui/components/detail-list';
 import { linkVariants } from '@app/ui/components/link';
 import { PageHeader, RecordHeader } from '@app/ui/components/page';
-import { formatDateTime } from '@app/ui/lib/dates';
+import { getServerDates } from '@/lib/dates-server';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
@@ -21,6 +21,7 @@ export const metadata = { title: 'Activity entry' };
 const inherit = linkVariants({ tone: 'inherit' });
 
 export default async function ActivityEntryPage({ params }: { params: Promise<{ id: string }> }) {
+  const { formatDateTime } = await getServerDates();
   const { id } = await params;
   const viewer = await requireViewer('activity.read', `/admin/activity/${id}`);
   const result = await callAction(getActivity, { id }, viewer.actor);

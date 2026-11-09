@@ -8,6 +8,8 @@ import { type ReactNode, useActionState, useEffect, useRef } from 'react';
 
 import type { ActionName } from '@/lib/action-names';
 import { invokeAction } from '@/lib/invoke';
+import { announceDataChanged } from '@/lib/data-changed';
+import { withoutReference } from '@/lib/error-message';
 import { isStaleDeploy, promptReload } from '@/lib/stale-deploy';
 
 import { FormError } from './field-error';
@@ -161,7 +163,7 @@ export function ActionForm({
         return {
           status: 'error',
           at: Date.now(),
-          message: res.error.message,
+          message: withoutReference(res.error.message, res.error.ref),
           ref: res.error.ref,
           fieldErrors: details?.fieldErrors,
         };
@@ -185,6 +187,7 @@ export function ActionForm({
     handled.current = state.at;
     if (success) toast.success(success);
     router.refresh();
+    announceDataChanged();
     onSuccess?.(state.data);
     if (!keepOpen) {
       formRef.current?.reset();

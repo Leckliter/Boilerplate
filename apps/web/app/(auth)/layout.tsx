@@ -11,7 +11,7 @@ export default async function AuthLayout({ children }: { children: React.ReactNo
   return (
     <NextIntlClientProvider>
       <div className="flex min-h-dvh flex-col items-center justify-center gap-8 px-4 py-12">
-        <Link href="/" aria-label={`${SITE.name} home`}>
+        <Link href="/">
           <Logo name={SITE.name} />
         </Link>
         <main

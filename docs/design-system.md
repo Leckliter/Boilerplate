@@ -81,6 +81,15 @@ FileDrop/DropZone `status` states. (CopyableCode already exists as `ClipboardTex
 event colours are `--event-<name>[-tint|-ink]` tokens. `<Logo tone="onBrand">` on brand backgrounds.
 Tests: `pnpm --filter @app/ui test` (vitest + Testing Library + jest-axe; `test/axe.ts`).
 
+## Words inside components: `labels`
+
+Components that say something themselves (ThemeToggle, Wizard, Steps, NotificationList, DataTable, and
+Tabs' scroll buttons) take an optional `labels` prop with English defaults, so the UI package needs no
+i18n library. In `apps/web` use the hooks in `lib/ui-labels.ts` (`useTableLabels()`,
+`useWizardLabels()` …; messages under `ui.*` in `messages/*.json`): `<DataTable labels={useTableLabels()} … />`.
+Avatar takes `src` (a picture, with the initials as the fallback) and `alt` (a labelled image when it
+stands alone); Sparkline takes `width` (pixels or `'fill'`) and `height`.
+
 ## Time zone in client components
 
 `formatDate` etc. default to the module zone (`APP_TIME_ZONE`, set on the server). Browsers don't see
@@ -88,6 +97,10 @@ that env, so mount `<TimeZoneProvider zone={getAppTimeZone()}>` (`@app/ui/compon
 `AppProviders` with the server's zone, and in client components use `useAppTimeZone()` or
 `const { formatDate, formatDateTime } = useDates()`. Every formatter also takes a trailing `zone`
 argument. Timeline and NotificationList already use `useDates()`. (Web worker: mount the provider.)
+
+Server components use `getServerDates()` (`apps/web/lib/dates-server.ts`): the same formatters bound to the
+signed-in person's time zone (the `tz` cookie, set under Account → Preferences), else `APP_TIME_ZONE`.
+Don't import `formatDate` from `@app/ui/lib/dates` in an admin or account page: it ignores the cookie.
 
 Helpers: `formatMoney(cents, { currency, trimZeros })`/`parseMoneyToCents` (alias `parseMoney`) (`@app/ui/lib/money`, integer cents), `formatDate`/
 `formatDateTime`/`formatDay` (`@app/ui/lib/dates`, always in `APP_TIME_ZONE`, default

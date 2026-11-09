@@ -4,7 +4,7 @@ import { Button } from '@app/ui/components/button';
 import { Callout } from '@app/ui/components/callout';
 import { DownloadSimpleIcon } from '@app/ui/components/icons';
 import { Progress } from '@app/ui/components/progress';
-import { formatDateTime } from '@app/ui/lib/dates';
+import { useDates } from '@app/ui/components/ui-context';
 import { useEffect, useState } from 'react';
 
 import { invokeAction } from '@/lib/invoke';
@@ -31,6 +31,7 @@ export function DataExport({
   initial: ExportFile | null;
   storageReady: boolean;
 }) {
+  const { formatDateTime } = useDates();
   const [file, setFile] = useState<ExportFile | null>(initial);
   const [waitingSince, setWaitingSince] = useState<number | null>(null);
   const [gaveUp, setGaveUp] = useState(false);

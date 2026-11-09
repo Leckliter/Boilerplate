@@ -58,7 +58,8 @@ function fakeStorage() {
       objects.has(key(b, p))
         ? { sizeBytes: objects.get(key(b, p))!.length, contentType: 'application/json' }
         : null,
-    signedUrl: async (b, p) => `https://s3.test/${key(b, p)}?signed=1`,
+    signedUrl: async (b, p, _expires, downloadAs) =>
+      `https://s3.test/${key(b, p)}?signed=1${downloadAs ? `&download=${encodeURIComponent(downloadAs)}` : ''}`,
     publicUrl: async (b, p) => `https://cdn.test/${key(b, p)}`,
     remove: async (b, p) => void removed.push(key(b, p)),
   };
@@ -145,6 +146,8 @@ describe('account.exportData', () => {
     );
     expect(list).toHaveLength(1);
     expect(list[0]!.url).toContain('signed=1');
+    // Saved, not shown: the storage link asks for a download with the file's name.
+    expect(list[0]!.url).toContain(`download=${encodeURIComponent(list[0]!.filename)}`);
     const manager = await makeActor(['manager']);
     expect(
       await callAction(listFiles, { purpose: 'data_export', subjectId: id }, manager),

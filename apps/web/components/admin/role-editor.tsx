@@ -26,7 +26,8 @@ export function RoleEditor({
 }) {
   const { run, pending } = useAction();
   const available = options.filter((o) => !roles.includes(o.role));
-  const [role, setRole] = useState(available[0]?.role ?? '');
+  // Nothing is preselected: granting a role is a deliberate choice, never a default.
+  const [role, setRole] = useState('');
   return (
     <div className="grid gap-3">
       <div className="flex flex-wrap gap-1.5">
@@ -53,11 +54,12 @@ export function RoleEditor({
       {available.length > 0 && (
         <div className="flex gap-2">
           <NativeSelect
-            value={role}
+            value={available.some((o) => o.role === role) ? role : ''}
             onChange={(e) => setRole(e.target.value)}
             aria-label="Role to grant"
             className="h-8 min-w-0 flex-1 sm:max-w-56"
           >
+            <option value="">Choose a role…</option>
             {available.map((o) => (
               <option key={o.role} value={o.role}>
                 {o.role} — {o.description}
@@ -67,9 +69,14 @@ export function RoleEditor({
           <Button
             size="sm"
             disabled={pending || !role}
-            onClick={() =>
-              run('access.grantRole', { contactId, role }, { success: `Granted ${role}` })
-            }
+            onClick={async () => {
+              const res = await run(
+                'access.grantRole',
+                { contactId, role },
+                { success: `Granted ${role}` },
+              );
+              if (res.ok) setRole('');
+            }}
           >
             Grant role
           </Button>

@@ -142,5 +142,45 @@
     "notFoundTitle": "Page not found",
     "notFoundBody": "That page doesn’t exist or was moved.",
     "home": "Go to the home page"
+  },
+  "ui": {
+    "theme": {
+      "legend": "Theme",
+      "light": "Light",
+      "dark": "Dark",
+      "system": "System"
+    },
+    "wizard": {
+      "region": "Step by step",
+      "back": "Back",
+      "next": "Next",
+      "finish": "Finish",
+      "stepOf": "Step {step} of {total}:"
+    },
+    "steps": {
+      "progress": "Progress",
+      "done": " (done)",
+      "next": " (next)",
+      "goBack": "{label} (done) — go back"
+    },
+    "notificationList": {
+      "region": "Notifications",
+      "unread": "{count} unread",
+      "noUnread": "No unread",
+      "markAllRead": "Mark all read",
+      "markAsRead": "Mark as read",
+      "unreadPrefix": "Unread: ",
+      "empty": "You are all caught up."
+    },
+    "table": {
+      "sortBy": "Sort by",
+      "defaultOrder": "Default order",
+      "ascending": "{column} (A–Z, low to high)",
+      "descending": "{column} (Z–A, high to low)",
+      "selectAll": "Select all rows in {caption}",
+      "selectRow": "Select row {id}",
+      "loading": "Loading",
+      "empty": "Nothing here yet."
+    }
   }
 }

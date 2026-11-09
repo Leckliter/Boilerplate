@@ -4,7 +4,7 @@ import { Callout } from '@app/ui/components/callout';
 import { Card, CardContent, CardHeader, CardTitle } from '@app/ui/components/card';
 import { CodeBlock } from '@app/ui/components/code-block';
 import { PageHeader } from '@app/ui/components/page';
-import { formatDateTime } from '@app/ui/lib/dates';
+import { getServerDates } from '@/lib/dates-server';
 import Link from 'next/link';
 
 import { ActionError } from '@/components/action-error';
@@ -16,6 +16,7 @@ import { requireViewer } from '@/lib/viewer';
 export const metadata = { title: 'Automation run' };
 
 export default async function RunPage({ params }: { params: Promise<{ id: string }> }) {
+  const { formatDateTime } = await getServerDates();
   const { id } = await params;
   const viewer = await requireViewer('automations.manage', `/admin/automations/runs/${id}`);
   const res = await callAction(getRun, { id }, viewer.actor);

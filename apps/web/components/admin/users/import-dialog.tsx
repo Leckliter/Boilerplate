@@ -12,7 +12,7 @@ import {
   DialogTrigger,
 } from '@app/ui/components/dialog';
 import { FileDrop } from '@app/ui/components/file-drop';
-import { UploadSimpleIcon } from '@app/ui/components/icons';
+import { FileCsvIcon } from '@app/ui/components/icons';
 import { Textarea } from '@app/ui/components/input';
 import { Field } from '@app/ui/components/label';
 import { toast } from '@app/ui/components/toaster';
@@ -87,7 +87,7 @@ export function ImportDialog({ tags }: { tags: { slug: string; label: string }[]
         if (!next) reset();
       }}
     >
-      <DialogTrigger render={<Button icon={<UploadSimpleIcon />}>Import CSV</Button>} />
+      <DialogTrigger render={<Button icon={<FileCsvIcon />}>Import CSV</Button>} />
       <DialogContent size="lg">
         <DialogHeader>
           <DialogTitle>Import users from a CSV</DialogTitle>

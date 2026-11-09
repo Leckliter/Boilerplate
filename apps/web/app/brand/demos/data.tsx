@@ -267,6 +267,21 @@ export function DataDemos() {
         </div>
         <div className="flex flex-wrap items-center gap-6 text-sm">
           <span className="flex items-center gap-2">
+            Fixed size{' '}
+            <Sparkline label="Fixed size" data={[2, 5, 3, 7, 6]} width={96} height={24} />
+          </span>
+          <span className="flex min-w-0 flex-1 basis-48 items-center gap-2">
+            <span className="shrink-0">Fills its container</span>
+            <span className="min-w-0 flex-1">
+              <Sparkline
+                label="Fills its container"
+                data={[2, 5, 3, 7, 6]}
+                width="fill"
+                height={24}
+              />
+            </span>
+          </span>
+          <span className="flex items-center gap-2">
             Up <Sparkline label="Up trend" data={[1, 2, 2, 4, 6]} className="w-24" />
           </span>
           <span className="flex items-center gap-2">

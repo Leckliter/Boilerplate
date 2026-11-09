@@ -59,15 +59,18 @@ Signing in: `signInAs(page, email)` in `e2e/support/auth.ts` (`/api/dev-login`).
 Specs share one database and run in parallel: create your own records with `uniq()` names instead of
 editing seeded ones, and never remove the owner's role (one spec proves the last owner is protected).
 
-| Spec          | Covers                                                                                                                                                                             |
-| ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `public`      | public pages, sign-in form, redirects for signed-out visitors, 401 / 403 from the APIs                                                                                             |
-| `admin-users` | dashboard, New user dialog (no / field error / `E-` reference / success), edit in place, field history, roles, last-owner guard, Activity before/after                             |
-| `errors`      | the error pipeline: reference shown → Admin → Errors → "Copy for AI agent" (reference + `## Stack`) for a page bug, a server crash, a client crash, a timer error, a failing route |
-| `account`     | profile edit, cancel, sign out                                                                                                                                                     |
-| `navigation`  | keyboard-only: skip link, sidebar, command palette (Ctrl+K, arrows, Escape); dark mode persistence with no flash                                                                   |
-| `responsive`  | no sideways scroll at 320px on every main route                                                                                                                                    |
-| `a11y`        | axe-core (WCAG A/AA) on the main screens in light and dark; zero serious/critical, with a `KNOWN` list that can only shrink                                                        |
+| Spec          | Covers                                                                                                                                                                                                                                          |
+| ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `public`      | public pages, sign-in form, redirects for signed-out visitors, 401 / 403 from the APIs                                                                                                                                                          |
+| `admin-users` | dashboard, New user dialog (no / field error / `E-` reference / success), edit in place, field history, roles, last-owner guard, Activity before/after                                                                                          |
+| `errors`      | the error pipeline: reference shown → Admin → Errors → "Copy for AI agent" (reference + `## Stack`) for a page bug, a server crash, a client crash, a timer error, a failing route                                                              |
+| `account`     | profile edit, cancel, sign out                                                                                                                                                                                                                  |
+| `navigation`  | keyboard-only: skip link, sidebar, command palette (Ctrl+K, arrows, Escape); dark mode persistence with no flash                                                                                                                                |
+| `responsive`  | no sideways scroll at 320px on every main route                                                                                                                                                                                                 |
+| `a11y`        | axe-core (WCAG A/AA) on the main screens in light and dark; zero serious/critical (the `KNOWN` allow-list is empty and a new entry needs a reason and a TODO item)                                                                              |
+| `crawl`       | opens every public, account and admin page and one record of each kind, clicks the whole admin sidebar; fails on any console error/warning, page error, failed request or 5xx                                                                   |
+| `files`       | document upload / open / delete on a user, profile picture, "download my data", against the local S3 stand-in (`scripts/dev-s3.mjs`, started by the config; docs/files.md)                                                                      |
+| `features`    | contact form → admin inquiry, newsletter sign-up, bulk archive with confirm, CSV import dry run, ⌘K record search, feature flag, "Add setting", welcome wizard, bell, deleting an account, push states (mocked `Notification` / service worker) |
 
 The crashes come from dev-only routes in `apps/web/app/api/dev/` (`boom`, `crash`, `crash/client`): each
 404s unless `DEV_LOGIN` is on in a non-production build.
@@ -82,10 +85,15 @@ Rules for new specs: select by role and accessible name (it doubles as an a11y c
 (wait for a URL, a role or text); check phone width for a new screen; a spec that finds a bug in the app
 is a good spec: fix the app, or `test.fixme` it with a TODO.md item, never loosen it.
 
+Console and network problems: `e2e/support/watch.ts` collects console errors/warnings, page errors, failed
+requests and 5xx answers; attach it (`const w = watch(page)`) and assert `w.problems` is empty. Server-side
+errors (a React Server Components render failure the browser never sees) show in the web server's output
+that `pnpm e2e` prints as `[WebServer] ⨯ …`: read it after a run.
+
 ## Script tests
 
 `pnpm test:scripts` (Node's test runner): `scripts/new-project.test.mjs` runs the new-project script on a
 copy of the repo and typechecks the result against an untouched copy (about a minute;
-`NEW_PROJECT_SKIP_TYPECHECK=1` skips that part).
+`NEW_PROJECT_SKIP_TYPECHECK=1` skips that part); `scripts/dev-s3.test.mjs` checks the local S3 stand-in.
 
 Check phone width (320px) for any screen you add.

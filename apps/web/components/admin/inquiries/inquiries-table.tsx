@@ -1,8 +1,9 @@
 'use client';
 
+import { useTableLabels } from '@/lib/ui-labels';
 import { DataTable, type DataTableColumn } from '@app/ui/components/data-table';
 import { Empty } from '@app/ui/components/empty';
-import { TrayIcon } from '@app/ui/components/icons';
+import { InboxIcon } from '@app/ui/components/icons';
 import { useDates } from '@app/ui/components/ui-context';
 import Link from 'next/link';
 
@@ -21,6 +22,7 @@ export type InquiryRow = {
 /** The inquiries list: the name opens the inquiry; on a phone each row is a card. Sorting is within the page. */
 export function InquiriesTable({ rows, filtered }: { rows: InquiryRow[]; filtered: boolean }) {
   const { formatWhen } = useDates();
+  const tableLabels = useTableLabels();
   const columns: DataTableColumn<InquiryRow>[] = [
     {
       id: 'from',
@@ -64,6 +66,7 @@ export function InquiriesTable({ rows, filtered }: { rows: InquiryRow[]; filtere
   ];
   return (
     <DataTable
+      labels={tableLabels}
       caption="Website inquiries"
       rows={rows}
       columns={columns}
@@ -71,7 +74,7 @@ export function InquiriesTable({ rows, filtered }: { rows: InquiryRow[]; filtere
       defaultSort={{ id: 'received', direction: 'desc' }}
       empty={
         <Empty
-          icon={<TrayIcon />}
+          icon={<InboxIcon />}
           title={filtered ? 'No inquiries match' : 'No inquiries yet'}
           description={
             filtered

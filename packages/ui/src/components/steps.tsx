@@ -10,10 +10,30 @@ import { cn } from '../lib/utils';
  *
  *   <Steps steps={['Your details', 'Agreement', 'Payment']} current={1} onStepClick={setStep} />
  */
+/** Words the indicator uses for screen readers; pass translations (all have English defaults). */
+interface StepsLabels {
+  /** Accessible name of the list. @default "Progress" */
+  progress?: string;
+  /** Added after a finished step. @default " (done)" */
+  done?: string;
+  /** Added after an upcoming step. @default " (next)" */
+  next?: string;
+  /** Name of the button that returns to a done step. @default (label) => `${label} (done) — go back` */
+  goBack?: (label: string) => string;
+}
+
+const DEFAULT_LABELS = {
+  progress: 'Progress',
+  done: ' (done)',
+  next: ' (next)',
+  goBack: (label: string) => `${label} (done) — go back`,
+};
+
 function Steps({
   steps,
   current,
   onStepClick,
+  labels: labelsProp,
   className,
   ...props
 }: Omit<React.ComponentProps<'ol'>, 'children'> & {
@@ -22,11 +42,13 @@ function Steps({
   current: number;
   /** Go back to a done step. Leave out to make the steps plain text. */
   onStepClick?: (index: number) => void;
+  labels?: StepsLabels;
 }) {
+  const labels = { ...DEFAULT_LABELS, ...labelsProp };
   return (
     <ol
       data-slot="steps"
-      aria-label="Progress"
+      aria-label={labels.progress}
       className={cn('flex min-w-0 items-center gap-2 text-sm', className)}
       {...props}
     >
@@ -67,14 +89,14 @@ function Steps({
                 type="button"
                 onClick={() => onStepClick(i)}
                 className="flex min-w-0 cursor-pointer items-center gap-2 rounded-md hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
-                aria-label={`${label} (done) — go back`}
+                aria-label={labels.goBack(label)}
               >
                 {inner}
               </button>
             ) : (
               <span className="flex min-w-0 items-center gap-2">
                 {inner}
-                <span className="sr-only">{done ? ' (done)' : active ? '' : ' (next)'}</span>
+                <span className="sr-only">{done ? labels.done : active ? '' : labels.next}</span>
               </span>
             )}
           </li>
@@ -84,4 +106,5 @@ function Steps({
   );
 }
 
+export type { StepsLabels };
 export { Steps };

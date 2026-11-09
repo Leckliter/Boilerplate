@@ -31,6 +31,33 @@ import {
  *     columns={[{ id: 'number', header: 'Order', cell: (o) => o.number, sortValue: (o) => o.number }]}
  *   />
  */
+/** Words the table shows; pass translations (all have English defaults). */
+interface DataTableLabels {
+  /** Label of the phone-width sort menu. @default "Sort by" */
+  sortBy?: string;
+  /** The unsorted option. @default "Default order" */
+  defaultOrder?: string;
+  ascending?: (column: string) => string;
+  descending?: (column: string) => string;
+  selectAll?: (caption: string) => string;
+  selectRow?: (id: string) => string;
+  /** Screen-reader text of the loading skeleton. @default "Loading" */
+  loading?: string;
+  /** Shown with no rows (and no `empty` prop). @default "Nothing here yet." */
+  empty?: string;
+}
+
+const DEFAULT_LABELS: Required<DataTableLabels> = {
+  sortBy: 'Sort by',
+  defaultOrder: 'Default order',
+  ascending: (column) => `${column} (A–Z, low to high)`,
+  descending: (column) => `${column} (Z–A, high to low)`,
+  selectAll: (caption) => `Select all rows in ${caption}`,
+  selectRow: (id) => `Select row ${id}`,
+  loading: 'Loading',
+  empty: 'Nothing here yet.',
+};
+
 type SortDirection = 'asc' | 'desc';
 type SortState = { id: string; direction: SortDirection } | null;
 
@@ -73,6 +100,7 @@ type DataTableProps<T> = {
   stickyHeader?: boolean;
   /** CSS max-height of the scrolling area, e.g. "24rem". */
   maxHeight?: string;
+  labels?: DataTableLabels;
   className?: string;
 };
 
@@ -103,8 +131,10 @@ function DataTable<T>({
   empty,
   stickyHeader,
   maxHeight,
+  labels: labelsProp,
   className,
 }: DataTableProps<T>) {
+  const labels = { ...DEFAULT_LABELS, ...labelsProp };
   const sortId = React.useId();
   const [innerSort, setInnerSort] = React.useState<SortState>(defaultSort);
   const sort = sortProp !== undefined ? sortProp : innerSort;
@@ -161,7 +191,7 @@ function DataTable<T>({
         // Header buttons are hidden with the thead on phones, so offer the same sort as a menu.
         <div className="flex items-center gap-2 md:hidden">
           <label htmlFor={sortId} className="shrink-0 text-sm text-muted-foreground">
-            Sort by
+            {labels.sortBy}
           </label>
           <NativeSelect
             id={sortId}
@@ -172,13 +202,13 @@ function DataTable<T>({
               setSort(id ? { id, direction: direction as SortDirection } : null);
             }}
           >
-            <option value="">Default order</option>
+            <option value="">{labels.defaultOrder}</option>
             {sortable.flatMap((c) => [
               <option key={`${c.id}:asc`} value={`${c.id}:asc`}>
-                {labelOf(c)} (A–Z, low to high)
+                {labels.ascending(labelOf(c))}
               </option>,
               <option key={`${c.id}:desc`} value={`${c.id}:desc`}>
-                {labelOf(c)} (Z–A, high to low)
+                {labels.descending(labelOf(c))}
               </option>,
             ])}
           </NativeSelect>
@@ -201,7 +231,7 @@ function DataTable<T>({
                   checked={allSelected}
                   indeterminate={someSelected}
                   onCheckedChange={toggleAll}
-                  label={`Select all rows in ${caption}`}
+                  label={labels.selectAll(caption)}
                   disabled={loading || ids.length === 0}
                 />
               )}
@@ -257,7 +287,7 @@ function DataTable<T>({
                 >
                   <TableCell colSpan={colCount} className="max-md:block">
                     <Skeleton className="h-5 w-full" />
-                    <span className="sr-only">Loading</span>
+                    <span className="sr-only">{labels.loading}</span>
                   </TableCell>
                 </TableRow>
               ))}
@@ -267,7 +297,7 @@ function DataTable<T>({
                   {empty ?? (
                     <div className="flex flex-col items-center gap-2 py-10 text-center text-sm text-muted-foreground">
                       <TrayIcon aria-hidden className="size-6" />
-                      Nothing here yet.
+                      {labels.empty}
                     </div>
                   )}
                 </TableCell>
@@ -288,7 +318,7 @@ function DataTable<T>({
                       <TableCheckCell
                         checked={isSel}
                         onCheckedChange={(on) => toggleOne(id, on)}
-                        label={`Select row ${id}`}
+                        label={labels.selectRow(id)}
                         className="max-md:block max-md:p-0 max-md:pb-2"
                       />
                     )}
@@ -328,5 +358,5 @@ function DataTable<T>({
   );
 }
 
-export type { DataTableColumn, DataTableProps, SortDirection, SortState };
+export type { DataTableColumn, DataTableLabels, DataTableProps, SortDirection, SortState };
 export { DataTable };

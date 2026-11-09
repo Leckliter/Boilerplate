@@ -253,6 +253,13 @@ async function view(storage: Storage, f: FileRow) {
     url:
       f.bucket === BUCKETS.public
         ? await storage.publicUrl(f.bucket, f.path)
-        : await storage.signedUrl(f.bucket, f.path, SIGNED_URL_SECONDS),
+        : // A data export is meant to be saved, not shown: the storage service says so itself, because the
+          // `download` attribute of a link is ignored for another origin.
+          await storage.signedUrl(
+            f.bucket,
+            f.path,
+            SIGNED_URL_SECONDS,
+            f.purpose === 'data_export' ? f.filename : undefined,
+          ),
   };
 }

@@ -9,6 +9,7 @@ import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 
 import { LANGUAGE_NAMES, type Locale, LOCALE_COOKIE } from '@/i18n/locales';
+import { useThemeToggleLabels } from '@/lib/ui-labels';
 import { COMMON_TIME_ZONES, TIME_ZONE_COOKIE } from '@/lib/timezone';
 
 import { applyTheme, useTheme } from '../layout/theme-switch';
@@ -36,6 +37,7 @@ export function PreferencesForm({
   appTimeZone: string;
 }) {
   const t = useTranslations('prefs');
+  const themeLabels = useThemeToggleLabels();
   const router = useRouter();
   const theme = useTheme();
   const zones = [...new Set([appTimeZone, ...(timeZone ? [timeZone] : []), ...COMMON_TIME_ZONES])];
@@ -47,7 +49,12 @@ export function PreferencesForm({
           <CardDescription>{t('appearanceHint')}</CardDescription>
         </CardHeader>
         <CardContent>
-          <ThemeToggle value={theme} onChange={applyTheme} legend={t('theme')} />
+          <ThemeToggle
+            value={theme}
+            onChange={applyTheme}
+            legend={t('theme')}
+            labels={themeLabels}
+          />
         </CardContent>
       </Card>
       <Card>

@@ -23,41 +23,69 @@ type NotificationItem = {
   icon?: React.ReactNode;
 };
 
+/** Words the list shows; pass translations (all have English defaults). */
+interface NotificationListLabels {
+  /** Accessible name of the region. @default "Notifications" */
+  region?: string;
+  unread?: (count: number) => string;
+  noUnread?: string;
+  markAllRead?: string;
+  markAsRead?: string;
+  /** Screen-reader prefix of an unread item. @default "Unread: " */
+  unreadPrefix?: string;
+  /** Shown with no items. @default "You are all caught up." */
+  empty?: string;
+}
+
+const DEFAULT_LABELS: Required<NotificationListLabels> = {
+  region: 'Notifications',
+  unread: (count) => `${count} unread`,
+  noUnread: 'No unread',
+  markAllRead: 'Mark all read',
+  markAsRead: 'Mark as read',
+  unreadPrefix: 'Unread: ',
+  empty: 'You are all caught up.',
+};
+
 function NotificationList({
   items,
   onMarkRead,
   onMarkAllRead,
-  emptyText = 'You are all caught up.',
+  emptyText,
+  labels: labelsProp,
   className,
 }: {
   items: NotificationItem[];
   onMarkRead?: (id: string) => void;
   onMarkAllRead?: () => void;
+  /** Same as `labels.empty`. */
   emptyText?: string;
+  labels?: NotificationListLabels;
   className?: string;
 }) {
   const { formatWhen } = useDates();
+  const labels = { ...DEFAULT_LABELS, ...labelsProp, ...(emptyText ? { empty: emptyText } : {}) };
   const unread = items.filter((i) => !i.read).length;
   return (
     <section
       data-slot="notification-list"
-      aria-label="Notifications"
+      aria-label={labels.region}
       className={cn('min-w-0', className)}
     >
       <div className="flex items-center justify-between gap-2 px-4 py-2">
         <p className="text-sm text-muted-foreground" aria-live="polite">
-          {unread ? `${unread} unread` : 'No unread'}
+          {unread ? labels.unread(unread) : labels.noUnread}
         </p>
         {onMarkAllRead && (
           <Button size="sm" variant="ghost" onClick={onMarkAllRead} disabled={!unread}>
-            <CheckIcon /> Mark all read
+            <CheckIcon /> {labels.markAllRead}
           </Button>
         )}
       </div>
       {items.length === 0 ? (
         <p className="flex flex-col items-center gap-2 px-4 py-10 text-center text-sm text-muted-foreground">
           <BellIcon aria-hidden className="size-6" />
-          {emptyText}
+          {labels.empty}
         </p>
       ) : (
         <ul className="divide-y divide-hairline">
@@ -86,7 +114,7 @@ function NotificationList({
                       n.read ? 'text-foreground' : 'font-medium text-foreground',
                     )}
                   >
-                    {!n.read && <span className="sr-only">Unread: </span>}
+                    {!n.read && <span className="sr-only">{labels.unreadPrefix}</span>}
                     {n.title}
                   </span>
                   {n.body && (
@@ -117,7 +145,7 @@ function NotificationList({
                   <Button
                     size="icon-sm"
                     variant="ghost"
-                    aria-label="Mark as read"
+                    aria-label={labels.markAsRead}
                     onClick={() => onMarkRead(n.id)}
                   >
                     <CheckIcon />
@@ -132,5 +160,5 @@ function NotificationList({
   );
 }
 
-export type { NotificationItem };
+export type { NotificationItem, NotificationListLabels };
 export { NotificationList };

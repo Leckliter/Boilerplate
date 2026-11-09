@@ -17,7 +17,7 @@ import {
 import { Empty } from '@app/ui/components/empty';
 import {
   InfoIcon,
-  TrayIcon,
+  InboxIcon,
   WarningIcon,
   CheckCircleIcon,
   WarningOctagonIcon,
@@ -293,7 +293,7 @@ export default function FeedbackDemos() {
         <div className="grid gap-4 md:grid-cols-2">
           <Empty
             size="sm"
-            icon={<TrayIcon />}
+            icon={<InboxIcon />}
             title="No projects yet"
             description="Projects show up here when someone creates one."
             contents={<Button variant="primary">Create project</Button>}

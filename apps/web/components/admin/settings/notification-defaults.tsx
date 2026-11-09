@@ -1,5 +1,6 @@
 import { callAction } from '@app/core';
-import { getPreferences } from '@app/core/notifications';
+import { typeDefaults } from '@app/core/notifications';
+import { Badge } from '@app/ui/components/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@app/ui/components/card';
 import { CheckIcon, LockIcon, MinusIcon } from '@app/ui/components/icons';
 import {
@@ -24,12 +25,12 @@ const CHANNELS = [
 
 /**
  * Settings → Notifications: every kind of message the app can send and how it reaches people by default.
- * Defaults live in code (packages/core/src/notifications/*-types.ts), and people change their own copy in
- * Account → Notifications, so this is a read-only reference, shown through the signed-in person's own
- * settings (which start from the defaults). Required messages (receipts, security) are locked on.
+ * Defaults live in code (packages/core/src/notifications/*-types.ts) and come from `notifications.typeDefaults`;
+ * people change their own copy in Account → Notifications, so this is a read-only reference. Required
+ * messages (receipts, security) are always emailed.
  */
 export async function NotificationDefaults({ viewer }: { viewer: SignedInViewer }) {
-  const res = await callAction(getPreferences, {}, viewer.actor);
+  const res = await callAction(typeDefaults, {}, viewer.actor);
   if (!res.ok) return <ActionError error={res.error} what="the notification types" />;
   return (
     <div className="grid gap-6">
@@ -55,30 +56,39 @@ export async function NotificationDefaults({ viewer }: { viewer: SignedInViewer 
               </TableRow>
             </TableHeader>
             <TableBody>
-              {res.data.types.map((t) => (
+              {res.data.map((t) => (
                 <TableRow key={t.key}>
                   <TableCell className="max-w-sm">
-                    <span className="font-medium">{t.label}</span>
+                    <span className="flex flex-wrap items-center gap-2 font-medium">
+                      {t.label}
+                      <Badge color="outline">
+                        {t.audience === 'staff' ? 'Staff' : 'Customers'}
+                      </Badge>
+                    </span>
                     <span className="block text-xs text-muted-foreground">{t.description}</span>
                   </TableCell>
                   {CHANNELS.map(([c, label]) => {
-                    const ch = t.channels[c];
+                    const locked = c === 'email' && t.required;
+                    const ch = { enabled: t.defaults[c] || locked, locked };
                     return (
                       <TableCell key={c} className="text-center">
                         {ch.enabled ? (
                           <CheckIcon
                             className="mx-auto size-4 text-success"
+                            role="img"
                             aria-label={`${label}: on`}
                           />
                         ) : (
                           <MinusIcon
                             className="mx-auto size-4 text-muted-foreground"
+                            role="img"
                             aria-label={`${label}: off`}
                           />
                         )}
                         {ch.locked && (
                           <LockIcon
                             className="mx-auto mt-0.5 size-3 text-muted-foreground"
+                            role="img"
                             aria-label="Always on"
                           />
                         )}

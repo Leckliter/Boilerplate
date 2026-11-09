@@ -63,7 +63,8 @@ function InlineEdit({
       <button
         type="button"
         onClick={start}
-        aria-label={`Edit ${label}`}
+        // The visible text is the current value; the name keeps it (WCAG 2.5.3): "Edit Campaign name: Spring sale".
+        aria-label={value ? `Edit ${label}: ${value}` : `Edit ${label}`}
         data-slot="inline-edit"
         className={cn(
           'group inline-flex max-w-full min-w-0 cursor-pointer items-center gap-1.5 rounded-md px-1.5 py-0.5 text-left outline-none hover:bg-tint focus-visible:ring-2 focus-visible:ring-ring',

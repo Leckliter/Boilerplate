@@ -13,7 +13,7 @@ import {
   TableHeader,
   TableRow,
 } from '@app/ui/components/table';
-import { formatDate } from '@app/ui/lib/dates';
+import { getServerDates } from '@/lib/dates-server';
 
 import { ActionError } from '@/components/action-error';
 import { CreateApiKey } from '@/components/admin/create-api-key';
@@ -23,6 +23,7 @@ import { requireViewer } from '@/lib/viewer';
 export const metadata = { title: 'API keys' };
 
 export default async function ApiKeysPage() {
+  const { formatDate } = await getServerDates();
   const viewer = await requireViewer('api_keys.manage', '/admin/api-keys');
   const keys = await callAction(listApiKeys, {}, viewer.actor);
 

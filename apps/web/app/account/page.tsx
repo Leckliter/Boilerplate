@@ -11,7 +11,7 @@ import {
   SlidersHorizontalIcon,
   UserIcon,
 } from '@app/ui/components/icons';
-import { formatDate } from '@app/ui/lib/dates';
+import { getServerDates } from '@/lib/dates-server';
 import Link from 'next/link';
 
 import { ActionError } from '@/components/action-error';
@@ -53,6 +53,7 @@ export default async function AccountPage({
 }: {
   searchParams: Promise<{ denied?: string }>;
 }) {
+  const { formatDate } = await getServerDates();
   const viewer = await requireViewer(undefined, '/account');
   const { denied } = await searchParams;
   const me = await callAction(getMyAccount, {}, viewer.actor);

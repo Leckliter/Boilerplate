@@ -1,6 +1,6 @@
 import { Badge } from '@app/ui/components/badge';
 import { focusRing } from '@app/ui/components/link';
-import { formatDateTime } from '@app/ui/lib/dates';
+import { getServerDates } from '@/lib/dates-server';
 import { cn } from '@app/ui/lib/utils';
 import { EyeIcon, GearSixIcon, RobotIcon, SignInIcon, UserIcon } from '@app/ui/components/icons';
 import Link from 'next/link';
@@ -21,9 +21,6 @@ type ActivityItem = {
   errorRef: string | null;
   ip: string | null;
 };
-
-/** "Nov 3, 2026, 4:05 PM" in Central time (kept as an object for existing `timeFormat.format(d)` callers). */
-export const timeFormat = { format: (d: Date | string | number) => formatDateTime(d) };
 
 /** "Ann Lee", "Claude (API key of Ann Lee)", "System", "Website visitor". */
 export function actorLabel(e: {
@@ -48,7 +45,8 @@ const FAILURE_LABEL: Record<string, string> = {
   auth_failed: 'Failed',
 };
 
-export function ActivityList({ entries }: { entries: ActivityItem[] }) {
+export async function ActivityList({ entries }: { entries: ActivityItem[] }) {
+  const { formatDateTime } = await getServerDates();
   if (entries.length === 0)
     return <p className="text-sm text-muted-foreground">Nothing has happened here yet.</p>;
   return (
@@ -85,7 +83,7 @@ export function ActivityList({ entries }: { entries: ActivityItem[] }) {
                   )}
                 </p>
                 <p className="truncate text-xs text-muted-foreground">
-                  {actorLabel(e)} · {e.channel} · {timeFormat.format(new Date(e.occurredAt))}
+                  {actorLabel(e)} · {e.channel} · {formatDateTime(new Date(e.occurredAt))}
                   {e.ip && ` · ${e.ip}`}
                   {e.errorRef ? ` · ${e.errorRef}` : e.error && ` · ${e.error}`}
                 </p>

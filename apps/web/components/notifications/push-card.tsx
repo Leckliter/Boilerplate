@@ -4,7 +4,7 @@ import { Button } from '@app/ui/components/button';
 import { Callout } from '@app/ui/components/callout';
 import { BellRingingIcon, BellSlashIcon } from '@app/ui/components/icons';
 import { toast } from '@app/ui/components/toaster';
-import { formatDate } from '@app/ui/lib/dates';
+import { useDates } from '@app/ui/components/ui-context';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
@@ -19,6 +19,7 @@ type Device = { id: string; label: string | null; endpointHost: string; createdA
  * with push. Each unsupported or blocked state says what to do instead of leaving a dead button.
  */
 export function PushCard({ devices }: { devices: Device[] }) {
+  const { formatDate } = useDates();
   const router = useRouter();
   const [state, setState] = useState<PushState>('checking');
   const [busy, setBusy] = useState(false);

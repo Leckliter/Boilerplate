@@ -132,8 +132,8 @@ describe('newsletter email links', () => {
     expect(page.status).toBe(200);
     expect(await page.text()).toContain('<button');
     const done = await confirm(request(`/api/v1/newsletter/confirm?t=${t}`, { method: 'POST' }));
-    expect(done.status).toBe(200);
-    expect(await done.text()).toContain('fan@example.com');
+    expect(done.status).toBe(303);
+    expect(new URL(done.headers.get('location')!).pathname).toBe('/newsletter/confirmed');
 
     const [row] = await getDb().execute<{ id: string }>(
       sql`select id from app.newsletter_subscriptions where email = 'fan@example.com'`,
@@ -141,8 +141,18 @@ describe('newsletter email links', () => {
     const unsubUrl = new URL(newsletterUnsubscribeUrl(row!.id));
     expect((await unsubscribePage(request(unsubUrl.pathname + unsubUrl.search))).status).toBe(200);
     const out = await unsubscribe(request(unsubUrl.pathname + unsubUrl.search, { method: 'POST' }));
-    expect(out.status).toBe(200);
-    expect(await out.text()).toContain('unsubscribed');
+    expect(out.status).toBe(303);
+    expect(new URL(out.headers.get('location')!).pathname).toBe('/newsletter/unsubscribed');
+    // Mail apps' one-click unsubscribe (RFC 8058) gets JSON, not a redirect.
+    const oneClick = await unsubscribe(
+      request(unsubUrl.pathname + unsubUrl.search, {
+        method: 'POST',
+        body: 'List-Unsubscribe=One-Click',
+        headers: { 'content-type': 'application/x-www-form-urlencoded' },
+      }),
+    );
+    expect(oneClick.status).toBe(200);
+    expect(await oneClick.json()).toEqual({ ok: true });
   });
 
   it('a bad token is a friendly 400 page, not an error', async () => {

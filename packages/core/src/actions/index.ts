@@ -8,7 +8,14 @@ export { getActivity, listActivity, listChanges } from './activity';
 export { exportActivityCsv } from './activity/export';
 export { listFlags, setFeatureFlag } from './flags';
 export { search, type SearchResult } from './search';
-export { errorBrief, getError, listErrors, resolveError } from './errors';
+export {
+  errorBrief,
+  errorOccurrences,
+  getError,
+  listErrors,
+  resolveError,
+  resolveManyErrors,
+} from './errors';
 export { createApiKey, listApiKeys, revokeApiKey } from './api-keys';
 export {
   addContactTags,
@@ -35,7 +42,7 @@ export {
   updateIntegration,
 } from './settings';
 export { systemIntegrations, whoami } from './system';
-export { cancelJob, listJobs, retryJob, systemHealth } from './system/jobs';
+export { cancelJob, listCronRuns, listJobs, retryJob, systemHealth } from './system/jobs';
 export {
   assertEmailFree,
   buildDisplayName,

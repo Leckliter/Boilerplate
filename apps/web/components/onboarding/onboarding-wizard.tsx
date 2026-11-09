@@ -1,5 +1,6 @@
 'use client';
 
+import { useWizardLabels } from '@/lib/ui-labels';
 import {
   Dialog,
   DialogContent,
@@ -7,7 +8,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@app/ui/components/dialog';
-import { KeyIcon, PaletteIcon, SparkleIcon, UserPlusIcon } from '@app/ui/components/icons';
+import { KeyIcon, PaletteIcon, RocketLaunchIcon, UserPlusIcon } from '@app/ui/components/icons';
 import { Wizard } from '@app/ui/components/wizard';
 import Link from 'next/link';
 import { useState } from 'react';
@@ -48,6 +49,7 @@ const TIPS = [
  * Closing it any way counts as seen.
  */
 export function OnboardingWizard({ show, appName }: { show: boolean; appName: string }) {
+  const wizardLabels = useWizardLabels();
   const [open, setOpen] = useState(show);
   const { run, pending } = useAction();
   if (!show) return null;
@@ -76,6 +78,7 @@ export function OnboardingWizard({ show, appName }: { show: boolean; appName: st
           </DialogDescription>
         </DialogHeader>
         <Wizard
+          labels={wizardLabels}
           busy={pending}
           finishLabel="Start exploring"
           onFinish={finish}
@@ -86,7 +89,7 @@ export function OnboardingWizard({ show, appName }: { show: boolean; appName: st
               description: 'You are the owner, so you can see and change everything.',
               content: (
                 <div className="flex items-start gap-3 rounded-lg bg-tint p-4 text-sm">
-                  <SparkleIcon aria-hidden className="mt-0.5 size-5 shrink-0 text-primary" />
+                  <RocketLaunchIcon aria-hidden className="mt-0.5 size-5 shrink-0 text-primary" />
                   <p>
                     This is your admin. Every change is logged, every error gets a reference you can
                     hand to an AI, and everything you can do here the REST API and AI assistants can

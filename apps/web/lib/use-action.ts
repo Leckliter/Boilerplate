@@ -6,6 +6,8 @@ import { useTransition } from 'react';
 
 import type { ActionName } from './action-names';
 import { invokeAction } from './invoke';
+import { announceDataChanged } from './data-changed';
+import { withoutReference } from './error-message';
 import { isStaleDeploy, promptReload } from './stale-deploy';
 
 export type RunResult<T> =
@@ -14,7 +16,7 @@ export type RunResult<T> =
 
 /** Toast an action failure; a bug (it has a reference) stays longer and offers "Copy reference". */
 export function toastActionError(message: string, ref?: string) {
-  toast.error(ref ? `${message} Error reference: ${ref}` : message, {
+  toast.error(ref ? `${withoutReference(message, ref)} Error reference: ${ref}` : message, {
     ...(ref && {
       duration: 30_000,
       action: {
@@ -71,6 +73,7 @@ export function useAction() {
         }
         if (opts.success) toast.success(opts.success);
         if (opts.refresh !== false) router.refresh();
+        announceDataChanged();
         resolve({ ok: true, data: res.data as T });
       }),
     );

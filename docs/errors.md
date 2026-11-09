@@ -68,7 +68,10 @@ curl -s -X POST "$APP_URL/api/v1/actions/errors.get" \
 1. Get the brief (above, or **Admin → Errors → Copy for AI agent**).
 2. The agent follows `.claude/skills/fix-error/SKILL.md`: read the diagnosis, find the code at the
    deployed commit, reproduce in a test, fix, `pnpm check`.
-3. After it ships: `errors.resolve { ref, resolution }` or **Mark fixed**. If it comes back, it reopens.
+3. After it ships: `errors.resolve { ref, resolution }` or **Mark fixed** (several at once: `errors.resolveMany { refs, resolution }`, the bulk button on the list). If it comes back, it reopens.
+
+How often a bug happens: `errors.occurrences { ref | fingerprint, days }` returns per-day counts (days in the app time
+zone, zeros included) for the sparklines on the list and the report. Scheduled-job history: `system.cronRuns`.
 
 ## Stack traces in production
 

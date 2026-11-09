@@ -29,7 +29,7 @@
     "e2e:test-site": "pnpm --filter web e2e:test-site",
     "new-project": "node scripts/new-project.mjs",
     "version:set": "npm version --no-git-tag-version",
-    "test:scripts": "node --test --test-timeout=900000 scripts/"
+    "test:scripts": "node --test --test-timeout=900000 \"scripts/*.test.mjs\""
   },
   "devDependencies": {
     "knip": "^6.44.2",

@@ -67,9 +67,13 @@ export default async function RolesPage() {
                     {roles.data.map((r) => (
                       <TableCell key={r.role} className="text-center">
                         {r.permissions.includes(p) ? (
-                          <CheckIcon className="mx-auto size-4 text-success" aria-label="Yes" />
+                          <CheckIcon
+                            className="mx-auto size-4 text-success"
+                            role="img"
+                            aria-label="Yes"
+                          />
                         ) : (
-                          <span className="text-muted-foreground" aria-label="No">
+                          <span className="text-muted-foreground" role="img" aria-label="No">
                             –
                           </span>
                         )}

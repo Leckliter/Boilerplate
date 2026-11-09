@@ -1,6 +1,6 @@
 'use client';
 
-import { cn } from '@app/ui/lib/utils';
+import { Tabs } from '@app/ui/components/tabs';
 import { PlusIcon, XIcon } from '@app/ui/components/icons';
 import { useTranslations } from 'next-intl';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
@@ -344,67 +344,67 @@ export function useRemembered<T>(key: string, initial: T): [T, (value: T) => voi
   return [value, set];
 }
 
-/** The strip. Rendered in the shell under the header, desktop only. */
+/**
+ * The strip. Rendered in the shell under the header, desktop only.
+ * Only real tabs sit inside the tablist: "New tab" and "Close tab" are `trailing` controls beside it
+ * (a button inside role=tablist is an accessibility error). Middle-click or Delete on a tab closes it.
+ */
 export function WorkspaceTabsStrip() {
   const t = useTranslations('shell');
   const ctx = useWorkspaceTabs();
   if (!ctx) return null;
   const { tabs, activeId, activate, close, open } = ctx;
+  const active = tabs.find((tab) => tab.id === activeId);
   return (
-    <div
-      role="tablist"
-      aria-label={t('openPages')}
-      className="flex min-w-0 items-end gap-1 overflow-x-auto px-3 pt-1.5"
-    >
-      {tabs.map((tab) => {
-        const active = tab.id === activeId;
-        return (
-          <div
-            key={tab.id}
-            role="presentation"
-            onAuxClick={(e) => {
-              if (e.button === 1) {
-                e.preventDefault();
-                close(tab.id);
-              }
-            }}
-            className={cn(
-              'group/tab flex h-8 max-w-48 min-w-24 items-center gap-1 rounded-t-lg border border-b-0 pr-1 pl-3 text-sm transition-colors',
-              active
-                ? 'border-border bg-background font-medium text-foreground'
-                : 'border-transparent text-muted-foreground hover:bg-tint',
-            )}
-          >
+    <div aria-label={t('openPages')} role="group" className="min-w-0 px-3 pt-1.5">
+      <Tabs
+        variant="underline"
+        size="sm"
+        value={String(activeId)}
+        onValueChange={(id) => activate(Number(id))}
+        tabs={tabs.map((tab) => ({
+          value: String(tab.id),
+          label: <span className="max-w-48 truncate">{ctx.titleFor(tab)}</span>,
+          render: (props) => (
             <button
+              {...props}
               type="button"
-              role="tab"
-              aria-selected={active}
-              onClick={() => activate(tab.id)}
-              className="min-w-0 flex-1 truncate text-left outline-none focus-visible:underline"
-            >
-              {ctx.titleFor(tab)}
-            </button>
-            {tabs.length > 1 && (
+              onAuxClick={(e) => {
+                if (e.button === 1) {
+                  e.preventDefault();
+                  close(tab.id);
+                }
+              }}
+              onKeyDown={(e) => {
+                props.onKeyDown?.(e);
+                if (e.key === 'Delete' && tabs.length > 1) close(tab.id);
+              }}
+            />
+          ),
+        }))}
+        trailing={
+          <div className="flex items-center gap-1">
+            {tabs.length > 1 && active && (
               <button
                 type="button"
-                aria-label={t('closeTab', { title: ctx.titleFor(tab) })}
-                onClick={() => close(tab.id)}
-                className="flex size-5 shrink-0 items-center justify-center rounded text-muted-foreground opacity-0 transition-opacity outline-none group-hover/tab:opacity-100 hover:bg-fill focus-visible:opacity-100"
+                aria-label={t('closeTab', { title: ctx.titleFor(active) })}
+                onClick={() => close(active.id)}
+                className="flex size-7 shrink-0 items-center justify-center rounded-lg text-muted-foreground transition-colors outline-none hover:bg-tint hover:text-foreground focus-visible:ring-[1.5px] focus-visible:ring-ring"
               >
-                <XIcon className="size-3" />
+                <XIcon className="size-4" />
               </button>
             )}
+            <button
+              type="button"
+              aria-label={t('newTab')}
+              onClick={() => open(`/admin`)}
+              className="flex size-7 shrink-0 items-center justify-center rounded-lg text-muted-foreground transition-colors outline-none hover:bg-tint hover:text-foreground focus-visible:ring-[1.5px] focus-visible:ring-ring"
+            >
+              <PlusIcon className="size-4" />
+            </button>
           </div>
-        );
-      })}
-      <button
-        type="button"
-        aria-label={t('newTab')}
-        onClick={() => open(`/admin`)}
-        className="mb-0.5 flex size-7 shrink-0 items-center justify-center rounded-lg text-muted-foreground transition-colors outline-none hover:bg-tint hover:text-foreground focus-visible:ring-[1.5px] focus-visible:ring-ring"
-      >
-        <PlusIcon className="size-4" />
-      </button>
+        }
+      />
     </div>
   );
 }

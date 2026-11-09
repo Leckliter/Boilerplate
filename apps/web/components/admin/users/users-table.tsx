@@ -1,5 +1,6 @@
 'use client';
 
+import { useTableLabels } from '@/lib/ui-labels';
 import { confirm } from '@app/ui/components/alert-dialog';
 import { Avatar } from '@app/ui/components/avatar';
 import { Badge, tagColor } from '@app/ui/components/badge';
@@ -7,7 +8,7 @@ import { Button } from '@app/ui/components/button';
 import { type DataTableColumn, DataTable, type SortState } from '@app/ui/components/data-table';
 import { Empty } from '@app/ui/components/empty';
 import { ArchiveIcon, KeyIcon, UsersIcon } from '@app/ui/components/icons';
-import { formatDate } from '@app/ui/lib/dates';
+import { useDates } from '@app/ui/components/ui-context';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
@@ -54,11 +55,13 @@ export function UsersTable({
   canWrite: boolean;
   emptyIsFiltered: boolean;
 }) {
+  const { formatDate } = useDates();
   const router = useRouter();
   const pathname = usePathname();
   const params = useSearchParams();
   const { run } = useAction();
 
+  const tableLabels = useTableLabels();
   const columns: DataTableColumn<UserRow>[] = [
     {
       id: 'name',
@@ -135,6 +138,7 @@ export function UsersTable({
 
   return (
     <DataTable
+      labels={tableLabels}
       caption="Users"
       rows={rows}
       getRowId={(u) => u.id}

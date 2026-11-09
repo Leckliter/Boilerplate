@@ -12,31 +12,51 @@ import { DesktopIcon, MoonIcon, SunIcon } from './icons';
  */
 type ThemeValue = 'light' | 'dark' | 'system';
 
+/** Words the toggle shows; pass translations (all have English defaults). */
+interface ThemeToggleLabels {
+  /** Screen-reader legend of the group. @default "Theme" */
+  legend?: string;
+  light?: string;
+  dark?: string;
+  system?: string;
+}
+
+const DEFAULT_LABELS: Required<ThemeToggleLabels> = {
+  legend: 'Theme',
+  light: 'Light',
+  dark: 'Dark',
+  system: 'System',
+};
+
 const OPTIONS = [
-  { value: 'light', label: 'Light', Icon: SunIcon },
-  { value: 'dark', label: 'Dark', Icon: MoonIcon },
-  { value: 'system', label: 'System', Icon: DesktopIcon },
+  { value: 'light', Icon: SunIcon },
+  { value: 'dark', Icon: MoonIcon },
+  { value: 'system', Icon: DesktopIcon },
 ] as const;
 
 function ThemeToggle({
   value,
   onChange,
-  legend = 'Theme',
+  legend,
+  labels: labelsProp,
   className,
 }: {
   value: ThemeValue;
   onChange: (value: ThemeValue) => void;
+  /** Same as `labels.legend`. */
   legend?: string;
+  labels?: ThemeToggleLabels;
   className?: string;
 }) {
   const name = React.useId();
+  const labels = { ...DEFAULT_LABELS, ...labelsProp, ...(legend ? { legend } : {}) };
   return (
     <fieldset
       data-slot="theme-toggle"
       className={cn('m-0 inline-flex min-w-0 gap-0.5 rounded-lg bg-fill p-0.5', className)}
     >
-      <legend className="sr-only">{legend}</legend>
-      {OPTIONS.map(({ value: v, label, Icon }) => (
+      <legend className="sr-only">{labels.legend}</legend>
+      {OPTIONS.map(({ value: v, Icon }) => (
         <label
           key={v}
           className={cn(
@@ -54,12 +74,12 @@ function ThemeToggle({
             className="peer sr-only"
           />
           <Icon aria-hidden className="size-4" weight={value === v ? 'fill' : undefined} />
-          <span className="sr-only sm:not-sr-only">{label}</span>
+          <span className="sr-only sm:not-sr-only">{labels[v]}</span>
         </label>
       ))}
     </fieldset>
   );
 }
 
-export type { ThemeValue };
+export type { ThemeToggleLabels, ThemeValue };
 export { ThemeToggle };

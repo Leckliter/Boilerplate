@@ -2,7 +2,9 @@
 /** What each person wants to hear about, and how — including SMS consent and one-click unsubscribe. */
 
 import {
+  type AppRole,
   and,
+  contactRoles,
   contacts,
   desc,
   eq,
@@ -10,17 +12,89 @@ import {
   notificationPreferences,
   or,
   pushSubscriptions,
+  type Tx,
 } from '@app/db';
 import { z } from 'zod';
 
-import { hasPermission } from '../../access';
+import { type Actor, hasPermission, userActor } from '../../access';
 import { CHANNELS } from '../../notifications/base';
 import { smsConsentText } from '../../notifications/consent';
-import { getNotificationType } from '../../notifications/registry';
+import { getNotificationType, NOTIFICATION_TYPES } from '../../notifications/registry';
 import { verifyUnsubscribe } from '../../notifications/tokens';
 import { phoneField } from '../contacts/shared';
 import { ActionError, defineAction } from '../define';
 import { channelField, me, visibleTypes } from './shared';
+
+/** One person's notification settings as that person would see them (`actor` decides which staff types are listed). */
+export async function preferencesView(tx: Tx, contactId: string, actor: Actor) {
+  const [contact] = await tx.select().from(contacts).where(eq(contacts.id, contactId));
+  if (!contact) throw new ActionError('not_found', 'No such contact.');
+  const prefs = await tx
+    .select()
+    .from(notificationPreferences)
+    .where(eq(notificationPreferences.contactId, contactId));
+  const suppressions = await tx
+    .select()
+    .from(messageSuppressions)
+    .where(
+      or(
+        contact.email
+          ? and(
+              eq(messageSuppressions.channel, 'email'),
+              eq(messageSuppressions.address, contact.email),
+            )
+          : undefined,
+        contact.phone
+          ? and(
+              eq(messageSuppressions.channel, 'sms'),
+              eq(messageSuppressions.address, contact.phone),
+            )
+          : undefined,
+      ),
+    );
+  const devices = await tx
+    .select({
+      id: pushSubscriptions.id,
+      label: pushSubscriptions.label,
+      createdAt: pushSubscriptions.createdAt,
+      lastSuccessAt: pushSubscriptions.lastSuccessAt,
+    })
+    .from(pushSubscriptions)
+    .where(eq(pushSubscriptions.contactId, contactId))
+    .orderBy(desc(pushSubscriptions.createdAt));
+  return {
+    types: visibleTypes(actor).map((t) => ({
+      key: t.key,
+      audience: t.audience,
+      label: t.label,
+      description: t.description,
+      required: Boolean(t.required),
+      channels: Object.fromEntries(
+        CHANNELS.map((c) => [
+          c,
+          {
+            enabled:
+              (c === 'email' && Boolean(t.required)) ||
+              (prefs.find((p) => p.type === t.key && p.channel === c)?.enabled ?? t.defaults[c]),
+            locked: c === 'email' && Boolean(t.required),
+          },
+        ]),
+      ) as Record<(typeof CHANNELS)[number], { enabled: boolean; locked: boolean }>,
+    })),
+    email: {
+      address: contact.email,
+      suppressed: suppressions.find((s) => s.channel === 'email')?.reason ?? null,
+    },
+    sms: {
+      phone: contact.phone,
+      consentAt: contact.smsConsentAt,
+      consentSource: contact.smsConsentSource,
+      stopped: suppressions.some((s) => s.channel === 'sms'),
+    },
+    devices,
+    smsConsentText: smsConsentText(),
+  };
+}
 
 export const getPreferences = defineAction({
   name: 'notifications.preferences',
@@ -33,74 +107,7 @@ export const getPreferences = defineAction({
   returns: '{ types, email, sms, devices, smsConsentText }',
   input: z.object({}),
   async run({ actor, tx }) {
-    const contactId = me(actor);
-    const [contact] = await tx.select().from(contacts).where(eq(contacts.id, contactId));
-    if (!contact) throw new ActionError('not_found', 'No such contact.');
-    const prefs = await tx
-      .select()
-      .from(notificationPreferences)
-      .where(eq(notificationPreferences.contactId, contactId));
-    const suppressions = await tx
-      .select()
-      .from(messageSuppressions)
-      .where(
-        or(
-          contact.email
-            ? and(
-                eq(messageSuppressions.channel, 'email'),
-                eq(messageSuppressions.address, contact.email),
-              )
-            : undefined,
-          contact.phone
-            ? and(
-                eq(messageSuppressions.channel, 'sms'),
-                eq(messageSuppressions.address, contact.phone),
-              )
-            : undefined,
-        ),
-      );
-    const devices = await tx
-      .select({
-        id: pushSubscriptions.id,
-        label: pushSubscriptions.label,
-        createdAt: pushSubscriptions.createdAt,
-        lastSuccessAt: pushSubscriptions.lastSuccessAt,
-      })
-      .from(pushSubscriptions)
-      .where(eq(pushSubscriptions.contactId, contactId))
-      .orderBy(desc(pushSubscriptions.createdAt));
-    return {
-      types: visibleTypes(actor).map((t) => ({
-        key: t.key,
-        audience: t.audience,
-        label: t.label,
-        description: t.description,
-        required: Boolean(t.required),
-        channels: Object.fromEntries(
-          CHANNELS.map((c) => [
-            c,
-            {
-              enabled:
-                (c === 'email' && Boolean(t.required)) ||
-                (prefs.find((p) => p.type === t.key && p.channel === c)?.enabled ?? t.defaults[c]),
-              locked: c === 'email' && Boolean(t.required),
-            },
-          ]),
-        ) as Record<(typeof CHANNELS)[number], { enabled: boolean; locked: boolean }>,
-      })),
-      email: {
-        address: contact.email,
-        suppressed: suppressions.find((s) => s.channel === 'email')?.reason ?? null,
-      },
-      sms: {
-        phone: contact.phone,
-        consentAt: contact.smsConsentAt,
-        consentSource: contact.smsConsentSource,
-        stopped: suppressions.some((s) => s.channel === 'sms'),
-      },
-      devices,
-      smsConsentText: smsConsentText(),
-    };
+    return preferencesView(tx, me(actor), actor);
   },
 });
 
@@ -242,5 +249,61 @@ export const unsubscribe = defineAction({
       summary: `Unsubscribed from “${type.label}” emails`,
     });
     return { label: type.label };
+  },
+});
+
+export const preferencesFor = defineAction({
+  name: 'notifications.preferencesFor',
+  title: 'Someone’s notification settings',
+  description:
+    'Read-only: what one person is notified about and through which channels (the same shape as ' +
+    'notifications.preferences, as that person sees it), their email and texting status and how many devices get ' +
+    'push. Staff use it to see how a user can be reached; the person’s own switches can only be changed by them.',
+  audience: 'notifications.manage',
+  mutates: false,
+  returns: '{ types, email, sms, devices, smsConsentText }',
+  input: z.object({ contactId: z.uuid() }),
+  async run({ input, tx }) {
+    const [contact] = await tx
+      .select({ id: contacts.id })
+      .from(contacts)
+      .where(eq(contacts.id, input.contactId));
+    if (!contact) throw new ActionError('not_found', 'No such contact.');
+    const roles = await tx
+      .select({ role: contactRoles.role })
+      .from(contactRoles)
+      .where(eq(contactRoles.contactId, contact.id));
+    const as = userActor({ contactId: contact.id, roles: roles.map((r) => r.role as AppRole) });
+    return preferencesView(tx, contact.id, as);
+  },
+});
+
+export const typeDefaults = defineAction({
+  name: 'notifications.typeDefaults',
+  title: 'Notification types and their defaults',
+  description:
+    'The catalogue of everything the app can notify about: for each type its key, label, who it is for ' +
+    '(customers or staff, and the permission staff need), whether email is required, whether it is urgent or ' +
+    'hidden from people’s settings, and which of email / SMS / push are on by default. Defaults apply until a ' +
+    'person changes their own settings.',
+  audience: 'notifications.manage',
+  mutates: false,
+  returns:
+    '[{ key, label, description, audience, permission, required, urgent, hidden, defaults: { email, sms, push } }]',
+  input: z.object({ audience: z.enum(['customer', 'staff']).optional() }),
+  async run({ input }) {
+    return NOTIFICATION_TYPES.filter((t) => !input.audience || t.audience === input.audience).map(
+      (t) => ({
+        key: t.key,
+        label: t.label,
+        description: t.description,
+        audience: t.audience,
+        permission: ('permission' in t ? t.permission : null) ?? null,
+        required: Boolean('required' in t && t.required),
+        urgent: Boolean('urgent' in t && t.urgent),
+        hidden: Boolean('hidden' in t && t.hidden),
+        defaults: t.defaults,
+      }),
+    );
   },
 });

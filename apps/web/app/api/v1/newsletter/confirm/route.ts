@@ -3,7 +3,7 @@ import { confirmNewsletter } from '@app/core/newsletter';
 
 import { requestInfoFrom } from '@/lib/request-info';
 
-import { esc, page } from '../../_lib/page';
+import { esc, page, publicOrigin } from '../../_lib/page';
 
 /**
  * The confirmation link in the newsletter double opt-in email (`/api/v1/newsletter/confirm?t=<token>`).
@@ -25,8 +25,6 @@ export async function POST(req: Request) {
   );
   const result = await callAction(confirmNewsletter, { token }, actor);
   if (!result.ok) return page('That link isn’t valid', `<p>${esc(result.error.message)}</p>`, 400);
-  return page(
-    'You’re subscribed',
-    `<p>Thanks! ${esc(result.data.email)} is now on the newsletter.</p>`,
-  );
+  // A person clicking the button lands on the site's own page.
+  return Response.redirect(new URL('/newsletter/confirmed', publicOrigin(req)), 303);
 }

@@ -1,4 +1,4 @@
-import { callAction, listErrors } from '@app/core';
+import { callAction, errorOccurrences, listErrors } from '@app/core';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@app/ui/components/card';
 import { Sparkline } from '@app/ui/components/charts';
 import { PageHeader } from '@app/ui/components/page';
@@ -6,7 +6,6 @@ import { PageHeader } from '@app/ui/components/page';
 import { ActionError } from '@/components/action-error';
 import { FilterLinks } from '@/components/admin/filter-links';
 import { ErrorsTable } from '@/components/admin/errors/errors-table';
-import { countByDay, lastDays } from '@/lib/admin-stats';
 import { requireViewer } from '@/lib/viewer';
 
 export const metadata = { title: 'Errors' };
@@ -18,6 +17,8 @@ const STATUSES = [
 ] as const;
 
 const DAYS = 14;
+/** Only this many rows get their own trend (one small query each). */
+const TREND_ROWS = 25;
 
 export default async function ErrorsPage({
   searchParams,
@@ -32,13 +33,24 @@ export default async function ErrorsPage({
     callAction(listErrors, { status, sinceDays: 90 }, viewer.actor),
     callAction(listErrors, { status: 'all', sinceDays: 90, limit: 200 }, viewer.actor),
   ]);
-  const days = lastDays(DAYS);
-  const perDay = all.ok
-    ? countByDay(
-        all.data.map((g) => g.lastSeen),
-        days,
+  // Each listed bug's own per-day counts (errors.occurrences); the chart above is their sum.
+  const trends = result.ok
+    ? await Promise.all(
+        result.data
+          .slice(0, TREND_ROWS)
+          .map((g) =>
+            callAction(errorOccurrences, { fingerprint: g.fingerprint, days: DAYS }, viewer.actor),
+          ),
       )
     : [];
+  const trendOf = new Map(
+    trends.flatMap((t) =>
+      t.ok ? [[t.data.fingerprint, t.data.days.map((d) => d.count)] as const] : [],
+    ),
+  );
+  const perDay = Array.from({ length: DAYS }, (_, i) =>
+    [...trendOf.values()].reduce((sum, series) => sum + (series[i] ?? 0), 0),
+  );
   const counts = all.ok
     ? {
         open: all.data.filter((g) => g.openCount > 0).length,
@@ -63,18 +75,18 @@ export default async function ErrorsPage({
           count: counts?.[s.value],
         }))}
       />
-      {all.ok && all.data.length > 0 && (
+      {perDay.some(Boolean) && (
         <Card className="mb-4">
           <CardHeader>
-            <CardTitle>Bugs by day</CardTitle>
+            <CardTitle>Errors per day</CardTitle>
             <CardDescription>
-              How many distinct bugs were last seen on each of the last {DAYS} days.
+              How many times the bugs listed below happened on each of the last {DAYS} days.
             </CardDescription>
           </CardHeader>
           <CardContent>
             <Sparkline
               data={perDay}
-              label={`Distinct bugs last seen per day, last ${DAYS} days`}
+              label={`Errors per day, last ${DAYS} days`}
               series={3}
               className="h-12 w-full max-w-md"
             />
@@ -95,6 +107,7 @@ export default async function ErrorsPage({
             count: g.count,
             openCount: g.openCount,
             lastSeen: new Date(g.lastSeen).toISOString(),
+            trend: trendOf.get(g.fingerprint),
           }))}
         />
       )}

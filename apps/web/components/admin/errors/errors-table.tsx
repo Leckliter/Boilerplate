@@ -1,7 +1,9 @@
 'use client';
 
+import { useTableLabels } from '@/lib/ui-labels';
 import { prompt } from '@app/ui/components/alert-dialog';
 import { Button } from '@app/ui/components/button';
+import { Sparkline } from '@app/ui/components/charts';
 import { DataTable, type DataTableColumn } from '@app/ui/components/data-table';
 import { Empty } from '@app/ui/components/empty';
 import { BugIcon, ChecksIcon } from '@app/ui/components/icons';
@@ -24,18 +26,21 @@ export type ErrorRow = {
   count: number;
   openCount: number;
   lastSeen: string;
+  /** Occurrences per day over the last 14 days (errors.occurrences), oldest first. */
+  trend?: number[];
 };
 
 /**
- * The error groups as a table with a bulk "Mark fixed" (one note for all of them). There is no bulk
- * action in core, so it runs `errors.resolve` once per selected group and says how many it closed; each
- * call closes every repeat of that bug. Resolved groups can't be selected again (they have nothing open).
+ * The error groups as a table with a bulk "Mark fixed" (one note for all of them, one `errors.resolveMany`
+ * call: every repeat of each selected bug is closed). Resolved groups have nothing open, so there is
+ * nothing to do for them.
  */
 export function ErrorsTable({ rows, canResolve }: { rows: ErrorRow[]; canResolve: boolean }) {
   const { formatWhen } = useDates();
   const router = useRouter();
   const [busy, setBusy] = useState(false);
 
+  const tableLabels = useTableLabels();
   const columns: DataTableColumn<ErrorRow>[] = [
     {
       id: 'error',
@@ -71,6 +76,24 @@ export function ErrorsTable({ rows, canResolve }: { rows: ErrorRow[]; canResolve
       cell: (r) => <span className="tabular-nums">{r.count}</span>,
     },
     {
+      id: 'trend',
+      header: 'Last 14 days',
+      label: 'Last 14 days',
+      cell: (r) =>
+        r.trend ? (
+          <Sparkline
+            data={r.trend}
+            label={`${r.ref}: times per day, last 14 days`}
+            series={3}
+            width={72}
+            height={20}
+            area={false}
+          />
+        ) : (
+          <span className="text-muted-foreground">—</span>
+        ),
+    },
+    {
       id: 'last',
       header: 'Last seen',
       sortValue: (r) => new Date(r.lastSeen),
@@ -93,16 +116,13 @@ export function ErrorsTable({ rows, canResolve }: { rows: ErrorRow[]; canResolve
     if (!note) return;
     setBusy(true);
     try {
-      let closed = 0;
-      for (const ref of open) {
-        const res = await invokeAction('errors.resolve', { ref, resolution: note });
-        if (!res.ok) {
-          toastActionError(`${ref}: ${res.error.message}`, res.error.ref);
-          break;
-        }
-        closed++;
+      const res = await invokeAction('errors.resolveMany', { refs: open, resolution: note });
+      if (!res.ok) {
+        toastActionError(res.error.message, res.error.ref);
+        return;
       }
-      if (closed) toast.success(`Marked ${closed} ${closed === 1 ? 'error' : 'errors'} fixed.`);
+      const { groups } = res.data as { groups: number };
+      toast.success(`Marked ${groups} ${groups === 1 ? 'error' : 'errors'} fixed.`);
       router.refresh();
     } finally {
       setBusy(false);
@@ -111,6 +131,7 @@ export function ErrorsTable({ rows, canResolve }: { rows: ErrorRow[]; canResolve
 
   return (
     <DataTable
+      labels={tableLabels}
       caption="Errors"
       rows={rows}
       columns={columns}

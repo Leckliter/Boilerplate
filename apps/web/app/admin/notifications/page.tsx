@@ -13,7 +13,7 @@ import {
   TableHeader,
   TableRow,
 } from '@app/ui/components/table';
-import { formatDateTime } from '@app/ui/lib/dates';
+import { getServerDates } from '@/lib/dates-server';
 import Link from 'next/link';
 
 import { ActionError } from '@/components/action-error';
@@ -36,6 +36,7 @@ export default async function AdminNotificationsPage({
 }: {
   searchParams: Promise<{ status?: string; channel?: string }>;
 }) {
+  const { formatDateTime } = await getServerDates();
   const viewer = await requireViewer('notifications.manage', '/admin/notifications');
   const raw = await searchParams;
   const status: Status = STATUSES.find((s) => s === raw.status) ?? 'all';

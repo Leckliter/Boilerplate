@@ -58,6 +58,8 @@ test('New user: a no is explained, a field error is shown on its field, a bug ge
   await dialog.getByRole('button', { name: 'Create user' }).click();
   await expect(dialog.getByText('Error reference', { exact: true })).toBeVisible();
   await expect(dialog.locator('code')).toHaveText(/^E-[0-9A-Z]{8}$/);
+  // The reference is shown once (in its own box), not again inside the sentence above it.
+  await expect(dialog.getByText(/E-[0-9A-Z]{8}/)).toHaveCount(1);
 });
 
 test('New user: the happy path creates a contact', async ({ page }) => {
@@ -98,6 +100,9 @@ test('the record page edits in place and the change shows in Field history', asy
 
 test('roles can be granted and revoked; the last owner is protected', async ({ page }) => {
   await page.goto(userUrl);
+  // Granting a role is a deliberate choice: nothing is preselected (never the most powerful role).
+  await expect(page.getByLabel('Role to grant')).toHaveValue('');
+  await expect(page.getByRole('button', { name: 'Grant role' })).toBeDisabled();
   await page.getByLabel('Role to grant').selectOption('staff');
   await page.getByRole('button', { name: 'Grant role' }).click();
   await expect(page.getByText('Granted staff')).toBeVisible();

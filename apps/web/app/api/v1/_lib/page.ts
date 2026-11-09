@@ -12,3 +12,7 @@ export const page = (title: string, body: string, status = 200) =>
       headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store' },
     },
   );
+
+/** The origin to redirect to: the configured public URL when set, else the one the request came in on. */
+export const publicOrigin = (req: Request) =>
+  process.env.NEXT_PUBLIC_APP_URL || new URL(req.url).origin;

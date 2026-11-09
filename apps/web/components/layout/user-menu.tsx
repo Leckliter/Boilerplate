@@ -1,6 +1,6 @@
 'use client';
 
-import { Avatar } from '@app/ui/components/avatar';
+import { Avatar, initialsOf } from '@app/ui/components/avatar';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -44,7 +44,8 @@ export function UserMenu({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
-        aria-label={tn('myAccount')}
+        // The visible text is the initials, so the name starts with them (WCAG 2.5.3 label in name).
+        aria-label={`${initialsOf(name)} – ${tn('myAccount')}`}
         className="flex items-center rounded-full p-0.5 outline-none hover:bg-tint focus-visible:ring-[1.5px] focus-visible:ring-ring"
       >
         <Avatar name={name} />

@@ -12,7 +12,7 @@ import {
   TableHeader,
   TableRow,
 } from '@app/ui/components/table';
-import { formatDateTime } from '@app/ui/lib/dates';
+import { getServerDates } from '@/lib/dates-server';
 
 import { ActionError } from '@/components/action-error';
 import { FilterLinks } from '@/components/admin/filter-links';
@@ -102,6 +102,7 @@ async function Flags({ viewer }: { viewer: Viewer }) {
 }
 
 async function AllSettings({ viewer }: { viewer: Viewer }) {
+  const { formatDateTime } = await getServerDates();
   const result = await callAction(listSettings, {}, viewer.actor);
   return (
     <Card>

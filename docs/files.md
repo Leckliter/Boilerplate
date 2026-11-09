@@ -17,3 +17,23 @@ files with URLs (private ones: signed, valid an hour); `files.delete` marks it d
   removed after 7 days). Access is a permission, `'self'` (the contact themself or `users.manage`) or `'self-only'`.
   Add yours there and a subject check in `actions/files/subjects.ts`.
 - **Removing it:** delete `files/`, `actions/files`, the `modules.ts` line; its daily `files.abandoned` maintenance step and the job go with it.
+
+## Without a bucket: the local S3 stand-in
+
+`node scripts/dev-s3.mjs` starts a tiny in-memory S3 on `http://localhost:9000` (`S3_STUB_PORT` changes
+the port). It speaks just enough of the S3 protocol for this module: presigned `PUT` from the browser
+(with CORS), `GET` (with `response-content-disposition`, which is how data exports download), `HEAD`,
+`DELETE`. It does not check signatures or expiry and forgets everything when it stops, so it is for
+localhost only. Point the app at it in `.env.local`:
+
+```
+S3_ENDPOINT=http://localhost:9000
+S3_BUCKET=dev
+S3_ACCESS_KEY_ID=dev
+S3_SECRET_ACCESS_KEY=dev
+```
+
+`pnpm e2e` starts the stand-in itself (`playwright.config.ts`, port `E2E_S3_PORT`, default 9000) and
+gives the test server those variables, so the upload, avatar and data-export specs (`e2e/files.spec.ts`)
+run against real browser uploads. In scripts and tests it can also run in process:
+`const s3 = await startDevS3({ port: 0 })` (`s3.url`, `s3.objects`, `s3.close()`).

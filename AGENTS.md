@@ -92,6 +92,7 @@ cases a reviewer would agree with.
 - A hand-written form with its own server action and `useState` error handling → `<ActionForm
 action="area.verb">` (docs/actions.md).
 - `.catch(() => {})` / `catch {}` with no reason → report it, or say in a comment why it's expected.
+- `<Field label error>` with a hand-set `htmlFor` + `id` on its `<Input>` loses the label link in the browser once the field is invalid (axe: "form elements must have labels"). Leave both out; `Field` pairs them.
 - Putting a new action in a big `index.ts` → one file per action or group, re-exported.
 - Forgetting `pnpm actions:docs` → CI fails on stale generated files.
 - Editing a migration that's already on `main` → write a new one.

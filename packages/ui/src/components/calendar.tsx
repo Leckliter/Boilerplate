@@ -263,7 +263,6 @@ function CalendarAgenda({
                     className: cn(
                       'flex min-w-0 items-start gap-3 rounded-lg px-2 py-1.5 transition-colors hover:bg-fill-hover',
                       focusRing,
-                      e.muted && 'opacity-70',
                     ),
                     children: (
                       <>
@@ -274,7 +273,9 @@ function CalendarAgenda({
                         </span>
                         <span className={cn(calendarDotVariants({ color: e.color }), 'mt-1.5')} />
                         <span className="grid min-w-0 flex-1">
-                          <span className="truncate text-sm">
+                          <span
+                            className={cn('truncate text-sm', e.muted && 'text-muted-foreground')}
+                          >
                             {e.title}
                             {e.late && <span className="text-destructive"> · late</span>}
                           </span>

@@ -142,5 +142,45 @@
     "notFoundTitle": "Página no encontrada",
     "notFoundBody": "Esa página no existe o se movió.",
     "home": "Ir a la página de inicio"
+  },
+  "ui": {
+    "theme": {
+      "legend": "Tema",
+      "light": "Claro",
+      "dark": "Oscuro",
+      "system": "Sistema"
+    },
+    "wizard": {
+      "region": "Paso a paso",
+      "back": "Atrás",
+      "next": "Siguiente",
+      "finish": "Finalizar",
+      "stepOf": "Paso {step} de {total}:"
+    },
+    "steps": {
+      "progress": "Progreso",
+      "done": " (hecho)",
+      "next": " (siguiente)",
+      "goBack": "{label} (hecho) — volver"
+    },
+    "notificationList": {
+      "region": "Notificaciones",
+      "unread": "{count} sin leer",
+      "noUnread": "Nada sin leer",
+      "markAllRead": "Marcar todo como leído",
+      "markAsRead": "Marcar como leída",
+      "unreadPrefix": "Sin leer: ",
+      "empty": "Estás al día."
+    },
+    "table": {
+      "sortBy": "Ordenar por",
+      "defaultOrder": "Orden predeterminado",
+      "ascending": "{column} (A–Z, de menor a mayor)",
+      "descending": "{column} (Z–A, de mayor a menor)",
+      "selectAll": "Seleccionar todas las filas de {caption}",
+      "selectRow": "Seleccionar la fila {id}",
+      "loading": "Cargando",
+      "empty": "Aún no hay nada."
+    }
   }
 }

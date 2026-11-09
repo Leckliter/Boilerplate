@@ -57,6 +57,8 @@ See [actions.md](./actions.md) for how the system works.
 | [`errors.list`](#errorslist) | `errors.manage` |  |
 | [`errors.get`](#errorsget) | `errors.manage` |  |
 | [`errors.resolve`](#errorsresolve) | `errors.manage` | yes |
+| [`errors.resolveMany`](#errorsresolveMany) | `errors.manage` | yes |
+| [`errors.occurrences`](#errorsoccurrences) | `errors.manage` |  |
 | [`apiKeys.list`](#apiKeyslist) | `api_keys.manage` |  |
 | [`apiKeys.create`](#apiKeyscreate) | `api_keys.manage` | yes |
 | [`apiKeys.revoke`](#apiKeysrevoke) | `api_keys.manage` | yes |
@@ -71,6 +73,7 @@ See [actions.md](./actions.md) for how the system works.
 | [`system.whoami`](#systemwhoami) | `authenticated` |  |
 | [`system.integrations`](#systemintegrations) | `system.manage` |  |
 | [`system.health`](#systemhealth) | `system.manage` |  |
+| [`system.cronRuns`](#systemcronRuns) | `system.manage` |  |
 | [`jobs.list`](#jobslist) | `system.manage` |  |
 | [`jobs.retry`](#jobsretry) | `system.manage` | yes |
 | [`jobs.cancel`](#jobscancel) | `system.manage` | yes |
@@ -97,6 +100,8 @@ See [actions.md](./actions.md) for how the system works.
 | [`notifications.dismiss`](#notificationsdismiss) | `authenticated` | yes |
 | [`notifications.open`](#notificationsopen) | `authenticated` | yes |
 | [`notifications.preferences`](#notificationspreferences) | `authenticated` |  |
+| [`notifications.preferencesFor`](#notificationspreferencesFor) | `notifications.manage` |  |
+| [`notifications.typeDefaults`](#notificationstypeDefaults) | `notifications.manage` |  |
 | [`notifications.setPreference`](#notificationssetPreference) | `authenticated` | yes |
 | [`notifications.setSmsConsent`](#notificationssetSmsConsent) | `authenticated` | yes |
 | [`notifications.unsubscribe`](#notificationsunsubscribe) | `public` | yes |
@@ -862,7 +867,7 @@ See [actions.md](./actions.md) for how the system works.
 
 ### activity.list
 
-**List activity** — The audit trail, newest first: every change (successful or not), every sign-in/sign-out and password event, every denied attempt, and every API/MCP call including reads — who (person, API key/AI, system), which channel (web, api, mcp, system), from which IP, what, and whether it worked. Filter by subject to see one record’s history, by actor or API key to see what someone (or an AI) did. Page with `before` = the occurredAt of the last row. Use activity.get for one entry’s field-level changes.
+**List activity** — The audit trail, newest first: every change (successful or not), every sign-in/sign-out and password event, every denied attempt, and every API/MCP call including reads — who (person, API key/AI, system), which channel (web, api, mcp, system), from which IP, what, and whether it worked. Filter by subject to see one record’s history, by actor or API key to see what someone (or an AI) did. Narrow to a period with `from` / `to`. Page with `before` = the occurredAt of the last row. Use activity.get for one entry’s field-level changes.
 
 - Who: `activity.read`
 - Changes data: no
@@ -931,6 +936,36 @@ See [actions.md](./actions.md) for how the system works.
     },
     "before": {
       "description": "Only entries older than this (for paging).",
+      "anyOf": [
+        {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+        },
+        {
+          "type": "string",
+          "format": "date",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+        }
+      ]
+    },
+    "from": {
+      "description": "Only entries at or after this moment (inclusive).",
+      "anyOf": [
+        {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+        },
+        {
+          "type": "string",
+          "format": "date",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+        }
+      ]
+    },
+    "to": {
+      "description": "Only entries at or before this moment (inclusive).",
       "anyOf": [
         {
           "type": "string",
@@ -1179,6 +1214,77 @@ See [actions.md](./actions.md) for how the system works.
     "ref",
     "resolution"
   ]
+}
+```
+
+### errors.resolveMany
+
+**Mark several errors fixed** — Mark many bugs fixed at once: for each reference, every open occurrence with the same fingerprint is closed with your note (the same as errors.resolve, in one transaction). References that do not exist are listed in `notFound` and skipped; if none exist it fails. Say what fixed them (commit, PR link).
+
+- Who: `errors.manage`
+- Changes data: yes (written to the activity log)
+- Returns: { resolved: number, groups: number, notFound: string[] }
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "refs": {
+      "minItems": 1,
+      "maxItems": 100,
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 4,
+        "description": "The error reference people see, e.g. \"E-7K3QX9MD\" (or a Next.js error digest)."
+      },
+      "description": "Error references (any occurrence of each bug)."
+    },
+    "resolution": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 2000,
+      "description": "What fixed them, e.g. \"Fixed in a1b2c3d (PR #42)\"."
+    }
+  },
+  "required": [
+    "refs",
+    "resolution"
+  ]
+}
+```
+
+### errors.occurrences
+
+**Error occurrences per day** — How often one bug happened on each of the last N days (days with none are 0, oldest first, days counted in the app time zone): the data for a sparkline. Give the `ref` of any occurrence, or the `fingerprint` of the group from errors.list. Also returns the total in the window.
+
+- Who: `errors.manage`
+- Changes data: no
+- Returns: { fingerprint, days: [{ day, count }], total }
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "ref": {
+      "type": "string",
+      "minLength": 4,
+      "description": "The error reference people see, e.g. \"E-7K3QX9MD\" (or a Next.js error digest)."
+    },
+    "fingerprint": {
+      "description": "From errors.list.",
+      "type": "string",
+      "minLength": 4
+    },
+    "days": {
+      "default": 14,
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 90
+    }
+  }
 }
 ```
 
@@ -1603,6 +1709,34 @@ See [actions.md](./actions.md) for how the system works.
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "type": "object",
   "properties": {}
+}
+```
+
+### system.cronRuns
+
+**Scheduled job history** — The history of the scheduled jobs (crons), newest first: which job, when it started and finished, whether it worked, how long it took, a small summary and the error if it failed. Filter by `job` (see `crons` in system.health for the names). Use it to see whether a cron has been running regularly.
+
+- Who: `system.manage`
+- Changes data: no
+- Returns: [{ id, job, startedAt, finishedAt, ok, durationMs, summary, error }]
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "job": {
+      "description": "Only this job, e.g. \"maintenance\".",
+      "type": "string",
+      "minLength": 1
+    },
+    "limit": {
+      "default": 50,
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 500
+    }
+  }
 }
 ```
 
@@ -3750,6 +3884,55 @@ See [actions.md](./actions.md) for how the system works.
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "type": "object",
   "properties": {}
+}
+```
+
+### notifications.preferencesFor
+
+**Someone’s notification settings** — Read-only: what one person is notified about and through which channels (the same shape as notifications.preferences, as that person sees it), their email and texting status and how many devices get push. Staff use it to see how a user can be reached; the person’s own switches can only be changed by them.
+
+- Who: `notifications.manage`
+- Changes data: no
+- Returns: { types, email, sms, devices, smsConsentText }
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "contactId": {
+      "type": "string",
+      "format": "uuid",
+      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+    }
+  },
+  "required": [
+    "contactId"
+  ]
+}
+```
+
+### notifications.typeDefaults
+
+**Notification types and their defaults** — The catalogue of everything the app can notify about: for each type its key, label, who it is for (customers or staff, and the permission staff need), whether email is required, whether it is urgent or hidden from people’s settings, and which of email / SMS / push are on by default. Defaults apply until a person changes their own settings.
+
+- Who: `notifications.manage`
+- Changes data: no
+- Returns: [{ key, label, description, audience, permission, required, urgent, hidden, defaults: { email, sms, push } }]
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "audience": {
+      "type": "string",
+      "enum": [
+        "customer",
+        "staff"
+      ]
+    }
+  }
 }
 ```
 

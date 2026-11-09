@@ -14,7 +14,7 @@ import {
   TableHeader,
   TableRow,
 } from '@app/ui/components/table';
-import { formatDateTime } from '@app/ui/lib/dates';
+import { getServerDates } from '@/lib/dates-server';
 import Link from 'next/link';
 
 import { ActionError } from '@/components/action-error';
@@ -36,6 +36,7 @@ export default async function RunsPage({
 }: {
   searchParams: Promise<{ status?: string }>;
 }) {
+  const { formatDateTime } = await getServerDates();
   const viewer = await requireViewer('automations.manage', '/admin/automations/runs');
   const raw = (await searchParams).status;
   const status = FILTERS.find((f) => f.value === raw)?.value ?? 'all';

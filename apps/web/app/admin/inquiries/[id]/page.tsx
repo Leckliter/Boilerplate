@@ -3,7 +3,7 @@ import { getInquiry } from '@app/core/inquiries';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@app/ui/components/card';
 import { DetailItem, DetailLink, DetailList } from '@app/ui/components/detail-list';
 import { RecordHeader } from '@app/ui/components/page';
-import { formatDateTime } from '@app/ui/lib/dates';
+import { getServerDates } from '@/lib/dates-server';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
@@ -16,6 +16,7 @@ import { requireViewer } from '@/lib/viewer';
 export const metadata = { title: 'Inquiry' };
 
 export default async function InquiryPage({ params }: { params: Promise<{ id: string }> }) {
+  const { formatDateTime } = await getServerDates();
   const { id } = await params;
   const viewer = await requireViewer('inquiries.manage', `/admin/inquiries/${id}`);
   const result = await callAction(getInquiry, { id }, viewer.actor);

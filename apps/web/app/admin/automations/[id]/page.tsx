@@ -15,7 +15,7 @@ import {
   TableHeader,
   TableRow,
 } from '@app/ui/components/table';
-import { formatDateTime } from '@app/ui/lib/dates';
+import { getServerDates } from '@/lib/dates-server';
 import Link from 'next/link';
 
 import { ActionError } from '@/components/action-error';
@@ -27,6 +27,7 @@ import { requireViewer } from '@/lib/viewer';
 export const metadata = { title: 'Automation' };
 
 export default async function AutomationPage({ params }: { params: Promise<{ id: string }> }) {
+  const { formatDateTime } = await getServerDates();
   const { id } = await params;
   const viewer = await requireViewer('automations.manage', `/admin/automations/${id}`);
   const res = await callAction(getAutomation, { id }, viewer.actor);

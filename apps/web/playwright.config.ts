@@ -19,6 +19,8 @@ const port = Number(process.env.E2E_PORT ?? 3100);
 const external = process.env.E2E_BASE_URL;
 const baseURL = external ?? `http://localhost:${port}`;
 const root = path.resolve(import.meta.dirname, '../..');
+/** The in-process S3 stand-in (scripts/dev-s3.mjs) the file-upload specs talk to. */
+const s3Port = Number(process.env.E2E_S3_PORT ?? 9000);
 
 /**
  * A Chromium to launch. PLAYWRIGHT_CHROMIUM_PATH wins; otherwise Playwright's own download; otherwise any
@@ -69,30 +71,48 @@ export default defineConfig({
   projects: [{ name: 'desktop', use: { ...devices['Desktop Chrome'] } }],
   webServer: external
     ? undefined
-    : {
-        // The database is prepared first (create, migrate and seed: scripts/e2e-db.mjs), then the app starts on it.
-        command: `node ../../scripts/e2e-db.mjs && pnpm exec next dev --port ${port}`,
-        cwd: import.meta.dirname,
-        // Any page that answers means the app is up (the healthcheck is 503 until the scheduled jobs have run).
-        url: `${baseURL}/login`,
-        reuseExistingServer: !process.env.CI,
-        timeout: 180_000,
-        stdout: 'ignore',
-        stderr: 'pipe',
-        env: {
-          ...(process.env as Record<string, string>),
-          DATABASE_URL: databaseUrl(),
-          BACKEND: 'neon',
-          DEV_LOGIN: '1',
-          NODE_ENV: 'development',
-          OWNER_EMAILS: 'owner@example.com',
-          NEXT_DIST_DIR: '.next-e2e',
-          NEXT_TELEMETRY_DISABLED: '1',
-          // Throw-away sends only: nothing leaves the machine.
-          RESEND_API_KEY: '',
-          QUO_API_KEY: '',
-          NEXT_PUBLIC_APP_URL: baseURL,
-          E2E_ROOT: root,
+    : [
+        {
+          // A tiny S3 for uploads, avatars and data exports (docs/files.md → "Without a bucket").
+          command: 'node ../../scripts/dev-s3.mjs',
+          cwd: import.meta.dirname,
+          url: `http://localhost:${s3Port}/__health`,
+          reuseExistingServer: !process.env.CI,
+          timeout: 30_000,
+          env: { ...(process.env as Record<string, string>), S3_STUB_PORT: String(s3Port) },
         },
-      },
+        {
+          // The database is prepared first (create, migrate and seed: scripts/e2e-db.mjs), then the app starts on it.
+          command: `node ../../scripts/e2e-db.mjs && pnpm exec next dev --port ${port}`,
+          cwd: import.meta.dirname,
+          // Any page that answers means the app is up (the healthcheck is 503 until the scheduled jobs have run).
+          url: `${baseURL}/login`,
+          reuseExistingServer: !process.env.CI,
+          timeout: 180_000,
+          stdout: 'ignore',
+          stderr: 'pipe',
+          env: {
+            ...(process.env as Record<string, string>),
+            DATABASE_URL: databaseUrl(),
+            BACKEND: 'neon',
+            DEV_LOGIN: '1',
+            NODE_ENV: 'development',
+            OWNER_EMAILS: 'owner@example.com',
+            NEXT_DIST_DIR: '.next-e2e',
+            NEXT_TELEMETRY_DISABLED: '1',
+            // Throw-away sends only: nothing leaves the machine.
+            RESEND_API_KEY: '',
+            QUO_API_KEY: '',
+            // File storage: the local S3 stand-in above.
+            S3_ENDPOINT: `http://localhost:${s3Port}`,
+            S3_BUCKET: 'e2e',
+            S3_ACCESS_KEY_ID: 'e2e',
+            S3_SECRET_ACCESS_KEY: 'e2e',
+            S3_REGION: 'us-east-1',
+            S3_FORCE_PATH_STYLE: 'true',
+            NEXT_PUBLIC_APP_URL: baseURL,
+            E2E_ROOT: root,
+          },
+        },
+      ],
 });
