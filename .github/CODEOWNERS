@@ -1,0 +1,11 @@
+# Who is asked to review what. Replace @your-github-username (or a team, e.g. @acme/maintainers).
+# The last matching pattern wins.
+
+*                                   @your-github-username
+
+# Changes to these deserve a second look: who may do what, the database, the rules themselves.
+/packages/core/src/access/          @your-github-username
+/packages/db/migrations/            @your-github-username
+/scripts/check-rules.mjs            @your-github-username
+/.github/                           @your-github-username
+/AGENTS.md                          @your-github-username

@@ -111,6 +111,15 @@ export const serverEnvSchema = z.object({
   QUO_API_BASE: str(),
   APP_NAME: str(),
   AUTOMATIONS_WEBHOOK_SECRET: str(),
+  // webhooks (provider → us): Resend signs with Svix (`whsec_…`); Quo with a base64 signing key
+  RESEND_WEBHOOK_SECRET: str(),
+  QUO_WEBHOOK_SECRET: str(),
+  // web push (VAPID): `npx web-push generate-vapid-keys`; the subject is a mailto: or https: URL
+  VAPID_PUBLIC_KEY: str(),
+  VAPID_PRIVATE_KEY: str(),
+  VAPID_SUBJECT: str(),
+  // logging: debug | info | warn | error (default info)
+  LOG_LEVEL: str(),
   // abuse protection
   TURNSTILE_SECRET_KEY: str(),
   NEXT_PUBLIC_TURNSTILE_SITE_KEY: str(),
@@ -123,7 +132,7 @@ export const serverEnvSchema = z.object({
 export type ServerEnvKey = keyof z.output<typeof serverEnvSchema>;
 
 export type IntegrationId =
-  'database' | 'auth' | 'site-url' | 'storage' | 'email' | 'sms' | 'cron' | 'human-check';
+  'database' | 'auth' | 'site-url' | 'storage' | 'email' | 'sms' | 'push' | 'cron' | 'human-check';
 
 export type IntegrationStatus = {
   id: IntegrationId;
@@ -193,6 +202,13 @@ const INTEGRATIONS: IntegrationDef[] = [
     description: 'SMS notifications (only to people who gave consent).',
     core: false,
     anyOf: [['QUO_API_KEY', 'QUO_FROM_NUMBER']],
+  },
+  {
+    id: 'push',
+    label: 'Push notifications (Web Push)',
+    description: 'Browser and installed-app notifications (VAPID keys).',
+    core: false,
+    anyOf: [['VAPID_PUBLIC_KEY', 'VAPID_PRIVATE_KEY', 'VAPID_SUBJECT']],
   },
   {
     id: 'cron',

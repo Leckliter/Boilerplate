@@ -55,9 +55,28 @@ catches writes made outside the app (SQL editor, seed, a script); those show as 
   Only logs and queues may skip it, listed with reasons in `scripts/check-rules.mjs`.
 - **New sign-in method:** record it with `recordAuthEvent`, only after confirming it server-side.
 
+## Server log lines (`logger`)
+
+Besides the audit trail, servers write **structured log lines**: `logger({ source, requestId })` from `@app/core`
+prints one JSON object per line (`time`, `level`, `message`, `requestId`, your fields; secrets redacted with the same
+rules as the activity log; an `Error` becomes `{ name, message, stack }`). `LOG_LEVEL` = `debug | info | warn |
+error | silent` (default `info`). The cron routes, the webhook routes and the MCP route use it, with the request id
+(`x-vercel-id`), so one request's lines line up with its activity rows and error reports. It is for tracing: anything
+**unexpected** still goes to `reportError` ([errors.md](errors.md)); a log line is not an error inbox.
+
+```ts
+const log = logger({ source: 'webhook.resend', requestId });
+log.info('handled', { type, eventId });
+log.error('crashed', { ref, err });
+```
+
 ## Retention
 
-No action edits or deletes the log. The daily maintenance job (`/api/cron/maintenance`, needs
+No action edits or deletes the log, with one exception: when a deletion request is carried out
+(`account.processDeletions`) the personal fields of the person's contact are scrubbed from the change history
+(`before` / `after`) and from the inputs of activity rows about them; who did what and when stays. Exporting the
+log or contacts (`activity.exportCsv`, `contacts.exportCsv`) is itself logged. The daily maintenance job (`/api/cron/maintenance`, needs
 `CRON_SECRET`) deletes only API/AI reads older than 365 days and rate-limit counters older than a
 day. Changes, failed changes, denied attempts, sign-ins and the whole change log are kept forever.
-Scheduled-job runs are recorded in `app.cron_runs`.
+Scheduled-job runs are recorded in `app.cron_runs`. Modules add their own daily steps with
+`registerMaintenanceStep(name, fn)` (e.g. `account.deletions`); `runMaintenance()` returns what each did under `steps`.

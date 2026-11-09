@@ -18,12 +18,22 @@
         "EMAIL_FROM",
         "APP_NAME",
         "APP_TIME_ZONE",
-        "NOTIFICATIONS_SECRET"
+        "NOTIFICATIONS_SECRET",
+        "VAPID_*",
+        "LOG_LEVEL"
       ]
     },
-    "dev": { "cache": false, "persistent": true },
-    "typecheck": { "dependsOn": ["^typecheck"] },
+    "dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "typecheck": {
+      "dependsOn": ["^typecheck"]
+    },
     "lint": {},
-    "test": { "cache": false, "env": ["DATABASE_URL"] }
+    "test": {
+      "cache": false,
+      "env": ["DATABASE_URL"]
+    }
   }
 }

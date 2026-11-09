@@ -3,6 +3,7 @@
 import { confirm } from '@app/ui/components/alert-dialog';
 import { Button, type ButtonProps } from '@app/ui/components/button';
 import { TrashIcon } from '@app/ui/components/icons';
+import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import type { ReactNode } from 'react';
 
@@ -20,11 +21,11 @@ import { useCloseDialog } from './form-dialog';
 export function DeleteForm({
   action,
   input,
-  title = 'Are you sure?',
+  title,
   description,
-  confirmLabel = 'Delete',
-  label = 'Delete',
-  success = 'Deleted',
+  confirmLabel,
+  label,
+  success,
   redirectTo,
   inDialog = false,
   variant = 'destructive',
@@ -45,6 +46,7 @@ export function DeleteForm({
   size?: ButtonProps['size'];
   icon?: ReactNode;
 }) {
+  const t = useTranslations('forms');
   const { run, pending } = useAction();
   const router = useRouter();
   const closeDialog = useCloseDialog();
@@ -57,14 +59,24 @@ export function DeleteForm({
         icon={icon}
         loading={pending}
         onClick={async () => {
-          if (!(await confirm({ title, description, confirmLabel }))) return;
-          const res = await run(action, input, { success, refresh: !redirectTo });
+          if (
+            !(await confirm({
+              title: title ?? t('areYouSure'),
+              description,
+              confirmLabel: confirmLabel ?? t('delete'),
+            }))
+          )
+            return;
+          const res = await run(action, input, {
+            success: success ?? t('deleted'),
+            refresh: !redirectTo,
+          });
           if (!res.ok) return;
           closeDialog?.();
           if (redirectTo) router.push(redirectTo);
         }}
       >
-        {label}
+        {label ?? t('delete')}
       </Button>
     </div>
   );

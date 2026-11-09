@@ -7,7 +7,17 @@
  * email is the first entry of OWNER_EMAILS (or owner@example.com); sign in with that email
  * and your login is linked to this contact (resolveSignedInContact).
  */
-import { and, contactRoles, contacts, contactTags, createDb, eq, tags } from '../src';
+import {
+  and,
+  contactRoles,
+  contacts,
+  contactTags,
+  createDb,
+  eq,
+  inquiries,
+  settings,
+  tags,
+} from '../src';
 
 const url = process.env.DATABASE_URL_DIRECT ?? process.env.DATABASE_URL;
 if (!url) {
@@ -96,6 +106,30 @@ try {
         .from(contactTags)
         .where(and(eq(contactTags.contactId, contact.id), eq(contactTags.tagId, tagId)));
       if (!has) await db.insert(contactTags).values({ contactId: contact.id, tagId });
+    }
+  }
+  // Sample feature flags (packages/core/src/flags.ts lists the flags the code knows about).
+  const FLAGS = {
+    'flags.beta-dashboard': { enabled: true, percent: 50, roles: ['owner', 'admin'] },
+    'flags.new-checkout': { enabled: false },
+    'flags.holiday-banner': { enabled: true },
+  };
+  for (const [key, value] of Object.entries(FLAGS)) {
+    await db.insert(settings).values({ key, value }).onConflictDoNothing();
+  }
+  // One sample inquiry, from the seeded lead.
+  const [lee] = await db.select().from(contacts).where(eq(contacts.email, 'lee@example.com'));
+  if (lee) {
+    const [has] = await db.select().from(inquiries).where(eq(inquiries.contactId, lee.id));
+    if (!has) {
+      await db.insert(inquiries).values({
+        contactId: lee.id,
+        name: 'Lee Lead',
+        email: 'lee@example.com',
+        subject: 'Do you do weekend appointments?',
+        message: 'Hi! Do you take weekend appointments, and how far ahead should I book?',
+        source: 'seed',
+      });
     }
   }
   console.log(`Seeded ${created} new contact(s). Owner: ${ownerEmail}`);

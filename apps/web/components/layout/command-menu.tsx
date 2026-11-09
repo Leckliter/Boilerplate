@@ -12,8 +12,8 @@ import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { createContext, type ReactNode, useCallback, useContext, useMemo, useState } from 'react';
 
-import type { AppDef, NavGroup } from '@/lib/nav';
-import { ADMIN_RECORD_SOURCES, useRecordSearch } from '@/lib/use-record-search';
+import type { AppDef, CreateCommand, NavGroup } from '@/lib/nav';
+import { type SearchGroupType, useGlobalSearch } from '@/lib/use-record-search';
 
 type Ctx = { open: () => void };
 const CommandMenuContext = createContext<Ctx | null>(null);
@@ -24,22 +24,27 @@ export function useCommandMenu() {
 }
 
 /**
- * ⌘K: jump to any page in the nav, switch app, and (in admin) find records. Mounted once by the shell. Pages
- * come from lib/nav.ts, records from `ADMIN_RECORD_SOURCES` in lib/use-record-search.ts.
+ * ⌘K: jump to any page in the nav, switch app, start something ("New user" …) and find records, docs and
+ * errors. Mounted once by the shell. Pages and create commands come from lib/nav.ts; results come from the
+ * `search.query` action (it only returns what the person may see; see lib/use-record-search.ts).
  */
 export function CommandMenuProvider({
   groups,
   apps,
-  searchRecords,
+  createCommands = [],
+  searchRecords = true,
   children,
 }: {
   groups: NavGroup[];
   apps: AppDef[];
-  /** Search records too (admin viewers). */
-  searchRecords: boolean;
+  /** "Create …" commands this person may use (already permission-filtered and translated). */
+  createCommands?: CreateCommand[];
+  /** Search records, docs and errors too (every signed-in person; the action filters). */
+  searchRecords?: boolean;
   children: ReactNode;
 }) {
   const t = useTranslations('shell');
+  const tp = useTranslations('palette');
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
@@ -71,9 +76,33 @@ export function CommandMenuProvider({
       })),
     [apps, t],
   );
-  const records = useRecordSearch(query, ADMIN_RECORD_SOURCES, searchRecords && open);
+  const creates = useMemo<CommandItem[]>(
+    () =>
+      createCommands.map((c) => ({
+        id: c.href,
+        label: c.label,
+        hint: tp('create'),
+        icon: <c.icon />,
+        keywords: ['new', 'add', 'create'],
+      })),
+    [createCommands, tp],
+  );
+  const groupLabels = useMemo<Record<SearchGroupType, string>>(
+    () => ({
+      contact: tp('groups.contact'),
+      tag: tp('groups.tag'),
+      inquiry: tp('groups.inquiry'),
+      automation: tp('groups.automation'),
+      error: tp('groups.error'),
+      activity: tp('groups.activity'),
+      doc: tp('groups.doc'),
+    }),
+    [tp],
+  );
+  const records = useGlobalSearch(query, searchRecords && open, groupLabels);
 
   const palette: CommandGroup[] = [
+    { label: tp('create'), items: filterCommands(creates, query) },
     { label: t('pages'), items: filterCommands(pages, query) },
     { label: t('apps'), items: filterCommands(switchApps, query) },
     ...records.groups,
@@ -93,6 +122,7 @@ export function CommandMenuProvider({
         groups={palette}
         loading={records.loading}
         placeholder={t('search')}
+        emptyText={tp('empty')}
         onSelect={(item) => {
           setOpen(false);
           setQuery('');

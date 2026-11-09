@@ -1,5 +1,6 @@
 {
   "name": "app",
+  "version": "0.1.0",
   "private": true,
   "packageManager": "pnpm@10.28.0",
   "engines": {
@@ -9,11 +10,11 @@
     "dev": "turbo dev --filter=web",
     "build": "turbo build",
     "typecheck": "turbo typecheck",
-    "lint": "turbo lint",
+    "lint": "turbo lint && pnpm lint:root",
     "format": "prettier --check .",
     "format:fix": "prettier --write .",
     "rules": "node scripts/check-rules.mjs",
-    "check": "pnpm typecheck && pnpm lint && pnpm rules && pnpm format && pnpm actions:docs --check && pnpm docs:build --check && pnpm test && pnpm actions:tests",
+    "check": "pnpm typecheck && pnpm lint && pnpm rules && pnpm knip && pnpm format && pnpm actions:docs --check && pnpm docs:build --check && pnpm test && pnpm actions:tests",
     "db:generate": "pnpm --filter @app/db generate",
     "db:migrate": "pnpm --filter @app/db migrate",
     "db:seed": "pnpm --filter @app/db seed",
@@ -21,9 +22,18 @@
     "docs:build": "pnpm --filter @app/core docs:build --",
     "actions:docs": "pnpm --filter @app/core actions:docs --",
     "actions:tests": "pnpm --filter @app/core actions:tests --",
-    "test": "turbo test"
+    "test": "turbo test",
+    "lint:root": "oxlint -c .oxlintrc.json scripts .claude",
+    "knip": "knip",
+    "e2e": "pnpm --filter web e2e",
+    "e2e:test-site": "pnpm --filter web e2e:test-site",
+    "new-project": "node scripts/new-project.mjs",
+    "version:set": "npm version --no-git-tag-version",
+    "test:scripts": "node --test --test-timeout=900000 scripts/"
   },
   "devDependencies": {
+    "knip": "^6.44.2",
+    "oxlint": "^1.92.0",
     "prettier": "^3.9.10",
     "prettier-plugin-tailwindcss": "^0.8.1",
     "turbo": "^2.11.10",

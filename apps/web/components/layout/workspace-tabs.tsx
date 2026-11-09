@@ -2,6 +2,7 @@
 
 import { cn } from '@app/ui/lib/utils';
 import { PlusIcon, XIcon } from '@app/ui/components/icons';
+import { useTranslations } from 'next-intl';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import {
   createContext,
@@ -345,13 +346,14 @@ export function useRemembered<T>(key: string, initial: T): [T, (value: T) => voi
 
 /** The strip. Rendered in the shell under the header, desktop only. */
 export function WorkspaceTabsStrip() {
+  const t = useTranslations('shell');
   const ctx = useWorkspaceTabs();
   if (!ctx) return null;
   const { tabs, activeId, activate, close, open } = ctx;
   return (
     <div
       role="tablist"
-      aria-label="Open pages"
+      aria-label={t('openPages')}
       className="flex min-w-0 items-end gap-1 overflow-x-auto px-3 pt-1.5"
     >
       {tabs.map((tab) => {
@@ -385,7 +387,7 @@ export function WorkspaceTabsStrip() {
             {tabs.length > 1 && (
               <button
                 type="button"
-                aria-label={`Close ${ctx.titleFor(tab)}`}
+                aria-label={t('closeTab', { title: ctx.titleFor(tab) })}
                 onClick={() => close(tab.id)}
                 className="flex size-5 shrink-0 items-center justify-center rounded text-muted-foreground opacity-0 transition-opacity outline-none group-hover/tab:opacity-100 hover:bg-fill focus-visible:opacity-100"
               >
@@ -397,7 +399,7 @@ export function WorkspaceTabsStrip() {
       })}
       <button
         type="button"
-        aria-label="New tab"
+        aria-label={t('newTab')}
         onClick={() => open(`/admin`)}
         className="mb-0.5 flex size-7 shrink-0 items-center justify-center rounded-lg text-muted-foreground transition-colors outline-none hover:bg-tint hover:text-foreground focus-visible:ring-[1.5px] focus-visible:ring-ring"
       >

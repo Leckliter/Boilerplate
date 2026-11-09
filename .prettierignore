@@ -8,3 +8,4 @@ packages/core/src/docs/docs.generated.ts
 packages/core/src/docs/docs-es.generated.ts
 packages/core/src/docs/docs-es-slugs.generated.ts
 packages/core/src/legal/legal.generated.ts
+.next-e2e

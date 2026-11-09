@@ -1,0 +1,31 @@
+{
+  "name": "app",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "app",
+  "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+  "forwardPorts": [3000, 5432],
+  "portsAttributes": { "3000": { "label": "web" }, "5432": { "label": "postgres" } },
+  "containerEnv": {
+    "DATABASE_URL": "postgres://postgres:postgres@db:5432/app",
+    "BACKEND": "neon",
+    "DEV_LOGIN": "1",
+    "OWNER_EMAILS": "owner@example.com"
+  },
+  "postCreateCommand": "corepack enable && pnpm install && pnpm db:migrate && pnpm db:seed && npx playwright install --with-deps chromium",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "esbenp.prettier-vscode",
+        "oxc.oxc-vscode",
+        "bradlc.vscode-tailwindcss",
+        "ms-playwright.playwright",
+        "anthropic.claude-code"
+      ],
+      "settings": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.formatOnSave": true,
+        "typescript.tsdk": "node_modules/typescript/lib"
+      }
+    }
+  }
+}

@@ -3,6 +3,10 @@
  * The server runs in UTC, so a plain toLocaleDateString() shows evening events as the
  * next day; always format through this file. Store UTC, display in the app zone.
  *
+ * Client components: mount `<TimeZoneProvider zone>` (ui-context) so the browser shows the same
+ * zone as the server, and read it with `useAppTimeZone()` / `useDates()`; every formatter also
+ * takes an optional trailing `zone` argument.
+ *
  * Change the zone once at startup with `setAppTimeZone('Europe/Berlin')` (e.g. from
  * `APP_TIME_ZONE`), or edit DEFAULT_TIME_ZONE. Formatters are rebuilt on change.
  */
@@ -22,48 +26,64 @@ export function setAppTimeZone(zone: string): void {
 
 // Formatters read TZ at call time (a cheap cache keyed by zone + shape).
 const cache = new Map<string, Intl.DateTimeFormat>();
-function fmt(locale: string, opts: Intl.DateTimeFormatOptions): Intl.DateTimeFormat {
-  const key = `${locale}|${TZ}|${JSON.stringify(opts)}`;
+function fmt(
+  locale: string,
+  opts: Intl.DateTimeFormatOptions,
+  zone: string = TZ,
+): Intl.DateTimeFormat {
+  const key = `${locale}|${zone}|${JSON.stringify(opts)}`;
   let f = cache.get(key);
   if (!f) {
-    f = new Intl.DateTimeFormat(locale, { timeZone: TZ, ...opts });
+    f = new Intl.DateTimeFormat(locale, { timeZone: zone, ...opts });
     cache.set(key, f);
   }
   return f;
 }
 
-const dateFmt = () =>
-  fmt('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  });
-const dateTimeFmt = () =>
-  fmt('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit',
-  });
-const isoDayFmt = () =>
-  fmt('en-CA', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  });
+const dateFmt = (zone?: string) =>
+  fmt(
+    'en-US',
+    {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    },
+    zone,
+  );
+const dateTimeFmt = (zone?: string) =>
+  fmt(
+    'en-US',
+    {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+    },
+    zone,
+  );
+const isoDayFmt = (zone?: string) =>
+  fmt(
+    'en-CA',
+    {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    },
+    zone,
+  );
 
 type DateInput = Date | string | number;
 const toDate = (d: DateInput) => (d instanceof Date ? d : new Date(d));
 
 /** "Nov 3, 2026" */
-export function formatDate(d: DateInput): string {
-  return dateFmt().format(toDate(d));
+export function formatDate(d: DateInput, zone?: string): string {
+  return dateFmt(zone).format(toDate(d));
 }
 
 /** "Nov 3, 2026, 4:05 PM" */
-export function formatDateTime(d: DateInput): string {
-  return dateTimeFmt().format(toDate(d));
+export function formatDateTime(d: DateInput, zone?: string): string {
+  return dateTimeFmt(zone).format(toDate(d));
 }
 
 /**
@@ -76,32 +96,36 @@ export function formatDay(day: string): string {
 }
 
 /** Today in the app time zone as "YYYY-MM-DD" (for <input type="date" min>). */
-export function todayInAppZone(now: Date = new Date()): string {
-  return isoDayFmt().format(now);
+export function todayInAppZone(now: Date = new Date(), zone?: string): string {
+  return isoDayFmt(zone).format(now);
 }
 
 /** "Nov 3, 2026, 4:05 PM", or "—" when there's no date (tables, timelines). */
-export function formatWhen(d: DateInput | null | undefined): string {
-  return d ? formatDateTime(d) : '—';
+export function formatWhen(d: DateInput | null | undefined, zone?: string): string {
+  return d ? formatDateTime(d, zone) : '—';
 }
 
 /**
  * The moment a wall-clock time in the app zone happens, e.g. 9:00 on "2026-11-14"
  * → 15:00Z in winter (CST) or 14:00Z in summer (CDT) for America/Chicago.
  */
-export function zonedTimeToDate(day: string, hour = 0, minute = 0): Date {
+export function zonedTimeToDate(day: string, hour = 0, minute = 0, zone?: string): Date {
   const [y, m, d] = day.slice(0, 10).split('-').map(Number);
   const wanted = Date.UTC(y!, m! - 1, d!, hour, minute);
   // Read what the app zone's clock says at `wanted` (as if it were UTC) and shift by the gap.
   const parts: Record<string, number> = Object.fromEntries(
-    fmt('en-US', {
-      hourCycle: 'h23',
-      year: 'numeric',
-      month: 'numeric',
-      day: 'numeric',
-      hour: 'numeric',
-      minute: 'numeric',
-    })
+    fmt(
+      'en-US',
+      {
+        hourCycle: 'h23',
+        year: 'numeric',
+        month: 'numeric',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: 'numeric',
+      },
+      zone,
+    )
       .formatToParts(new Date(wanted))
       .map((p) => [p.type, Number(p.value)]),
   );
@@ -137,46 +161,58 @@ export function monthGridDays(day: string): string[] {
   return Array.from({ length: 42 }, (_, i) => addDaysToDay(start, i));
 }
 
-const minutesFmt = () =>
-  fmt('en-US', {
-    hourCycle: 'h23',
-    hour: 'numeric',
-    minute: 'numeric',
-  });
+const minutesFmt = (zone?: string) =>
+  fmt(
+    'en-US',
+    {
+      hourCycle: 'h23',
+      hour: 'numeric',
+      minute: 'numeric',
+    },
+    zone,
+  );
 
 /** Minutes after midnight on the app zone's clock (9:30 AM → 570). */
-export function minutesInAppZone(d: DateInput): number {
+export function minutesInAppZone(d: DateInput, zone?: string): number {
   const parts = Object.fromEntries(
-    minutesFmt()
+    minutesFmt(zone)
       .formatToParts(toDate(d))
       .map((p) => [p.type, Number(p.value)]),
   );
   return (parts.hour ?? 0) * 60 + (parts.minute ?? 0);
 }
 
-const timeFmt = () =>
-  fmt('en-US', {
-    hour: 'numeric',
-    minute: '2-digit',
-  });
-const shortTimeFmt = () =>
-  fmt('en-US', {
-    hour: 'numeric',
-  });
+const timeFmt = (zone?: string) =>
+  fmt(
+    'en-US',
+    {
+      hour: 'numeric',
+      minute: '2-digit',
+    },
+    zone,
+  );
+const shortTimeFmt = (zone?: string) =>
+  fmt(
+    'en-US',
+    {
+      hour: 'numeric',
+    },
+    zone,
+  );
 
 /** "9:00 AM" */
-export function formatTime(d: DateInput): string {
-  return timeFmt().format(toDate(d));
+export function formatTime(d: DateInput, zone?: string): string {
+  return timeFmt(zone).format(toDate(d));
 }
 
 /** "9a", "2:30p" — for tight calendar cells. */
-export function formatShortTime(d: DateInput): string {
+export function formatShortTime(d: DateInput, zone?: string): string {
   const date = toDate(d);
-  const mins = minutesInAppZone(date) % 60;
-  const hour = shortTimeFmt()
+  const mins = minutesInAppZone(date, zone) % 60;
+  const hour = shortTimeFmt(zone)
     .format(date)
     .replace(/\s?(AM|PM)/, '');
-  const ap = /PM/.test(shortTimeFmt().format(date)) ? 'p' : 'a';
+  const ap = /PM/.test(shortTimeFmt(zone).format(date)) ? 'p' : 'a';
   return `${hour}${mins ? `:${String(mins).padStart(2, '0')}` : ''}${ap}`;
 }
 
@@ -213,8 +249,8 @@ export function formatDayFull(day: string): string {
 }
 
 /** "November 4, 2026" for a moment, as the app-zone day it falls on. */
-export function formatDateLong(d: DateInput): string {
-  return formatDayFull(todayInAppZone(toDate(d)));
+export function formatDateLong(d: DateInput, zone?: string): string {
+  return formatDayFull(todayInAppZone(toDate(d), zone));
 }
 
 /** "Tuesday, November 4" (a day string, for a page title). */
@@ -228,16 +264,20 @@ export function formatDayTitle(day: string): string {
   }).format(new Date(Date.UTC(y!, m! - 1, d!, 12)));
 }
 
-const weekdayTimeFmt = () =>
-  fmt('en-US', {
-    weekday: 'short',
-    month: 'short',
-    day: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit',
-  });
+const weekdayTimeFmt = (zone?: string) =>
+  fmt(
+    'en-US',
+    {
+      weekday: 'short',
+      month: 'short',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+    },
+    zone,
+  );
 
 /** "Tue, Nov 4, 9:00 AM" (a moment, with its weekday: due times, bookings). */
-export function formatWeekdayTime(d: DateInput): string {
-  return weekdayTimeFmt().format(toDate(d));
+export function formatWeekdayTime(d: DateInput, zone?: string): string {
+  return weekdayTimeFmt(zone).format(toDate(d));
 }

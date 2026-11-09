@@ -16,7 +16,7 @@ const DOCUMENTS = [...PHONE_PHOTOS, 'application/pdf'] as const;
 
 const MB = 1024 * 1024;
 
-type Access = Permission | 'self';
+type Access = Permission | 'self' | 'self-only';
 
 export type FilePurpose = {
   label: string;
@@ -26,6 +26,8 @@ export type FilePurpose = {
   contentTypes: readonly string[];
   maxBytes: number;
   access: { read: Access; write: Access };
+  /** Created only by the system (e.g. a data export): files.requestUpload refuses it. */
+  systemOnly?: boolean;
 };
 
 export const FILE_PURPOSES = {
@@ -44,6 +46,16 @@ export const FILE_PURPOSES = {
     contentTypes: DOCUMENTS,
     maxBytes: 25 * MB,
     access: { read: 'users.read', write: 'users.manage' },
+  },
+  data_export: {
+    label: 'Data export',
+    subject: 'contact',
+    visibility: 'private',
+    contentTypes: ['application/json'],
+    maxBytes: 50 * MB,
+    // Only the person themself — not even staff — may see or delete it; nobody uploads one.
+    access: { read: 'self-only', write: 'self-only' },
+    systemOnly: true,
   },
 } as const satisfies Record<string, FilePurpose>;
 

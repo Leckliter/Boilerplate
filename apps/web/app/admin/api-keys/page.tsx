@@ -47,6 +47,7 @@ export default async function ApiKeysPage() {
             icon={<KeyIcon />}
             title="No API keys yet"
             description="Create one to connect a script or an AI assistant."
+            contents={<CreateApiKey />}
           />
         ) : (
           <Table>

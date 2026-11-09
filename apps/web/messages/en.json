@@ -5,11 +5,17 @@
     "signIn": "Sign in",
     "signOut": "Sign out",
     "tryAgain": "Try again",
-    "back": "Back"
+    "back": "Back",
+    "close": "Close",
+    "delete": "Delete",
+    "edit": "Edit",
+    "done": "Done",
+    "loading": "Loading…"
   },
   "nav": {
     "dashboard": "Dashboard",
     "users": "Users",
+    "inquiries": "Inquiries",
     "roles": "Roles & permissions",
     "activity": "Activity",
     "errors": "Errors",
@@ -24,6 +30,7 @@
     "profile": "Profile",
     "security": "Security",
     "preferences": "Preferences",
+    "privacy": "Privacy & data",
     "people": "People",
     "build": "Build",
     "monitor": "Monitor",
@@ -52,7 +59,59 @@
     "options": "Options",
     "pageOptions": "Page options",
     "pages": "Pages",
-    "records": "Records"
+    "records": "Records",
+    "quickNavigation": "Quick navigation",
+    "openPages": "Open pages",
+    "newTab": "New tab",
+    "closeTab": "Close {title}",
+    "details": "Details"
+  },
+  "bell": {
+    "label": "Notifications",
+    "labelUnread": "Notifications, {count} unread",
+    "title": "Notifications",
+    "viewAll": "See all",
+    "empty": "You are all caught up.",
+    "error": "Couldn’t load your notifications."
+  },
+  "palette": {
+    "create": "Create",
+    "empty": "Nothing matches.",
+    "groups": {
+      "contact": "Users",
+      "tag": "Tags",
+      "inquiry": "Inquiries",
+      "automation": "Automations",
+      "error": "Errors",
+      "activity": "Activity",
+      "doc": "Docs"
+    },
+    "commands": {
+      "newUser": "New user",
+      "newAutomation": "New automation",
+      "newApiKey": "New API key"
+    }
+  },
+  "forms": {
+    "checkFields": "Check the highlighted fields.",
+    "staleDeploy": "A new version of the app is available. Reload to continue.",
+    "areYouSure": "Are you sure?",
+    "delete": "Delete",
+    "deleted": "Deleted"
+  },
+  "prefs": {
+    "appearance": "Appearance",
+    "appearanceHint": "Light, dark, or follow your device.",
+    "theme": "Theme",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System",
+    "language": "Language",
+    "languageHint": "The language of menus and messages. Page content may stay in English.",
+    "timeZone": "Time zone",
+    "timeZoneHint": "Dates and times in the app are shown in this zone.",
+    "timeZoneDefault": "Business default ({zone})",
+    "saved": "Saved in this browser."
   },
   "auth": {
     "signInTitle": "Sign in or create an account",
@@ -68,11 +127,13 @@
     "codeSent": "Code sent.",
     "verifyTitle": "Verify your email",
     "verifyBody": "Your email address isn’t verified yet, so we can’t open your account. Use the code or link we sent you, or sign in again.",
+    "signedInAs": "Signed in as {email}",
     "disabledTitle": "This account is turned off",
     "disabledBody": "Contact us if you think that is a mistake.",
     "notConfigured": "Sign-in isn’t set up on this site yet. Choose a backend and set its variables (docs/choosing-a-backend.md).",
     "devNotice": "Development sign-in is on: any email works, the code is 000000.",
-    "linkFailed": "That sign-in link is invalid or has expired. Request a new code."
+    "linkFailed": "That sign-in link is invalid or has expired. Request a new code.",
+    "terms": "By continuing you agree to the <terms>terms</terms> and the <privacy>privacy policy</privacy>."
   },
   "errors": {
     "title": "Something went wrong",

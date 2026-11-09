@@ -182,3 +182,60 @@ export const openNotification = defineAction({
     return { url: n.content.url ?? null };
   },
 });
+
+export const recentNotifications = defineAction({
+  name: 'notifications.recent',
+  title: 'Recent notifications (the bell)',
+  description:
+    'The latest few items of the signed-in person’s inbox for the notification bell, newest first, each with the ' +
+    '`href` to open, plus the unread count. Lighter than notifications.list (no paging, no views). ' +
+    'Dismissed items are left out.',
+  audience: 'authenticated',
+  mutates: false,
+  returns:
+    '{ items: [{ id, type, title, body, href, action, urgent, createdAt, readAt }], unread, attention }',
+  input: z.object({ limit: z.number().int().min(1).max(20).default(8) }),
+  async run({ input, actor, tx }) {
+    const contactId = me(actor);
+    const rows = await tx
+      .select()
+      .from(notifications)
+      .where(inboxRows(contactId))
+      .orderBy(desc(notifications.createdAt))
+      .limit(input.limit);
+    return {
+      items: rows.map((n) => ({
+        id: n.id,
+        type: n.type,
+        title: n.content.title,
+        body: n.content.body,
+        href: n.content.url ?? null,
+        action: n.content.action ?? null,
+        urgent: URGENT_TYPES.includes(n.type),
+        createdAt: n.createdAt,
+        readAt: n.readAt,
+      })),
+      ...(await inboxCounts(tx, contactId)),
+    };
+  },
+});
+
+export const markAllRead = defineAction({
+  name: 'notifications.markAllRead',
+  title: 'Mark all notifications read',
+  description:
+    'Mark every unread notification in the signed-in person’s inbox as read (the bell’s “Mark all read”).',
+  audience: 'authenticated',
+  mutates: true,
+  logOnlyWhenChanged: true,
+  returns: '{ updated: number, unread: 0 }',
+  input: z.object({}),
+  async run({ actor, tx }) {
+    const rows = await tx
+      .update(notifications)
+      .set({ readAt: new Date() })
+      .where(and(inboxRows(me(actor)), isNull(notifications.readAt)))
+      .returning({ id: notifications.id });
+    return { updated: rows.length, unread: 0 as const };
+  },
+});

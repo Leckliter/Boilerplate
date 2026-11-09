@@ -85,3 +85,28 @@ export const staffAutomationFailed = defineType<{
     sms: `Automation failed: ${d.automationName} — ${d.error.slice(0, 100)}`,
   }),
 });
+
+/** A website visitor sent the contact form. */
+export const staffNewInquiry = defineType<{
+  inquiryId: string;
+  name: string;
+  email: string;
+  subject: string | null;
+  preview: string;
+}>()({
+  key: 'staff.newInquiry',
+  audience: 'staff',
+  permission: 'inquiries.manage',
+  label: 'New website inquiries',
+  description: 'Someone sent the contact form on the website.',
+  defaults: STAFF_DEFAULTS,
+  render: (d) => ({
+    title: `New inquiry from ${d.name}`,
+    body: `${d.subject ? `“${d.subject}” — ` : ''}${d.preview}`,
+    emailSubject: `New inquiry from ${d.name}${d.subject ? `: ${d.subject}` : ''}`,
+    emailLines: [`Reply to ${d.email}.`],
+    url: `/admin/inquiries/${d.inquiryId}`,
+    action: 'Open the inquiry',
+    sms: `New inquiry from ${d.name}: ${d.preview}`.slice(0, 300),
+  }),
+});

@@ -285,7 +285,8 @@ function checkSource(file, text) {
 
       // Rule 9: provider clients only in the auth adapter; the Data API packages nowhere.
       if (PROVIDER_PKG.test(spec) && !isTest) {
-        if (/postgrest-js$/.test(spec) || !inAuthAdapter) flag(node, 'no-provider-client-for-data');
+        if (spec.endsWith('postgrest-js') || !inAuthAdapter)
+          flag(node, 'no-provider-client-for-data');
       }
 
       // Rule 4: icons come from the ui package's icon list.
@@ -600,7 +601,8 @@ function listFiles(dirs) {
       for (const name of readdirSync(abs)) {
         if (['node_modules', '.next', '.git', '.turbo', 'dist'].includes(name)) continue;
         const r = `${rel}/${name}`;
-        statSync(path.join(ROOT, r)).isDirectory() ? walk(r) : out.push(r);
+        if (statSync(path.join(ROOT, r)).isDirectory()) walk(r);
+        else out.push(r);
       }
     };
     dirs.forEach(walk);

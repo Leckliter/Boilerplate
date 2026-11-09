@@ -16,7 +16,14 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { type ReactNode, useState, useSyncExternalStore } from 'react';
 
-import { activeItem, type AppDef, type NavGroup, submenuFor, type SubMenu } from '@/lib/nav';
+import {
+  activeItem,
+  type AppDef,
+  type CreateCommand,
+  type NavGroup,
+  submenuFor,
+  type SubMenu,
+} from '@/lib/nav';
 
 import { AppNav, AppSubNav } from './app-nav';
 import { CommandMenuProvider, CommandMenuTrigger, useCommandMenu } from './command-menu';
@@ -73,8 +80,8 @@ export type AppShellProps = {
   user: ShellUser;
   /** The `rail-mode` cookie, read by the layout so the first paint is right. */
   railMode?: RailMode;
-  /** ⌘K also searches records (admin). */
-  searchRecords?: boolean;
+  /** "Create …" commands for ⌘K (permission-filtered, translated). */
+  createCommands?: CreateCommand[];
   /** Workspace tabs across the top of the content (admin). */
   workspaceTabs?: boolean;
   /** Rows for the phone's bottom dock (max 4) and the launcher. */
@@ -102,7 +109,7 @@ export function AppShell({
   submenus = [],
   user,
   railMode: initialRailMode = 'expanded',
-  searchRecords = false,
+  createCommands = [],
   workspaceTabs = false,
   dockItems = [],
   launcherItems = [],
@@ -119,7 +126,7 @@ export function AppShell({
   const hasDock = dockItems.length > 0;
 
   const shell = (
-    <CommandMenuProvider groups={navGroups} apps={apps} searchRecords={searchRecords}>
+    <CommandMenuProvider groups={navGroups} apps={apps} createCommands={createCommands}>
       <MobilePageActionsProvider>
         {/* `contained` scopes the drawer/backdrop to this wrapper: the shell owns its own h-svh viewport and
             scrolls inside <main>. Phones leave `open` to the sidebar (a controlled `open` would pin the drawer). */}

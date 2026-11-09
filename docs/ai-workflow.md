@@ -6,12 +6,15 @@ and how to fix it. Read the message and fix the cause; don't silence it.
 
 ## The checks (all in `pnpm check` and CI)
 
-| Check                                                       | What it catches                                                                                                     | Where                                         |
-| ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- | --------------------------------------------- |
-| `pnpm rules`                                                | the rule ids below, plus files over 750 lines                                                                       | `scripts/check-rules.mjs`                     |
-| `pnpm actions:tests`                                        | an action with no test where it **works** (the "refused" test is automatic)                                         | `packages/core/scripts/check-action-tests.ts` |
-| `pnpm test`                                                 | behaviour against a real Postgres; `refusals.test.ts` proves every non-public action refuses callers without access | `packages/core/test/`                         |
-| typecheck, lint, format, `actions:docs --check`, migrations | the usual, plus stale generated files                                                                               | `package.json`, `.github/workflows/ci.yml`    |
+| Check                                                 | What it catches                                                                                                     | Where                                          |
+| ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
+| `pnpm rules`                                          | the rule ids below, plus files over 750 lines                                                                       | `scripts/check-rules.mjs`                      |
+| `pnpm actions:tests`                                  | an action with no test where it **works** (the "refused" test is automatic)                                         | `packages/core/scripts/check-action-tests.ts`  |
+| `pnpm test`                                           | behaviour against a real Postgres; `refusals.test.ts` proves every non-public action refuses callers without access | `packages/core/test/`                          |
+| `pnpm lint`                                           | oxlint (`.oxlintrc.json`: correctness, React hooks, jsx-a11y, Next, import) plus `tsc` per package                  | `.oxlintrc.json`, each package's `lint` script |
+| `pnpm knip`                                           | files nothing imports, unused / unlisted dependencies (exports are left alone: they are the API)                    | `knip.json`                                    |
+| `pnpm e2e`                                            | the real app in a real browser: admin flows, error pipeline, keyboard, dark mode, 320px, axe accessibility          | `apps/web/e2e/` (docs/testing.md)              |
+| typecheck, format, `actions:docs --check`, migrations | the usual, plus stale generated files                                                                               | `package.json`, `.github/workflows/ci.yml`     |
 
 `pnpm rules` checks:
 
@@ -43,6 +46,13 @@ with a message that explains the fix; prove it fires by planting a violation, th
 `packages/core/test/action-coverage.ts` records every action the tests run and how it ended.
 `pnpm actions:tests` requires, for every action, one run that **worked** (in the area's test file) and
 one that was **refused** (automatic for every non-public action in `refusals.test.ts`).
+
+## Lint and dead code
+
+`pnpm lint` runs `oxlint` with the root `.oxlintrc.json` in every package (and in `scripts/`, `.claude/`),
+then `tsc`. Errors are bugs (rules of hooks, a11y, unused code, duplicate imports); a few React-compiler
+style rules are warnings. Fix the cause; a justified exception is `// oxlint-disable-next-line <rule> -- <why>`.
+CI runs lint, knip and the e2e suite as separate jobs (`.github/workflows/ci.yml`).
 
 ## Claude Code setup (`.claude/`)
 

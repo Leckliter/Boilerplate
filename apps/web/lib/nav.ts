@@ -14,9 +14,16 @@ import {
   PulseIcon,
   ShieldCheckIcon,
   SlidersHorizontalIcon,
+  TrayIcon,
   UserIcon,
+  UserPlusIcon,
   UsersIcon,
 } from '@app/ui/components/icons';
+
+import type en from '@/messages/en.json';
+
+type NavKey = keyof typeof en.nav;
+type CommandKey = keyof typeof en.palette.commands;
 
 /**
  * THE navigation, in one file. Add a page: add a row here (and the route). The rail, the mobile menu, the
@@ -27,7 +34,7 @@ import {
  * `drill` makes the row open a submenu in the rail (see SUBMENUS) instead of being a plain link.
  */
 export type NavItem = {
-  key: string;
+  key: NavKey;
   label: string;
   href: string;
   icon: Icon;
@@ -40,12 +47,16 @@ export type NavItem = {
   drill?: string;
   /** Show this row in the mobile dock (max 4 across the dock). */
   dock?: boolean;
+  /** A count shown next to the label; which count is decided in ShellFor (`NavCounts`). */
+  badge?: 'inquiries';
+  /** Filled in by ShellFor from `badge`. */
+  count?: number;
 };
 
-export type NavGroup = { key: string; label: string; items: NavItem[] };
+export type NavGroup = { key: NavKey; label: string; items: NavItem[] };
 
 export type SubMenu = {
-  id: string;
+  id: NavKey;
   label: string;
   /** Paths under which the rail shows this submenu. */
   prefixes: string[];
@@ -57,7 +68,7 @@ export type AppId = 'account' | 'admin';
 
 export type AppDef = {
   id: AppId;
-  key: string;
+  key: NavKey;
   label: string;
   href: string;
   icon: Icon;
@@ -105,6 +116,7 @@ export const ACCOUNT_NAV: NavGroup[] = [
         href: '/account/preferences',
         icon: SlidersHorizontalIcon,
       },
+      { key: 'privacy', label: 'Privacy & data', href: '/account/privacy', icon: ShieldCheckIcon },
     ],
   },
 ];
@@ -135,6 +147,15 @@ export const ADMIN_NAV: NavGroup[] = [
         icon: UsersIcon,
         permission: 'users.read',
         dock: true,
+      },
+      {
+        key: 'inquiries',
+        label: 'Inquiries',
+        href: '/admin/inquiries',
+        icon: TrayIcon,
+        permission: 'inquiries.manage',
+        // The sidebar shows how many are new (components/layout/shell-for.tsx fills it in).
+        badge: 'inquiries',
       },
       {
         key: 'roles',
@@ -216,6 +237,39 @@ export const ADMIN_NAV: NavGroup[] = [
         drill: 'settings',
       },
     ],
+  },
+];
+
+/** "Create …" commands in ⌘K: what a person with the permission can start from anywhere. */
+export type CreateCommand = {
+  key: CommandKey;
+  label: string;
+  href: string;
+  icon: Icon;
+  permission: Permission;
+};
+
+export const CREATE_COMMANDS: CreateCommand[] = [
+  {
+    key: 'newUser',
+    label: 'New user',
+    href: '/admin/users/new',
+    icon: UserPlusIcon,
+    permission: 'users.manage',
+  },
+  {
+    key: 'newAutomation',
+    label: 'New automation',
+    href: '/admin/automations/new',
+    icon: LightningIcon,
+    permission: 'automations.manage',
+  },
+  {
+    key: 'newApiKey',
+    label: 'New API key',
+    href: '/admin/api-keys',
+    icon: KeyIcon,
+    permission: 'api_keys.manage',
   },
 ];
 

@@ -18,6 +18,12 @@ wait for and are cancelled by these. See [events.md](./events.md) and [automatio
 | [`error.new`](#errornew) |  | A new bug was reported: the first occurrence of an error fingerprint (or the first since it was marked fixed). |
 | [`error.spike`](#errorspike) |  | An open bug is happening a lot: 10 times in 15 minutes (at most one event per bug per hour). |
 | [`automation.failed`](#automationfailed) | automation | An automation run stopped with an error. |
+| [`email.bounced`](#emailbounced) | contact | An email we sent bounced or was marked as spam (reported by Resend’s webhook). |
+| [`sms.received`](#smsreceived) | contact | A text message arrived on our number (Quo webhook). |
+| [`inquiry.created`](#inquirycreated) | contact | Someone sent the website contact form (inquiries.create). |
+| [`newsletter.subscribed`](#newslettersubscribed) | contact | Someone confirmed their newsletter subscription (double opt-in: they clicked the link in the confirmation email). |
+| [`account.deletion_requested`](#accountdeletionrequested) | contact | Someone asked to delete their account (account.requestDeletion). |
+| [`account.deleted`](#accountdeleted) | contact | A deletion request was carried out: the contact’s personal data was wiped (anonymised) and their login unlinked. |
 
 ### contact.created
 
@@ -537,5 +543,341 @@ Example:
   "automationName": "Welcome new leads",
   "runId": "00000000-0000-4000-8000-000000000001",
   "error": "contacts.get: No such contact."
+}
+```
+
+### email.bounced
+
+An email we sent bounced or was marked as spam (reported by Resend’s webhook). A permanent bounce or a complaint also stops all future email to that address (message suppression). A good trigger for “ask for a new email address”.
+
+- About: `contact`
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "emailId": {
+      "type": "string",
+      "description": "The provider’s email id (matches a delivery’s providerId)."
+    },
+    "email": {
+      "type": "string"
+    },
+    "kind": {
+      "type": "string",
+      "enum": [
+        "bounce",
+        "complaint"
+      ]
+    },
+    "permanent": {
+      "type": "boolean",
+      "description": "false for a temporary bounce (mailbox full …); nothing is suppressed"
+    },
+    "reason": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "contactId": {
+      "anyOf": [
+        {
+          "type": "string",
+          "format": "uuid",
+          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "The contact with that address, when there is one"
+    }
+  },
+  "required": [
+    "emailId",
+    "email",
+    "kind",
+    "permanent",
+    "reason",
+    "contactId"
+  ]
+}
+```
+
+Example:
+
+```json
+{
+  "emailId": "re_123",
+  "email": "pat@example.com",
+  "kind": "bounce",
+  "permanent": true,
+  "reason": "The recipient’s mailbox does not exist.",
+  "contactId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+### sms.received
+
+A text message arrived on our number (Quo webhook). `keyword` is "stop" or "start" when the whole message was an opt-out / opt-in word (consent has already been cleared / restored by then), otherwise null.
+
+- About: `contact`
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "messageId": {
+      "type": "string"
+    },
+    "from": {
+      "type": "string",
+      "description": "The sender’s number, E.164"
+    },
+    "to": {
+      "type": "string",
+      "description": "Our number that received it"
+    },
+    "text": {
+      "type": "string",
+      "description": "The message, cut at 1,600 characters"
+    },
+    "keyword": {
+      "anyOf": [
+        {
+          "type": "string",
+          "enum": [
+            "stop",
+            "start"
+          ]
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "contactId": {
+      "anyOf": [
+        {
+          "type": "string",
+          "format": "uuid",
+          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "The contact with that phone number, when there is one"
+    }
+  },
+  "required": [
+    "messageId",
+    "from",
+    "to",
+    "text",
+    "keyword",
+    "contactId"
+  ]
+}
+```
+
+Example:
+
+```json
+{
+  "messageId": "AC123",
+  "from": "+18165550100",
+  "to": "+18165550199",
+  "text": "Can I move my appointment to Friday?",
+  "keyword": null,
+  "contactId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+### inquiry.created
+
+Someone sent the website contact form (inquiries.create). They are already a lead contact by now. Spam caught by the honeypot never gets here.
+
+- About: `contact`
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "inquiryId": {
+      "type": "string",
+      "format": "uuid",
+      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+    },
+    "contactId": {
+      "type": "string",
+      "format": "uuid",
+      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+    },
+    "name": {
+      "type": "string"
+    },
+    "email": {
+      "type": "string"
+    },
+    "subject": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "newContact": {
+      "type": "boolean",
+      "description": "true when this created the contact (a brand-new lead)"
+    }
+  },
+  "required": [
+    "inquiryId",
+    "contactId",
+    "name",
+    "email",
+    "subject",
+    "newContact"
+  ]
+}
+```
+
+Example:
+
+```json
+{
+  "inquiryId": "00000000-0000-4000-8000-000000000001",
+  "contactId": "00000000-0000-4000-8000-000000000001",
+  "name": "Pat Example",
+  "email": "pat@example.com",
+  "subject": "Do you do weekends?",
+  "newContact": true
+}
+```
+
+### newsletter.subscribed
+
+Someone confirmed their newsletter subscription (double opt-in: they clicked the link in the confirmation email). They now carry the `newsletter` tag.
+
+- About: `contact`
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "contactId": {
+      "type": "string",
+      "format": "uuid",
+      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+    },
+    "email": {
+      "type": "string"
+    },
+    "source": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "contactId",
+    "email",
+    "source"
+  ]
+}
+```
+
+Example:
+
+```json
+{
+  "contactId": "00000000-0000-4000-8000-000000000001",
+  "email": "pat@example.com",
+  "source": "website"
+}
+```
+
+### account.deletion_requested
+
+Someone asked to delete their account (account.requestDeletion). Their data is wiped after the grace period (setting account.deletionGraceDays, default 14 days) unless they cancel.
+
+- About: `contact`
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "contactId": {
+      "type": "string",
+      "format": "uuid",
+      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+    },
+    "displayName": {
+      "type": "string"
+    },
+    "scheduledFor": {
+      "type": "string",
+      "description": "ISO time the account will be anonymised"
+    }
+  },
+  "required": [
+    "contactId",
+    "displayName",
+    "scheduledFor"
+  ]
+}
+```
+
+Example:
+
+```json
+{
+  "contactId": "00000000-0000-4000-8000-000000000001",
+  "displayName": "Pat Example",
+  "scheduledFor": "2026-12-01T05:00:00.000Z"
+}
+```
+
+### account.deleted
+
+A deletion request was carried out: the contact’s personal data was wiped (anonymised) and their login unlinked. The contact row remains so history still points somewhere, but it holds no personal data any more. Delete the person’s login at your auth provider when you see this.
+
+- About: `contact`
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "contactId": {
+      "type": "string",
+      "format": "uuid",
+      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+    },
+    "authUserId": {
+      "description": "The login that was unlinked (delete it at the provider)",
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  },
+  "required": [
+    "contactId",
+    "authUserId"
+  ]
+}
+```
+
+Example:
+
+```json
+{
+  "contactId": "00000000-0000-4000-8000-000000000001",
+  "authUserId": "user_123"
 }
 ```

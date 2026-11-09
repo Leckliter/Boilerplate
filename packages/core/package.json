@@ -21,13 +21,19 @@
     "./notifications": "./src/notifications/api.ts",
     "./messaging": "./src/messaging/index.ts",
     "./files": "./src/files/api.ts",
-    "./docs": "./src/docs/api.ts"
+    "./docs": "./src/docs/api.ts",
+    "./flags": "./src/flags.ts",
+    "./logger": "./src/logger.ts",
+    "./webhooks": "./src/webhooks/verify.ts",
+    "./newsletter": "./src/newsletter/api.ts",
+    "./inquiries": "./src/inquiries/api.ts",
+    "./account-data": "./src/account-data/api.ts"
   },
   "scripts": {
     "actions:docs": "tsx scripts/generate-action-docs.ts",
     "actions:tests": "tsx scripts/check-action-tests.ts",
     "typecheck": "tsc --noEmit",
-    "lint": "tsc --noEmit",
+    "lint": "oxlint -c ../../.oxlintrc.json . && tsc --noEmit",
     "test": "vitest run",
     "docs:build": "tsx scripts/build-docs.ts"
   },
@@ -35,10 +41,12 @@
     "@app/db": "workspace:*",
     "@aws-sdk/client-s3": "^3.1164.0",
     "@aws-sdk/s3-request-presigner": "^3.1164.0",
+    "web-push": "^4.0.0",
     "zod": "^4.6.7"
   },
   "devDependencies": {
     "@types/node": "^22.20.5",
+    "@types/web-push": "^3.6.4",
     "tsx": "^4.23.15",
     "typescript": "^5.9.3",
     "vitest": "^5.0.5"

@@ -1,4 +1,5 @@
 import {
+  and,
   type Contact,
   contactRoles,
   contacts,
@@ -128,5 +129,34 @@ export async function assertEmailFree(tx: Tx, email: string, exceptId?: string) 
     throw new ActionError('conflict', `${email} already belongs to ${existing.displayName}.`, {
       existingContactId: existing.id,
     });
+  }
+}
+
+/**
+ * Refuse (`conflict`) when archiving / deleting these contacts would leave the business without an
+ * active owner. Locks the owner rows so two simultaneous changes cannot both pass the check.
+ */
+export async function assertOwnerRemains(tx: Tx, removing: readonly string[]) {
+  const owners = await tx
+    .select({ contactId: contactRoles.contactId })
+    .from(contactRoles)
+    .where(eq(contactRoles.role, 'owner'))
+    .for('update');
+  if (!owners.length) return;
+  const active = await tx
+    .select({ id: contacts.id })
+    .from(contacts)
+    .where(
+      and(
+        inArray(
+          contacts.id,
+          owners.map((o) => o.contactId),
+        ),
+        eq(contacts.status, 'active'),
+      ),
+    );
+  const leaving = active.filter((o) => removing.includes(o.id));
+  if (leaving.length > 0 && active.length - leaving.length < 1) {
+    throw new ActionError('conflict', 'This is the last owner; add another owner first.');
   }
 }

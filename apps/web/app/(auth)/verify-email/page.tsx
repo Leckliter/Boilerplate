@@ -26,9 +26,7 @@ export default async function VerifyEmailPage({
         {disabled ? t('disabledBody') : t('verifyBody')}
       </p>
       {viewer.status === 'verify_email' && (
-        <p className="text-sm">
-          Signed in as <strong>{viewer.email}</strong>
-        </p>
+        <p className="text-sm">{t('signedInAs', { email: viewer.email })}</p>
       )}
       <div className="flex flex-wrap gap-2">
         <form action={signOut}>

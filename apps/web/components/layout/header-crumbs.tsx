@@ -1,6 +1,7 @@
 'use client';
 
 import { Breadcrumbs } from '@app/ui/components/breadcrumbs';
+import { useTranslations } from 'next-intl';
 import { usePathname } from 'next/navigation';
 
 import { activeItem, type AppDef, type NavGroup } from '@/lib/nav';
@@ -14,6 +15,7 @@ const title = (segment: string) => segment.replace(/-/g, ' ').replace(/^./, (c) 
  * (an `E-…` error reference shows as itself). Hidden on the smallest phones, where the page title says it.
  */
 export function HeaderCrumbs({ app, groups }: { app: AppDef; groups: NavGroup[] }) {
+  const t = useTranslations('shell');
   const pathname = usePathname();
   const item = activeItem(pathname, groups);
   const rest = pathname
@@ -32,8 +34,8 @@ export function HeaderCrumbs({ app, groups }: { app: AppDef; groups: NavGroup[] 
       return;
     }
     const label = ID_LIKE.test(segment)
-      ? 'Details'
-      : /^E-/.test(segment)
+      ? t('details')
+      : segment.startsWith('E-')
         ? segment
         : title(decodeURIComponent(segment));
     trail.push({ label, href });

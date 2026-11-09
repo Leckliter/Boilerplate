@@ -12,8 +12,10 @@ import {
   getPreferences,
   listDeliveries,
   listNotifications,
+  markAllRead,
   markRead,
   openNotification,
+  recentNotifications,
   recordSuppression,
   retryDelivery,
   sendTest,
@@ -22,16 +24,22 @@ import {
   unreadCount,
   unsubscribe,
 } from '../actions/notifications';
+import { pushStatus, subscribePush, unsubscribePush } from '../actions/push';
+import { quoWebhook, resendWebhook } from '../actions/webhooks';
 import { registerErrorAlerts } from '../errors/alerts';
 import { defineJob, registerJob } from '../jobs';
 import { registerTick } from '../module-ticks';
 import { dispatchDue } from './dispatch';
 import { notify } from './notify';
+import { webPushSender } from './push-sender';
+import { setPushSender } from './senders';
 
 registerActions(
   listNotifications,
+  recentNotifications,
   unreadCount,
   markRead,
+  markAllRead,
   dismissNotifications,
   openNotification,
   getPreferences,
@@ -42,7 +50,16 @@ registerActions(
   listDeliveries,
   retryDelivery,
   recordSuppression,
+  // web push + provider webhooks
+  subscribePush,
+  unsubscribePush,
+  pushStatus,
+  resendWebhook,
+  quoWebhook,
 );
+
+// Real Web Push (VAPID keys from the environment; "not set up" without them).
+setPushSender(webPushSender);
 
 /** Send everything that is due, repeating while there is work (a batch is 50). */
 async function sendDue(now = new Date()) {

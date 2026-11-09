@@ -18,7 +18,7 @@ export default getRequestConfig(async () => {
   };
 });
 
-type Messages = Record<string, Record<string, string>>;
+type Messages = Record<string, Record<string, unknown>>;
 
 async function loadMessages(locale: Locale): Promise<Messages> {
   const en = (await import('../messages/en.json')).default as Messages;
@@ -26,5 +26,5 @@ async function loadMessages(locale: Locale): Promise<Messages> {
   const other = (await import(`../messages/${locale}.json`)).default as Messages;
   return Object.fromEntries(
     Object.entries(en).map(([ns, keys]) => [ns, { ...keys, ...other[ns] }]),
-  );
+  ) as Messages;
 }

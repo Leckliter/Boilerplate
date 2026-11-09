@@ -21,7 +21,7 @@ function CardHeader({ className, ...props }: React.ComponentProps<'div'>) {
     <div
       data-slot="card-header"
       className={cn(
-        'flex flex-wrap items-start justify-between gap-x-4 gap-y-1 px-5 pt-5',
+        'flex flex-wrap items-start justify-between gap-x-4 gap-y-1 px-5 pt-5 empty:hidden',
         className,
       )}
       {...props}

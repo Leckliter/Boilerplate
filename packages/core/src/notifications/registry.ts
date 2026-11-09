@@ -1,21 +1,32 @@
 /** THE list of notification types — add every new type here (see ./base.ts for how). */
 
 import type { NotificationType } from './base';
-import { accountMessage, testMessage } from './customer-types';
+import {
+  accountDeletionScheduled,
+  accountExportReady,
+  accountMessage,
+  newsletterConfirm,
+  testMessage,
+} from './customer-types';
 import {
   staffAutomationFailed,
   staffAutomationMessage,
   staffErrorSpike,
   staffNewError,
+  staffNewInquiry,
 } from './staff-types';
 
 export const NOTIFICATION_TYPES = [
   accountMessage,
   testMessage,
+  newsletterConfirm,
+  accountExportReady,
+  accountDeletionScheduled,
   staffNewError,
   staffErrorSpike,
   staffAutomationMessage,
   staffAutomationFailed,
+  staffNewInquiry,
 ] as const;
 
 /** Type keys and the data each one needs — `notify` is checked against this. */

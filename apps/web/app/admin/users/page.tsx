@@ -1,26 +1,16 @@
 import { callAction, listContacts, listTags } from '@app/core';
-import { Avatar } from '@app/ui/components/avatar';
 import { buttonVariants } from '@app/ui/components/button';
 import { Card } from '@app/ui/components/card';
-import { Empty } from '@app/ui/components/empty';
-import { KeyIcon, PlusIcon, UsersIcon } from '@app/ui/components/icons';
-import { rowLink, rowLinkRow } from '@app/ui/components/link';
+import { PlusIcon } from '@app/ui/components/icons';
 import { PageHeader } from '@app/ui/components/page';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@app/ui/components/table';
-import { cn } from '@app/ui/lib/utils';
 import Link from 'next/link';
 
 import { ActionError } from '@/components/action-error';
 import { FilterLinks } from '@/components/admin/filter-links';
 import { NewUserDialog } from '@/components/admin/new-user-dialog';
-import { TagBadges } from '@/components/admin/tag-badges';
+import { ExportCsvButton } from '@/components/admin/users/export-button';
+import { ImportDialog } from '@/components/admin/users/import-dialog';
+import { UsersTable } from '@/components/admin/users/users-table';
 import { UrlSearch } from '@/components/admin/url-search';
 import { MobilePrimaryAction, fabClass } from '@/components/layout/mobile-dock';
 import { requireViewer } from '@/lib/viewer';
@@ -63,6 +53,7 @@ export default async function UsersPage({
     return `/admin/users${next.size ? `?${next}` : ''}`;
   };
   const canWrite = viewer.can('users.manage');
+  const tagOptions = tags.ok ? tags.data.map((t) => ({ slug: t.slug, label: t.label })) : [];
 
   return (
     <>
@@ -83,6 +74,17 @@ export default async function UsersPage({
       <UrlSearch
         placeholder="Search name, email, phone, company…"
         label="Search users"
+        actions={
+          <>
+            {canWrite && <ImportDialog tags={tagOptions} />}
+            {viewer.can('data.export') && (
+              <ExportCsvButton
+                action="contacts.exportCsv"
+                input={{ tag, search: q, includeArchived: archived === '1' }}
+              />
+            )}
+          </>
+        }
         filters={
           <FilterLinks
             label="Filter by type"
@@ -103,69 +105,29 @@ export default async function UsersPage({
           />
         }
       />
-      <Card>
-        {!result.ok ? (
+      {!result.ok ? (
+        <Card>
           <div className="p-5">
             <ActionError error={result.error} what="the users" />
           </div>
-        ) : contacts.length === 0 ? (
-          <Empty
-            icon={<UsersIcon />}
-            title={q ? 'No matches' : 'No users yet'}
-            description={
-              q ? 'Try a different search.' : 'People you add, or who sign up, show up here.'
-            }
-          />
-        ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead className="hidden md:table-cell">Email</TableHead>
-                <TableHead className="hidden lg:table-cell">Phone</TableHead>
-                <TableHead>Tags</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {contacts.map((c) => (
-                <TableRow key={c.id} className={rowLinkRow}>
-                  <TableCell>
-                    <Link
-                      href={`/admin/users/${c.id}`}
-                      className={cn('flex items-center gap-3', rowLink)}
-                    >
-                      <Avatar name={c.displayName} />
-                      <span className="grid min-w-0">
-                        <span className="flex min-w-0 items-center gap-1.5 font-medium">
-                          <span className="truncate">{c.displayName}</span>
-                          {c.hasLogin && (
-                            <KeyIcon
-                              className="size-3 shrink-0 text-muted-foreground"
-                              aria-label="Has a login"
-                            />
-                          )}
-                        </span>
-                        <span className="truncate text-xs text-muted-foreground md:hidden">
-                          {c.email}
-                        </span>
-                      </span>
-                    </Link>
-                  </TableCell>
-                  <TableCell className="hidden [overflow-wrap:anywhere] text-muted-foreground md:table-cell">
-                    {c.email ?? '—'}
-                  </TableCell>
-                  <TableCell className="hidden text-muted-foreground tabular-nums lg:table-cell">
-                    {c.phone ?? '—'}
-                  </TableCell>
-                  <TableCell>
-                    <TagBadges tags={c.tags} />
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        )}
-      </Card>
+        </Card>
+      ) : (
+        <UsersTable
+          rows={contacts.map((c) => ({
+            id: c.id,
+            displayName: c.displayName,
+            email: c.email,
+            phone: c.phone,
+            hasLogin: c.hasLogin,
+            status: c.status,
+            createdAt: new Date(c.createdAt).toISOString(),
+            tags: c.tags.map(({ slug, label, color }) => ({ slug, label, color })),
+          }))}
+          tags={tagOptions}
+          canWrite={canWrite}
+          emptyIsFiltered={Boolean(q || tag || archived)}
+        />
+      )}
       {total > PAGE_SIZE && (
         <div className="mt-4 flex flex-wrap items-center justify-between gap-2 text-sm text-muted-foreground">
           <span>

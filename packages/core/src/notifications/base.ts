@@ -32,6 +32,8 @@ export type NotificationType<D = never, K extends string = string> = {
   permission?: Permission;
   required?: boolean;
   urgent?: boolean;
+  /** Not listed in the person's notification settings (one-off confirmations). */
+  hidden?: boolean;
   defaults: Record<Channel, boolean>;
   render: (data: D, to: Recipient) => NotificationContent;
 };

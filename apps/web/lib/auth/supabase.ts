@@ -38,6 +38,15 @@ async function client() {
   });
 }
 
+/**
+ * A 4xx answer is the person's mistake (wrong or expired code, rate limit): say so. Anything else
+ * (Supabase down, a 5xx, a network failure) throws a plain Error so the sign-in action reports it and
+ * shows an E- reference instead of calling a correct code wrong.
+ */
+function isUserError(error: { status?: number }): boolean {
+  return typeof error.status === 'number' && error.status >= 400 && error.status < 500;
+}
+
 type SupabaseUser = {
   id: string;
   email?: string;
@@ -66,7 +75,11 @@ export function supabaseAdapter(): AuthAdapter {
         email,
         options: { shouldCreateUser: true },
       });
-      if (error) throw new AuthFailure(error.message, error.code ?? 'otp_failed');
+      if (error) {
+        if (!isUserError(error))
+          throw new Error(`Supabase Auth could not send the code: ${error.message}`);
+        throw new AuthFailure(error.message, error.code ?? 'otp_failed');
+      }
     },
     async verifyEmailCode(email, code) {
       const { data, error } = await (
@@ -76,6 +89,9 @@ export function supabaseAdapter(): AuthAdapter {
         token: code.trim(),
         type: 'email',
       });
+      if (error && !isUserError(error)) {
+        throw new Error(`Supabase Auth could not check the code: ${error.message}`);
+      }
       if (error || !data.user) {
         throw new AuthFailure(
           'That code is wrong or has expired. Ask for a new one.',
@@ -85,7 +101,9 @@ export function supabaseAdapter(): AuthAdapter {
       return toSession(data.user);
     },
     async signOut() {
-      await (await client()).auth.signOut();
+      // `local`: this browser only. Supabase's default (`global`) would also sign the person out of
+      // their phone and every other device.
+      await (await client()).auth.signOut({ scope: 'local' });
     },
     async confirmLink({ tokenHash, type }) {
       const { data, error } = await (
@@ -94,6 +112,9 @@ export function supabaseAdapter(): AuthAdapter {
         token_hash: tokenHash,
         type: type as 'email' | 'magiclink' | 'signup' | 'recovery' | 'invite' | 'email_change',
       });
+      if (error && !isUserError(error)) {
+        throw new Error(`Supabase Auth could not check the link: ${error.message}`);
+      }
       if (error || !data.user) {
         throw new AuthFailure(
           'That link is invalid or has expired.',

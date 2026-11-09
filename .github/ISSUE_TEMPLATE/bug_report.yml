@@ -1,0 +1,49 @@
+name: Bug report
+description: Something broke or behaves wrongly.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        If you saw an error screen or a red "Error reference", **paste the reference and the AI report**
+        below: they let us (or an AI agent) find the exact failure without asking you questions.
+  - type: input
+    id: ref
+    attributes:
+      label: Error reference
+      description: The `E-XXXXXXXX` code shown on the error screen or in the red message. Leave empty if there was none.
+      placeholder: E-7K3QX9MD
+  - type: textarea
+    id: report
+    attributes:
+      label: "'Copy for AI agent' report"
+      description: |
+        Admin → Errors → open the error → **Copy for AI agent**, then paste here. (Needs admin access; ask someone who has it if you don't.)
+        It contains the stack, the request, the diagnosis and the recent changes: nothing secret.
+      render: markdown
+  - type: textarea
+    id: steps
+    attributes:
+      label: What did you do, and what happened?
+      description: The page, the button, what you expected, what you got. A screenshot helps.
+    validations:
+      required: true
+  - type: dropdown
+    id: where
+    attributes:
+      label: Where did it happen?
+      options: [Website, My account, Admin, REST API, MCP / AI, Emails / texts, Not sure]
+    validations:
+      required: true
+  - type: dropdown
+    id: env
+    attributes:
+      label: Which site?
+      options: [Production, Test site, Local / preview]
+    validations:
+      required: true
+  - type: input
+    id: device
+    attributes:
+      label: Browser and device
+      placeholder: Safari on iPhone 15, Chrome 130 on Windows …

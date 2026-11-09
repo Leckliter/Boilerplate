@@ -2,6 +2,7 @@ import { callAction } from '@app/core';
 import { listDeliveries } from '@app/core/notifications';
 import { Card } from '@app/ui/components/card';
 import { Empty } from '@app/ui/components/empty';
+import { SendTestButton } from '@/components/notifications/send-test-button';
 import { BellIcon } from '@app/ui/components/icons';
 import { PageHeader } from '@app/ui/components/page';
 import {
@@ -87,6 +88,7 @@ export default async function AdminNotificationsPage({
             icon={<BellIcon />}
             title="No deliveries"
             description="Nothing matches. Messages show up here as soon as the app sends one."
+            contents={<SendTestButton />}
           />
         </Card>
       ) : (

@@ -53,6 +53,11 @@ export default async function AutomationsPage() {
             icon={<LightningIcon />}
             title="No automations yet"
             description="Try “when a contact is created, tell staff”. New automations start off until you turn them on."
+            contents={
+              <LinkButton href="/admin/automations/new" variant="primary">
+                New automation
+              </LinkButton>
+            }
           />
         </Card>
       ) : (

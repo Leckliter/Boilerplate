@@ -1,3 +1,5 @@
+'use client';
+
 import { CheckboxField } from '@app/ui/components/checkbox';
 import { PlusIcon } from '@app/ui/components/icons';
 

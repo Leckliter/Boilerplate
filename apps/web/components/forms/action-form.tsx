@@ -2,6 +2,7 @@
 
 import { toast } from '@app/ui/components/toaster';
 import { Button } from '@app/ui/components/button';
+import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { type ReactNode, useActionState, useEffect, useRef } from 'react';
 
@@ -10,6 +11,7 @@ import { invokeAction } from '@/lib/invoke';
 import { isStaleDeploy, promptReload } from '@/lib/stale-deploy';
 
 import { FormError } from './field-error';
+import { TurnstileWidget } from './turnstile';
 import { useCloseDialog } from './form-dialog';
 
 type FieldErrors = Record<string, string[] | undefined>;
@@ -45,7 +47,12 @@ export function formDataToInput(
   const out: FormInput = {};
   const groups = new Map<string, FormDataEntryValue[]>();
   for (const [rawKey, value] of data.entries()) {
-    if (rawKey.startsWith('$ACTION_') || rawKey.startsWith('_')) continue; // React's own fields
+    if (
+      rawKey.startsWith('$ACTION_') ||
+      rawKey.startsWith('_') ||
+      rawKey.startsWith('cf-turnstile')
+    )
+      continue; // React's and the bot check's own fields
     const key = rawKey.replace(/\[\]$/, '');
     const list = groups.get(key) ?? [];
     list.push(value);
@@ -113,6 +120,7 @@ export function ActionForm({
   submitVariant = 'primary',
   className,
   keepOpen = false,
+  humanCheck = false,
 }: {
   action: ActionName;
   /** Fields, or a function receiving each field's error message (`errors.name`). */
@@ -130,7 +138,10 @@ export function ActionForm({
   className?: string;
   /** Don't close the enclosing dialog / reset the form after a save. */
   keepOpen?: boolean;
+  /** A public form whose action has `humanCheck`: shows the Turnstile widget (when its keys are set) and sends its answer. */
+  humanCheck?: boolean;
 }) {
+  const t = useTranslations('forms');
   const router = useRouter();
   const closeDialog = useCloseDialog();
   const formRef = useRef<HTMLFormElement>(null);
@@ -141,7 +152,10 @@ export function ActionForm({
       const input = formDataToInput(form, kinds, blank);
       const body = transform ? transform(input, form) : input;
       try {
-        const res = await invokeAction(action, body);
+        const token = humanCheck ? form.get('cf-turnstile-response') : null;
+        const res = await invokeAction(action, body, {
+          humanToken: typeof token === 'string' ? token : null,
+        });
         if (res.ok) return { status: 'ok', at: Date.now(), data: res.data };
         const details = res.error.details as { fieldErrors?: FieldErrors } | undefined;
         return {
@@ -157,7 +171,7 @@ export function ActionForm({
           return {
             status: 'error',
             at: Date.now(),
-            message: 'A new version of the app is available. Reload to continue.',
+            message: t('staleDeploy'),
           };
         }
         throw err;
@@ -186,11 +200,12 @@ export function ActionForm({
     <form ref={formRef} action={submit} noValidate={false} className={className ?? 'grid gap-4'}>
       <fieldset disabled={pending} className="grid min-w-0 gap-4">
         {typeof children === 'function' ? children(errors) : children}
+        {humanCheck && <TurnstileWidget />}
         {state.status === 'error' && (
           <FormError
             message={
               // Per-field problems are shown under their fields; don't repeat the whole zod message.
-              Object.keys(errors).length > 0 ? 'Check the highlighted fields.' : state.message
+              Object.keys(errors).length > 0 ? t('checkFields') : state.message
             }
             reference={state.ref}
           />

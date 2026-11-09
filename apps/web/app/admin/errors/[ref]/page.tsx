@@ -1,5 +1,6 @@
-import { callAction, getError } from '@app/core';
+import { callAction, getError, listActivity } from '@app/core';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@app/ui/components/card';
+import { Sparkline } from '@app/ui/components/charts';
 import { CodeBlock } from '@app/ui/components/code-block';
 import { CopyButton } from '@app/ui/components/copy-button';
 import { DetailItem, DetailList } from '@app/ui/components/detail-list';
@@ -12,6 +13,7 @@ import { notFound } from 'next/navigation';
 import { ActionError } from '@/components/action-error';
 import { actorLabel } from '@/components/admin/activity-list';
 import { ErrorStatusBadge } from '@/components/admin/status-badges';
+import { countByDay, lastDays } from '@/lib/admin-stats';
 import { requireViewer } from '@/lib/viewer';
 
 import { ResolveForm } from './resolve-form';
@@ -37,6 +39,23 @@ export default async function ErrorPage({ params }: { params: Promise<{ ref: str
     );
   }
   const { error: e, occurrences, recentRefs, brief } = result.data;
+  // Occurrences over time: there is no per-occurrence list in core, but an action's failures are in the
+  // audit trail with their dates, so for an error that came from an action we chart those.
+  const failures =
+    e.action && viewer.can('activity.read')
+      ? await callAction(
+          listActivity,
+          { action: e.action, failedOnly: true, limit: 200 },
+          viewer.actor,
+        )
+      : null;
+  const days = lastDays(14);
+  const perDay = failures?.ok
+    ? countByDay(
+        failures.data.map((f) => f.occurredAt),
+        days,
+      )
+    : [];
 
   return (
     <div className="grid gap-6">
@@ -86,6 +105,21 @@ export default async function ErrorPage({ params }: { params: Promise<{ ref: str
               {occurrences.count}× ({occurrences.openCount} open) · first{' '}
               {formatDateTime(occurrences.firstSeen)} · last {formatDateTime(occurrences.lastSeen)}
             </DetailItem>
+            {failures?.ok && perDay.some(Boolean) && (
+              <DetailItem label="Failures of this action">
+                <span className="grid gap-1">
+                  <Sparkline
+                    data={perDay}
+                    label={`Failed calls of ${e.action} per day, last 14 days`}
+                    series={3}
+                    className="h-10 w-full max-w-xs"
+                  />
+                  <span className="text-xs text-muted-foreground">
+                    Failed calls per day, last 14 days (from the activity log).
+                  </span>
+                </span>
+              </DetailItem>
+            )}
             <DetailItem label="IP / browser">
               {[e.ip, e.userAgent].filter(Boolean).join(' · ')}
             </DetailItem>

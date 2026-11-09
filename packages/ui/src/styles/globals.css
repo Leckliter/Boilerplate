@@ -26,7 +26,7 @@
   --brand-200: oklch(0.87 0.065 277);
   --brand-300: oklch(0.79 0.11 277);
   --brand-400: oklch(0.7 0.16 277);
-  --brand-500: oklch(0.585 0.2 277);
+  --brand-500: oklch(0.56 0.2 277);
   --brand-600: oklch(0.51 0.21 277);
   --brand-700: oklch(0.45 0.19 277);
   --brand-800: oklch(0.38 0.15 277);
@@ -53,13 +53,13 @@
 
   /* Quiet text & fills */
   --muted: oklch(0.96 0 0);
-  --muted-foreground: oklch(0.556 0 0);
+  --muted-foreground: oklch(0.53 0 0);
 
   /* Status */
   --destructive: oklch(0.505 0.213 27.5);
   --destructive-foreground: oklch(1 0 0);
   --success: oklch(0.432 0.095 166.9);
-  --warning: oklch(0.597 0.144 57.5);
+  --warning: oklch(0.55 0.144 57.5);
   --info: oklch(0.424 0.199 265.6);
 
   /* Lines */
@@ -85,7 +85,7 @@
   --fill: light-dark(oklch(0.922 0 0), oklch(0.269 0 0));
   --fill-hover: light-dark(oklch(0.965 0 0), oklch(0.371 0 0));
   --inactive: light-dark(oklch(0.87 0 0), oklch(0.439 0 0));
-  --placeholder: light-dark(oklch(0.708 0 0), oklch(0.556 0 0));
+  --placeholder: light-dark(oklch(0.56 0 0), oklch(0.68 0 0));
   --inverse: light-dark(oklch(0.97 0 0), oklch(0.205 0 0));
   --link: light-dark(oklch(0.424 0.199 265.6), oklch(0.707 0.165 254.6));
   --destructive-tint: light-dark(oklch(0.936 0.032 17.7 / 0.42), oklch(0.429 0.176 28.7 / 0.17));
@@ -108,6 +108,49 @@
   --badge-neutral-subtle: light-dark(oklch(0.269 0 0), oklch(0.922 0 0));
   --arrow-edge: light-dark(oklch(0.145 0 0 / 0.1), transparent);
   --arrow-stroke: light-dark(transparent, oklch(0.32 0 0));
+
+  /* Charts: categorical series colours (first is the brand), grid lines, one line per token. */
+  --chart-1: light-dark(var(--brand-500), var(--brand-400));
+  --chart-2: light-dark(oklch(0.62 0.15 165), oklch(0.74 0.14 165));
+  --chart-3: light-dark(oklch(0.7 0.16 60), oklch(0.78 0.15 65));
+  --chart-4: light-dark(oklch(0.6 0.2 345), oklch(0.72 0.17 345));
+  --chart-5: light-dark(oklch(0.62 0.13 225), oklch(0.74 0.12 225));
+  --chart-6: light-dark(oklch(0.58 0.01 260), oklch(0.7 0.01 260));
+
+  /* Calendar event colours: solid (dot/edge), tint (chip fill), ink (chip text). Each is one light-dark() line. */
+  --event-emerald: light-dark(oklch(0.66 0.15 162), oklch(0.72 0.135 162));
+  --event-emerald-tint: light-dark(oklch(0.965 0.035 162), oklch(0.29 0.06 162));
+  --event-emerald-ink: light-dark(oklch(0.32 0.08 162), oklch(0.93 0.04 162));
+  --event-teal: light-dark(oklch(0.66 0.1 188), oklch(0.72 0.09 188));
+  --event-teal-tint: light-dark(oklch(0.965 0.035 188), oklch(0.29 0.06 188));
+  --event-teal-ink: light-dark(oklch(0.32 0.08 188), oklch(0.93 0.04 188));
+  --event-amber: light-dark(oklch(0.66 0.15 80), oklch(0.72 0.135 80));
+  --event-amber-tint: light-dark(oklch(0.965 0.035 80), oklch(0.29 0.06 80));
+  --event-amber-ink: light-dark(oklch(0.32 0.08 80), oklch(0.93 0.04 80));
+  --event-blue: light-dark(oklch(0.66 0.2 255), oklch(0.72 0.18 255));
+  --event-blue-tint: light-dark(oklch(0.965 0.035 255), oklch(0.29 0.06 255));
+  --event-blue-ink: light-dark(oklch(0.32 0.08 255), oklch(0.93 0.04 255));
+  --event-red: light-dark(oklch(0.66 0.2 27), oklch(0.72 0.18 27));
+  --event-red-tint: light-dark(oklch(0.965 0.035 27), oklch(0.29 0.06 27));
+  --event-red-ink: light-dark(oklch(0.32 0.08 27), oklch(0.93 0.04 27));
+  --event-violet: light-dark(oklch(0.66 0.2 293), oklch(0.72 0.18 293));
+  --event-violet-tint: light-dark(oklch(0.965 0.035 293), oklch(0.29 0.06 293));
+  --event-violet-ink: light-dark(oklch(0.32 0.08 293), oklch(0.93 0.04 293));
+  --event-sky: light-dark(oklch(0.66 0.14 235), oklch(0.72 0.126 235));
+  --event-sky-tint: light-dark(oklch(0.965 0.035 235), oklch(0.29 0.06 235));
+  --event-sky-ink: light-dark(oklch(0.32 0.08 235), oklch(0.93 0.04 235));
+  --event-slate: light-dark(oklch(0.66 0.03 255), oklch(0.72 0.027 255));
+  --event-slate-tint: light-dark(oklch(0.965 0.01 255), oklch(0.29 0.02 255));
+  --event-slate-ink: light-dark(oklch(0.32 0.02 255), oklch(0.93 0.01 255));
+  --event-orange: light-dark(oklch(0.66 0.17 55), oklch(0.72 0.153 55));
+  --event-orange-tint: light-dark(oklch(0.965 0.035 55), oklch(0.29 0.06 55));
+  --event-orange-ink: light-dark(oklch(0.32 0.08 55), oklch(0.93 0.04 55));
+  --event-pink: light-dark(oklch(0.66 0.19 350), oklch(0.72 0.171 350));
+  --event-pink-tint: light-dark(oklch(0.965 0.035 350), oklch(0.29 0.06 350));
+  --event-pink-ink: light-dark(oklch(0.32 0.08 350), oklch(0.93 0.04 350));
+  --event-lime: light-dark(oklch(0.66 0.16 125), oklch(0.72 0.144 125));
+  --event-lime-tint: light-dark(oklch(0.965 0.035 125), oklch(0.29 0.06 125));
+  --event-lime-ink: light-dark(oklch(0.32 0.08 125), oklch(0.93 0.04 125));
 }
 
 .dark {
@@ -133,6 +176,7 @@
   --muted-foreground: oklch(0.708 0 0);
 
   --destructive: oklch(0.704 0.191 22.2);
+  --destructive-foreground: oklch(0.16 0.03 25);
   --success: oklch(0.905 0.093 164.2);
   --warning: oklch(0.75 0.183 55.9);
   --info: oklch(0.707 0.165 254.6);
@@ -218,6 +262,45 @@
   --color-badge-neutral-subtle: var(--badge-neutral-subtle);
   --color-arrow-edge: var(--arrow-edge);
   --color-arrow-stroke: var(--arrow-stroke);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-chart-6: var(--chart-6);
+  --color-event-emerald: var(--event-emerald);
+  --color-event-emerald-tint: var(--event-emerald-tint);
+  --color-event-emerald-ink: var(--event-emerald-ink);
+  --color-event-teal: var(--event-teal);
+  --color-event-teal-tint: var(--event-teal-tint);
+  --color-event-teal-ink: var(--event-teal-ink);
+  --color-event-amber: var(--event-amber);
+  --color-event-amber-tint: var(--event-amber-tint);
+  --color-event-amber-ink: var(--event-amber-ink);
+  --color-event-blue: var(--event-blue);
+  --color-event-blue-tint: var(--event-blue-tint);
+  --color-event-blue-ink: var(--event-blue-ink);
+  --color-event-red: var(--event-red);
+  --color-event-red-tint: var(--event-red-tint);
+  --color-event-red-ink: var(--event-red-ink);
+  --color-event-violet: var(--event-violet);
+  --color-event-violet-tint: var(--event-violet-tint);
+  --color-event-violet-ink: var(--event-violet-ink);
+  --color-event-sky: var(--event-sky);
+  --color-event-sky-tint: var(--event-sky-tint);
+  --color-event-sky-ink: var(--event-sky-ink);
+  --color-event-slate: var(--event-slate);
+  --color-event-slate-tint: var(--event-slate-tint);
+  --color-event-slate-ink: var(--event-slate-ink);
+  --color-event-orange: var(--event-orange);
+  --color-event-orange-tint: var(--event-orange-tint);
+  --color-event-orange-ink: var(--event-orange-ink);
+  --color-event-pink: var(--event-pink);
+  --color-event-pink-tint: var(--event-pink-tint);
+  --color-event-pink-ink: var(--event-pink-ink);
+  --color-event-lime: var(--event-lime);
+  --color-event-lime-tint: var(--event-lime-tint);
+  --color-event-lime-ink: var(--event-lime-ink);
 
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);

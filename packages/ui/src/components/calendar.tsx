@@ -94,18 +94,18 @@ const dragged = (e: React.DragEvent) =>
 export const calendarDotVariants = cva('inline-block size-2 shrink-0 rounded-full', {
   variants: {
     color: {
-      emerald: 'bg-emerald-500',
-      teal: 'bg-teal-500',
-      amber: 'bg-amber-500',
-      blue: 'bg-blue-500',
-      red: 'bg-red-500',
-      violet: 'bg-violet-500',
-      sky: 'bg-sky-500',
-      slate: 'bg-slate-500',
+      emerald: 'bg-event-emerald',
+      teal: 'bg-event-teal',
+      amber: 'bg-event-amber',
+      blue: 'bg-event-blue',
+      red: 'bg-event-red',
+      violet: 'bg-event-violet',
+      sky: 'bg-event-sky',
+      slate: 'bg-event-slate',
       brand: 'bg-primary',
-      orange: 'bg-orange-500',
-      pink: 'bg-pink-500',
-      lime: 'bg-lime-500',
+      orange: 'bg-event-orange',
+      pink: 'bg-event-pink',
+      lime: 'bg-event-lime',
       neutral: 'bg-muted-foreground/60',
     },
   },
@@ -117,23 +117,23 @@ const chipVariants = cva(
     variants: {
       color: {
         emerald:
-          'border-emerald-500 bg-emerald-50 text-emerald-900 hover:bg-emerald-100 dark:bg-emerald-950 dark:text-emerald-100',
-        teal: 'border-teal-500 bg-teal-50 text-teal-900 hover:bg-teal-100 dark:bg-teal-950 dark:text-teal-100',
+          'border-event-emerald bg-event-emerald-tint text-event-emerald-ink hover:brightness-95 dark:hover:brightness-110',
+        teal: 'border-event-teal bg-event-teal-tint text-event-teal-ink hover:brightness-95 dark:hover:brightness-110',
         amber:
-          'border-amber-500 bg-amber-50 text-amber-900 hover:bg-amber-100 dark:bg-amber-950 dark:text-amber-100',
-        blue: 'border-blue-500 bg-blue-50 text-blue-900 hover:bg-blue-100 dark:bg-blue-950 dark:text-blue-100',
-        red: 'border-red-500 bg-red-50 text-red-900 hover:bg-red-100 dark:bg-red-950 dark:text-red-100',
+          'border-event-amber bg-event-amber-tint text-event-amber-ink hover:brightness-95 dark:hover:brightness-110',
+        blue: 'border-event-blue bg-event-blue-tint text-event-blue-ink hover:brightness-95 dark:hover:brightness-110',
+        red: 'border-event-red bg-event-red-tint text-event-red-ink hover:brightness-95 dark:hover:brightness-110',
         violet:
-          'border-violet-500 bg-violet-50 text-violet-900 hover:bg-violet-100 dark:bg-violet-950 dark:text-violet-100',
-        sky: 'border-sky-500 bg-sky-50 text-sky-900 hover:bg-sky-100 dark:bg-sky-950 dark:text-sky-100',
+          'border-event-violet bg-event-violet-tint text-event-violet-ink hover:brightness-95 dark:hover:brightness-110',
+        sky: 'border-event-sky bg-event-sky-tint text-event-sky-ink hover:brightness-95 dark:hover:brightness-110',
         slate:
-          'border-slate-500 bg-slate-100 text-slate-900 hover:bg-slate-200 dark:bg-slate-900 dark:text-slate-100',
+          'border-event-slate bg-event-slate-tint text-event-slate-ink hover:brightness-95 dark:hover:brightness-110',
         brand:
           'border-primary bg-brand-50 text-brand-900 hover:bg-brand-100 dark:bg-brand-900/40 dark:text-brand-100',
         orange:
-          'border-orange-500 bg-orange-50 text-orange-900 hover:bg-orange-100 dark:bg-orange-950 dark:text-orange-100',
-        pink: 'border-pink-500 bg-pink-50 text-pink-900 hover:bg-pink-100 dark:bg-pink-950 dark:text-pink-100',
-        lime: 'border-lime-500 bg-lime-50 text-lime-900 hover:bg-lime-100 dark:bg-lime-950 dark:text-lime-100',
+          'border-event-orange bg-event-orange-tint text-event-orange-ink hover:brightness-95 dark:hover:brightness-110',
+        pink: 'border-event-pink bg-event-pink-tint text-event-pink-ink hover:brightness-95 dark:hover:brightness-110',
+        lime: 'border-event-lime bg-event-lime-tint text-event-lime-ink hover:brightness-95 dark:hover:brightness-110',
         neutral: 'border-border bg-tint text-muted-foreground hover:bg-fill-hover',
       },
     },

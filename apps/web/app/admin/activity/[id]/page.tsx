@@ -1,6 +1,6 @@
 import { callAction, getActivity } from '@app/core';
 import { Badge } from '@app/ui/components/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@app/ui/components/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@app/ui/components/card';
 import { CodeBlock } from '@app/ui/components/code-block';
 import { DetailItem, DetailList } from '@app/ui/components/detail-list';
 import { linkVariants } from '@app/ui/components/link';
@@ -10,7 +10,8 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
 import { ActionError } from '@/components/action-error';
-import { ActivityList, actorLabel } from '@/components/admin/activity-list';
+import { actorLabel } from '@/components/admin/activity-list';
+import { ActivityTimeline } from '@/components/admin/dashboard/activity-timeline';
 import { ChangeList } from '@/components/admin/change-list';
 import { SUBJECT_LINKS } from '@/lib/labels';
 import { requireViewer } from '@/lib/viewer';
@@ -133,9 +134,18 @@ export default async function ActivityEntryPage({ params }: { params: Promise<{ 
         <Card>
           <CardHeader>
             <CardTitle>Same request</CardTitle>
+            <CardDescription>Everything else this one request did, in order.</CardDescription>
           </CardHeader>
           <CardContent>
-            <ActivityList entries={sameRequest} />
+            <ActivityTimeline
+              items={sameRequest.map((r) => ({
+                id: r.id,
+                summary: r.summary ?? r.action,
+                who: `${actorLabel(r)} · ${r.channel}`,
+                at: new Date(r.occurredAt).toISOString(),
+                ok: r.ok,
+              }))}
+            />
           </CardContent>
         </Card>
       )}

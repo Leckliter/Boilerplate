@@ -8,14 +8,17 @@
     "build": "next build",
     "start": "next start",
     "typecheck": "next typegen && tsc --noEmit",
-    "lint": "next typegen && tsc --noEmit",
-    "e2e": "playwright test"
+    "lint": "next typegen && oxlint -c ../../.oxlintrc.json . && tsc --noEmit",
+    "e2e": "env -u E2E_BASE_URL playwright test",
+    "e2e:test-site": "sh -c 'test -n \"$E2E_BASE_URL\" || { echo \"Set E2E_BASE_URL to the test site, e.g. https://test.example.com\"; exit 1; }; playwright test'",
+    "test": "vitest run"
   },
   "dependencies": {
     "@app/core": "workspace:*",
     "@app/db": "workspace:*",
     "@app/ui": "workspace:*",
     "@base-ui/react": "^1.9.0",
+    "@modelcontextprotocol/sdk": "^1.32.2",
     "@neondatabase/auth": "^0.7.0-beta",
     "@supabase/ssr": "^0.12.7",
     "next": "^16.4.3",
@@ -26,12 +29,14 @@
     "zod": "^4.6.7"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.14.0",
     "@playwright/test": "^1.63.0",
     "@tailwindcss/postcss": "^4.3.3",
     "@types/node": "^22.20.5",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "tailwindcss": "^4.3.3",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vitest": "^5.1.0"
   }
 }

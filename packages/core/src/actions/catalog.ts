@@ -9,19 +9,26 @@
 import { getMyAccount, updateMyAccount } from './account';
 import { grantRole, listRoles, listStaff, revokeRole } from './access';
 import { getActivity, listActivity, listChanges } from './activity';
+import { exportActivityCsv } from './activity/export';
 import { createApiKey, listApiKeys, revokeApiKey } from './api-keys';
 import {
   addContactTags,
   archiveContact,
+  bulkAddContactTags,
+  bulkArchiveContacts,
   createContact,
+  exportContactsCsv,
   getContact,
+  importContacts,
   listContacts,
   removeContactTags,
   restoreContact,
   updateContact,
 } from './contacts';
 import { getError, listErrors, resolveError } from './errors';
+import { listFlags, setFeatureFlag } from './flags';
 import { registerActions } from './registry-store';
+import { search } from './search';
 import {
   getSetting,
   listIntegrations,
@@ -43,6 +50,10 @@ registerActions(
   restoreContact,
   addContactTags,
   removeContactTags,
+  bulkAddContactTags,
+  bulkArchiveContacts,
+  importContacts,
+  exportContactsCsv,
   listTags,
   createTag,
   deleteTag,
@@ -57,6 +68,7 @@ registerActions(
   listActivity,
   getActivity,
   listChanges,
+  exportActivityCsv,
   listErrors,
   getError,
   resolveError,
@@ -69,6 +81,10 @@ registerActions(
   setSetting,
   listIntegrations,
   updateIntegration,
+  listFlags,
+  setFeatureFlag,
+  // search
+  search,
   // system
   whoami,
   systemIntegrations,

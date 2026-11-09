@@ -45,7 +45,7 @@ export function RoleEditor({
               }
               className={cn('opacity-60 hover:opacity-100 focus-visible:opacity-100', focusRing)}
             >
-              <XIcon />
+              <XIcon className="size-3" />
             </button>
           </Badge>
         ))}

@@ -1,10 +1,11 @@
 import { callAction, getMyAccount } from '@app/core';
 import { Badge } from '@app/ui/components/badge';
 import { Callout } from '@app/ui/components/callout';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@app/ui/components/card';
+import { Card, CardDescription, CardHeader, CardTitle } from '@app/ui/components/card';
 import { PageHeader } from '@app/ui/components/page';
 import {
   ArrowRightIcon,
+  BellIcon,
   LockIcon,
   ShieldCheckIcon,
   SlidersHorizontalIcon,
@@ -31,6 +32,18 @@ const LINKS = [
     title: 'Preferences',
     text: 'Theme, language and time zone.',
     icon: SlidersHorizontalIcon,
+  },
+  {
+    href: '/account/privacy',
+    title: 'Privacy & data',
+    text: 'Download your data or delete your account.',
+    icon: ShieldCheckIcon,
+  },
+  {
+    href: '/account/notifications',
+    title: 'Notifications',
+    text: 'Inbox, push, text and email.',
+    icon: BellIcon,
   },
 ];
 

@@ -18,3 +18,10 @@ without the owner. In a new project, start a fresh log (skill `new-project-from-
 - 2026-11-08 — Phosphor icons only, via `@app/ui/components/icons`. — One icon set, one place to add one, checked by `icons-from-ui-only`.
 - 2026-11-08 — Dates are stored UTC and formatted in `APP_TIME_ZONE` (default `America/Chicago`) through `@app/ui/lib/dates`. — Servers run in UTC; evening times must not show as the next day.
 - 2026-11-08 — Money is always integer cents. — No floating-point rounding bugs.
+- 2026-11-09 — Lint is oxlint (one root `.oxlintrc.json`) plus `tsc`, not ESLint. — Fast, one config, covers React hooks, jsx-a11y, Next and import rules; knip covers dead code (exports are intentionally not checked: core's exports are its API).
+- 2026-11-09 — The e2e suite runs `next dev` with `DEV_LOGIN`, against a database it drops and recreates every run (`<name>_e2e`). — Dev login is refused by production builds on purpose; a fresh database means a failed run cannot poison the next.
+- 2026-11-09 — Dev-only crash routes live in `apps/web/app/api/dev/` and 404 unless `DEV_LOGIN` is on outside production. — The error pipeline needs real crashes to be tested end to end.
+- 2026-11-09 — Open axe violations are listed per page in `e2e/a11y.spec.ts` (`KNOWN`) with a TODO item; the list may only shrink. — Zero serious/critical is the bar, but existing debt must not hide new regressions.
+- 2026-11-09 — Auth adapters turn a provider 4xx into a message and anything else into a thrown, reported error; Supabase sign-out is `local` scope. — An outage must not read as "wrong code", and signing out of a laptop must not sign out the phone.
+- 2026-11-09 — Migrations run from the Vercel build command and are expand-then-contract. — A failing migration fails the build and the old deployment keeps serving; backwards-compatible schema makes code rollback safe.
+- 2026-11-09 — `scripts/new-project.mjs` removes `automations` (events + automations), `docs` and `brand`; notifications, jobs and REST/MCP are removed by hand. — Those three separate by deleting folders and registrations; the rest are coupled to actors, auth and the delivery log.

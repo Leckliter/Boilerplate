@@ -15,7 +15,7 @@ No fork, no published packages. Copy this repo's files into a NEW repository and
 
 1. Copy the files (not `.git`) into your new repo and commit them as the first commit.
 2. Open it in Claude Code and say: **"Start a new project from the boilerplate."** The skill
-   `new-project-from-boilerplate` renames `@app/*`, helps you pick Neon or Supabase, sets your brand
+   `new-project-from-boilerplate` runs `scripts/new-project.mjs` (renames `@app/*`, keeps one provider, removes modules; `--dry-run` first), helps you pick Neon or Supabase, sets your brand
    colour and deletes the modules you do not need.
 3. Build features with the other skills (`add-action`, `add-migration`, `add-screen`,
    `add-notification`), and `finish-change` before every commit.
@@ -32,6 +32,8 @@ pnpm install
 createdb app && pnpm db:migrate && pnpm db:seed
 pnpm dev                        # http://localhost:3000
 pnpm check                      # typecheck, lint, rules, format, docs, tests — run before every push
+pnpm e2e                        # browser tests (Playwright) on a throw-away database
+docker compose up -d --build    # or: Postgres + the production image (docs/deploy.md)
 ```
 
 In a Claude Code cloud session the hooks in `.claude/` do the install and start Postgres for you.

@@ -10,7 +10,8 @@ import { linkVariants } from '@app/ui/components/link';
 import { Field } from '@app/ui/components/label';
 import { RadioCard, RadioCardGroup } from '@app/ui/components/radio-card';
 import { TagInput } from '@app/ui/components/tag-input';
-const formatMoney = (cents: number) => `$${(cents / 100).toFixed(2)}`; // integer cents → text
+import { formatMoney } from '@app/ui/lib/money';
+
 import { BellIcon } from '@app/ui/components/icons';
 import { useState } from 'react';
 

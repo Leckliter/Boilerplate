@@ -1,0 +1,22 @@
+# The dev container (VS Code / Codespaces): your tools next to a Postgres 16, as in CI.
+services:
+  app:
+    image: mcr.microsoft.com/devcontainers/typescript-node:1-22-bookworm
+    command: sleep infinity
+    volumes: ['..:/workspaces/${localWorkspaceFolderBasename}:cached']
+    depends_on:
+      db: { condition: service_healthy }
+  db:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: app
+    volumes: ['pgdata:/var/lib/postgresql/data']
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres -d app']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+volumes:
+  pgdata:

@@ -1,33 +1,23 @@
 import { callAction, listErrors } from '@app/core';
-import { Card } from '@app/ui/components/card';
-import { rowLink, rowLinkRow } from '@app/ui/components/link';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@app/ui/components/card';
+import { Sparkline } from '@app/ui/components/charts';
 import { PageHeader } from '@app/ui/components/page';
-import { Empty } from '@app/ui/components/empty';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@app/ui/components/table';
-import { BugIcon } from '@app/ui/components/icons';
-import { cn } from '@app/ui/lib/utils';
-import Link from 'next/link';
 
 import { ActionError } from '@/components/action-error';
-import { timeFormat } from '@/components/admin/activity-list';
 import { FilterLinks } from '@/components/admin/filter-links';
-import { ErrorStatusBadge } from '@/components/admin/status-badges';
+import { ErrorsTable } from '@/components/admin/errors/errors-table';
+import { countByDay, lastDays } from '@/lib/admin-stats';
 import { requireViewer } from '@/lib/viewer';
 
 export const metadata = { title: 'Errors' };
 
 const STATUSES = [
   { value: 'open', label: 'Open' },
-  { value: 'resolved', label: 'Fixed' },
+  { value: 'resolved', label: 'Resolved' },
   { value: 'all', label: 'All' },
 ] as const;
+
+const DAYS = 14;
 
 export default async function ErrorsPage({
   searchParams,
@@ -37,7 +27,25 @@ export default async function ErrorsPage({
   const viewer = await requireViewer('errors.manage', '/admin/errors');
   const { status: raw } = await searchParams;
   const status = STATUSES.find((s) => s.value === raw)?.value ?? 'open';
-  const result = await callAction(listErrors, { status, sinceDays: 90 }, viewer.actor);
+  // The counts on the tabs come from the same call with status "all" (one cheap grouped query).
+  const [result, all] = await Promise.all([
+    callAction(listErrors, { status, sinceDays: 90 }, viewer.actor),
+    callAction(listErrors, { status: 'all', sinceDays: 90, limit: 200 }, viewer.actor),
+  ]);
+  const days = lastDays(DAYS);
+  const perDay = all.ok
+    ? countByDay(
+        all.data.map((g) => g.lastSeen),
+        days,
+      )
+    : [];
+  const counts = all.ok
+    ? {
+        open: all.data.filter((g) => g.openCount > 0).length,
+        resolved: all.data.filter((g) => g.openCount === 0).length,
+        all: all.data.length,
+      }
+    : null;
 
   return (
     <>
@@ -52,54 +60,43 @@ export default async function ErrorsPage({
           href: `/admin/errors?status=${s.value}`,
           label: s.label,
           active: s.value === status,
+          count: counts?.[s.value],
         }))}
       />
+      {all.ok && all.data.length > 0 && (
+        <Card className="mb-4">
+          <CardHeader>
+            <CardTitle>Bugs by day</CardTitle>
+            <CardDescription>
+              How many distinct bugs were last seen on each of the last {DAYS} days.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Sparkline
+              data={perDay}
+              label={`Distinct bugs last seen per day, last ${DAYS} days`}
+              series={3}
+              className="h-12 w-full max-w-md"
+            />
+          </CardContent>
+        </Card>
+      )}
       {!result.ok ? (
         <ActionError error={result.error} what="the errors" />
-      ) : result.data.length === 0 ? (
-        <Card>
-          <Empty
-            icon={<BugIcon />}
-            title={status === 'open' ? 'No open errors' : 'Nothing here'}
-            description="Errors from the last 90 days show up here."
-          />
-        </Card>
       ) : (
-        <Card>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Error</TableHead>
-                <TableHead className="hidden md:table-cell">Where</TableHead>
-                <TableHead className="text-right">Times</TableHead>
-                <TableHead className="hidden sm:table-cell">Last seen</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {result.data.map((g) => (
-                <TableRow key={g.fingerprint} className={rowLinkRow}>
-                  <TableCell className="max-w-md">
-                    <Link href={`/admin/errors/${g.ref}`} className={cn('grid gap-0.5', rowLink)}>
-                      <span className="truncate font-medium">{g.message}</span>
-                      <span className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                        <code>{g.ref}</code>
-                        <ErrorStatusBadge resolved={!g.openCount} />
-                        <code>{g.code}</code>
-                      </span>
-                    </Link>
-                  </TableCell>
-                  <TableCell className="hidden text-xs text-muted-foreground md:table-cell">
-                    {g.action ?? g.path ?? g.source}
-                  </TableCell>
-                  <TableCell className="text-right tabular-nums">{g.count}</TableCell>
-                  <TableCell className="hidden text-xs text-muted-foreground sm:table-cell">
-                    {timeFormat.format(new Date(g.lastSeen))}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </Card>
+        <ErrorsTable
+          canResolve
+          rows={result.data.map((g) => ({
+            ref: g.ref,
+            fingerprint: g.fingerprint,
+            message: g.message,
+            code: g.code,
+            where: g.action ?? g.path ?? g.source,
+            count: g.count,
+            openCount: g.openCount,
+            lastSeen: new Date(g.lastSeen).toISOString(),
+          }))}
+        />
       )}
     </>
   );

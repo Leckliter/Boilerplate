@@ -4,7 +4,7 @@ import { getSiteUrl, isProduction } from '@app/core/env';
 import { DialogsHost } from '@app/ui/components/alert-dialog';
 import { SkipLink } from '@app/ui/components/skip-link';
 import { Toaster } from '@app/ui/components/toaster';
-import { setAppTimeZone } from '@app/ui/lib/dates';
+import { getAppTimeZone, setAppTimeZone } from '@app/ui/lib/dates';
 import { THEME_COLORS } from '@app/ui/lib/theme-colors';
 import type { Metadata, Viewport } from 'next';
 import { Geist_Mono, Inter } from 'next/font/google';
@@ -37,7 +37,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
       <body>
-        <AppProviders>
+        <AppProviders timeZone={getAppTimeZone()}>
           <SkipLink />
           {children}
           <Toaster />

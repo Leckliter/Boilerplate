@@ -5,7 +5,11 @@
  */
 export type RailMode = 'expanded' | 'collapsed' | 'hover';
 
-export const RAIL_MODES: { value: RailMode; label: string; key: string }[] = [
+export const RAIL_MODES: {
+  value: RailMode;
+  label: string;
+  key: 'expanded' | 'collapsed' | 'hover';
+}[] = [
   { value: 'expanded', label: 'Expanded', key: 'expanded' },
   { value: 'collapsed', label: 'Collapsed', key: 'collapsed' },
   { value: 'hover', label: 'Expand on hover', key: 'hover' },

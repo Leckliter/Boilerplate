@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 
+import { DeletionBanner } from '@/components/account/deletion-banner';
 import { ShellFor } from '@/components/layout/shell-for';
 import { requireViewer } from '@/lib/viewer';
 
@@ -12,6 +13,7 @@ export default async function AccountLayout({ children }: { children: React.Reac
   const viewer = await requireViewer(undefined, '/account');
   return (
     <ShellFor appId="account" viewer={viewer}>
+      <DeletionBanner viewer={viewer} />
       {children}
     </ShellFor>
   );

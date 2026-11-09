@@ -25,7 +25,12 @@ await emit(tx, 'error.new', data, { dedupeKey: ref }); // the same type + key is
   `access.grantRole/revokeRole` → `role.*`; `apiKeys.create` → `api_key.created`; the error reporter →
   `error.new` / `error.spike`; sign-in → `user.signed_in` through the system action
   `events.recordSignIn` (call it with `systemActor()` from the web app's sign-in code); a failing
-  automation → `automation.failed`.
+  automation → `automation.failed`; the Resend webhook → `email.bounced`; the Quo webhook → `sms.received`
+  (both through the system actions `webhooks.resendEvent` / `webhooks.quoEvent`, once per provider event id);
+  `inquiries.create` → `inquiry.created`; `newsletter.confirm` → `newsletter.subscribed`;
+  `account.requestDeletion` → `account.deletion_requested`; the daily deletion step → `account.deleted`;
+  `contacts.import` → `contact.created` per created contact; `contacts.bulkAddTags` → `contact.tagged`,
+  `contacts.bulkArchive` → `contact.archived` per contact.
 
 ## Dispatch
 

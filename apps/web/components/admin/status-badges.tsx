@@ -28,3 +28,13 @@ export const ErrorStatusBadge = ({ resolved }: { resolved: boolean }) =>
 /** A contact: active or archived. */
 export const ContactStatusBadge = ({ status }: { status: string }) =>
   status === 'archived' ? <Badge color="outline">Archived</Badge> : null;
+
+const INQUIRY: StatusMap = {
+  new: ['blue', 'New'],
+  in_progress: ['amber', 'In progress'],
+  resolved: ['green', 'Resolved'],
+  spam: ['neutral', 'Spam'],
+  archived: ['outline', 'Archived'],
+};
+/** A website inquiry's status. */
+export const InquiryStatusBadge = ({ status }: { status: string }) => show(INQUIRY, status);

@@ -1,0 +1,41 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule: { interval: weekly, day: monday }
+    open-pull-requests-limit: 8
+    groups:
+      # One PR per family instead of thirty.
+      next-and-react:
+        patterns: ['next', 'next-intl', 'react', 'react-dom', '@types/react*', 'eslint-config-next']
+      tooling:
+        patterns:
+          [
+            'typescript',
+            'prettier*',
+            'oxlint',
+            'knip',
+            'turbo',
+            'vitest',
+            '@playwright/*',
+            '@axe-core/*',
+            'tsx',
+          ]
+      database:
+        patterns: ['drizzle-*', 'postgres']
+      auth-providers:
+        patterns: ['@neondatabase/*', '@supabase/*']
+      aws:
+        patterns: ['@aws-sdk/*']
+      patch-and-minor:
+        update-types: [patch, minor]
+        exclude-patterns: ['next', 'react', 'react-dom']
+  - package-ecosystem: github-actions
+    directory: /
+    schedule: { interval: monthly }
+    groups:
+      actions:
+        patterns: ['*']
+  - package-ecosystem: docker
+    directory: /
+    schedule: { interval: monthly }

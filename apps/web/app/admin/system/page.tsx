@@ -1,5 +1,6 @@
 import { callAction, listJobs, systemHealth } from '@app/core';
 import { Badge } from '@app/ui/components/badge';
+import { Sparkline } from '@app/ui/components/charts';
 import { Callout } from '@app/ui/components/callout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@app/ui/components/card';
 import { Empty } from '@app/ui/components/empty';
@@ -43,14 +44,33 @@ export default async function SystemPage({
   const viewer = await requireViewer('system.manage', '/admin/system');
   const { status: raw } = await searchParams;
   const status = STATUSES.find((s) => s.value === raw)?.value ?? 'all';
-  const [health, jobs] = await Promise.all([
+  const [health, jobs, recent] = await Promise.all([
     callAction(systemHealth, {}, viewer.actor),
     callAction(
       listJobs,
       { status: status === 'all' ? undefined : [status], limit: 50 },
       viewer.actor,
     ),
+    callAction(listJobs, { limit: 200 }, viewer.actor),
   ]);
+  // The "health history": there is no cron-run history action in core, so the trend is the background job
+  // queue itself (every cron run does its work through jobs): jobs finished and failed per hour, last 24 h.
+  const hours = Array.from({ length: 24 }, () => 0);
+  /** 0 = the latest hour … 23 = 23 hours ago; -1 = older or not finished. */
+  const hoursAgo = (at: Date | null) => {
+    const h = at ? Math.floor((Date.now() - new Date(at).getTime()) / 3_600_000) : -1;
+    return h >= 0 && h < 24 ? 23 - h : -1;
+  };
+  const finished = hours.map(() => 0);
+  const failed = hours.map(() => 0);
+  if (recent.ok) {
+    for (const j of recent.data) {
+      const i = hoursAgo(j.finishedAt);
+      if (i < 0) continue;
+      if (j.status === 'failed') failed[i]!++;
+      else if (j.status === 'done') finished[i]!++;
+    }
+  }
 
   return (
     <div className="grid gap-6">
@@ -102,6 +122,46 @@ export default async function SystemPage({
               </p>
             </Card>
           </div>
+          <Card>
+            <CardHeader>
+              <CardTitle>Health history</CardTitle>
+              <CardDescription>
+                Background jobs finished and failed per hour over the last 24 hours (the latest{' '}
+                {recent.ok ? recent.data.length : 0} jobs). A flat line means the jobs cron is not
+                running.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="grid gap-4 sm:grid-cols-2">
+              <div className="grid gap-1">
+                <p className="text-sm font-medium">
+                  Finished{' '}
+                  <span className="text-muted-foreground tabular-nums">
+                    · {finished.reduce((a, b) => a + b, 0)}
+                  </span>
+                </p>
+                <Sparkline
+                  data={finished}
+                  label="Background jobs finished per hour, last 24 hours"
+                  series={1}
+                  className="h-12 w-full"
+                />
+              </div>
+              <div className="grid gap-1">
+                <p className="text-sm font-medium">
+                  Failed{' '}
+                  <span className="text-muted-foreground tabular-nums">
+                    · {failed.reduce((a, b) => a + b, 0)}
+                  </span>
+                </p>
+                <Sparkline
+                  data={failed}
+                  label="Background jobs failed per hour, last 24 hours"
+                  series={3}
+                  className="h-12 w-full"
+                />
+              </div>
+            </CardContent>
+          </Card>
           <Card>
             <CardHeader>
               <CardTitle>Scheduled jobs</CardTitle>

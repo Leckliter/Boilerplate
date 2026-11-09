@@ -1,0 +1,67 @@
+# Local stack: Postgres 16 + the production image of the web app (+ an optional mail catcher).
+#
+#   docker compose up -d --build            # db + web at http://localhost:3000
+#   docker compose --profile mail up -d     # also Mailpit (UI http://localhost:8025)
+#   docker compose run --rm migrate         # apply migrations (and `... seed` for demo data)
+#
+# For day-to-day development you usually want only the database and `pnpm dev` on your machine:
+#   docker compose up -d db
+#   export DATABASE_URL=postgres://postgres:postgres@localhost:5432/app && pnpm db:migrate && pnpm dev
+#
+# Sign-in needs a provider project (Neon Auth or Supabase, docs/choosing-a-backend.md); for local
+# work only, set DEV_LOGIN=1 in a *dev* server (`pnpm dev`): it does not work in this production image.
+
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: app
+    ports: ['5432:5432']
+    volumes: ['pgdata:/var/lib/postgresql/data']
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres -d app']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  web:
+    build:
+      context: .
+      args:
+        NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:3000}
+        NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL:-}
+        NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY:-}
+    depends_on:
+      db: { condition: service_healthy }
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      DATABASE_URL: postgres://postgres:postgres@db:5432/app
+      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:3000}
+    ports: ['3000:3000']
+
+  # One-off: runs the migrations with the workspace tooling (not part of the runtime image).
+  migrate:
+    profiles: ['tools']
+    image: node:22-bookworm-slim
+    working_dir: /repo
+    volumes: ['.:/repo']
+    environment:
+      DATABASE_URL: postgres://postgres:postgres@db:5432/app
+      COREPACK_ENABLE_DOWNLOAD_PROMPT: '0'
+    depends_on:
+      db: { condition: service_healthy }
+    command: sh -c "corepack enable && pnpm install --frozen-lockfile && pnpm db:migrate"
+
+  # Optional (profile `mail`): catches mail on SMTP 1025. The app sends through Resend's API today
+  # (packages/core/src/messaging), so nothing reaches Mailpit until you add an SMTP transport there;
+  # TEST_RECIPIENTS_EMAIL already keeps non-production mail away from real people.
+  mailpit:
+    profiles: ['mail']
+    image: axllent/mailpit
+    ports: ['8025:8025', '1025:1025']
+
+volumes:
+  pgdata:

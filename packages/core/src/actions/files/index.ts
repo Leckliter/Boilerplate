@@ -18,7 +18,8 @@ const purposeField = z
   .enum(FILE_PURPOSE_KEYS as [FilePurposeKey, ...FilePurposeKey[]])
   .describe(
     'What the file is: avatar (a contact’s public profile photo; only yourself or staff with users.manage) or ' +
-      'contact_document (private paperwork on a contact; users.manage to add, users.read to see).',
+      'contact_document (private paperwork on a contact; users.manage to add, users.read to see) or ' +
+      'data_export (a person’s own data export, made by account.exportData; cannot be uploaded).',
   );
 
 /** How long a private file's link works. */
@@ -70,6 +71,12 @@ export const requestUpload = defineAction({
   }),
   async run({ input, actor, tx, log }) {
     const purpose = FILE_PURPOSES[input.purpose];
+    if ('systemOnly' in purpose && purpose.systemOnly) {
+      throw new ActionError(
+        'forbidden',
+        `${purpose.label}s are created by the system, not uploaded.`,
+      );
+    }
     requireFileAccess(actor, purpose, 'write', input.subjectId);
     const about = await subjectLabel(tx, purpose.subject, input.subjectId);
     if (!(purpose.contentTypes as readonly string[]).includes(input.contentType)) {

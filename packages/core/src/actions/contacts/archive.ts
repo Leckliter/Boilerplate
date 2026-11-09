@@ -1,9 +1,9 @@
-import { and, contactRoles, contacts, eq, inArray } from '@app/db';
+import { contacts, eq } from '@app/db';
 import { z } from 'zod';
 
-import { ActionError, defineAction } from '../define';
+import { defineAction } from '../define';
 import { emit } from '../../events/emit';
-import { getContactOrThrow } from './shared';
+import { assertOwnerRemains, getContactOrThrow } from './shared';
 
 export const archiveContact = defineAction({
   name: 'contacts.archive',
@@ -19,29 +19,7 @@ export const archiveContact = defineAction({
   input: z.object({ id: z.uuid() }),
   async run({ input, tx, log }) {
     const c = await getContactOrThrow(tx, input.id);
-    // Lock every owner row so two simultaneous archives can't both pass the check.
-    const owners = await tx
-      .select({ contactId: contactRoles.contactId })
-      .from(contactRoles)
-      .where(eq(contactRoles.role, 'owner'))
-      .for('update');
-    const active = owners.length
-      ? await tx
-          .select({ id: contacts.id })
-          .from(contacts)
-          .where(
-            and(
-              inArray(
-                contacts.id,
-                owners.map((o) => o.contactId),
-              ),
-              eq(contacts.status, 'active'),
-            ),
-          )
-      : [];
-    if (active.some((o) => o.id === c.id) && active.length <= 1) {
-      throw new ActionError('conflict', 'This is the last owner; add another owner first.');
-    }
+    await assertOwnerRemains(tx, [c.id]);
     await tx.update(contacts).set({ status: 'archived' }).where(eq(contacts.id, input.id));
     await emit(tx, 'contact.archived', { contactId: c.id, displayName: c.displayName });
     log({ subjectType: 'contact', subjectId: c.id, summary: `Archived ${c.displayName}` });

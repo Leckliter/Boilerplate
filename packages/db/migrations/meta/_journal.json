@@ -29,6 +29,20 @@
       "when": 1794164361772,
       "tag": "0003_sms_consent",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1794201594388,
+      "tag": "0004_leads_privacy",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1794201598018,
+      "tag": "0005_track_leads_privacy",
+      "breakpoints": true
     }
   ]
 }

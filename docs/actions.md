@@ -99,6 +99,24 @@ After-commit or retried work: `enqueue(tx, 'type', payload)`. Something worth re
 `emit(tx, 'project.archived', data)`. Telling someone: `notify(tx, …)`. All three are called inside
 `run`, with the `tx` you were given — never `getDb()` in a transaction.
 
+## Public forms and data tools
+
+- **A public form** is an action with `audience: 'public'`, a `rateLimit`, `humanCheck: true` and a honeypot field
+  (see `inquiries.create`, `newsletter.subscribe`): it never leaks whether something exists, and stores nothing
+  for bots. People who reach out become a `lead` contact (`findOrCreateLead`), never a second record.
+- **Exports of personal data** (`contacts.exportCsv`, `activity.exportCsv`; permission `data.export`) are declared
+  `mutates: true` on purpose: that puts an audit row in the activity log and makes AI clients ask first. They
+  return CSV text with a row cap (`truncated: true`), formula-safe cells.
+- **Bulk and import** (`contacts.bulkAddTags`, `contacts.bulkArchive`, `contacts.import`) run in ONE transaction
+  with ONE activity entry that says how many; the last active owner can never be archived through them. Imports
+  take `dryRun: true` first: per-row `problems`, dedupe by email, nothing saved.
+- **Feature flags** are settings (`flags.<name>`): `isEnabled('flag', actor?)` from `@app/core` in pages and route
+  handlers, `isEnabled('flag', actor, tx)` inside an action (never `getDb()` there); `flags.list` / `flags.set`
+  change them (`packages/core/src/flags.ts` lists the flags the code knows, rollout rules and the sample flags).
+- **System-only actions** (`webhooks.*`, `account.processDeletions`, `account.exportPayload` …) are how webhooks,
+  jobs and cron change data: routes and jobs call them with `systemActor()` so they get a transaction, an activity
+  row and events like everything else.
+
 ## Naming
 
 `<area>.<verb>`, verb in camelCase: `contacts.create`, `contacts.addTags`, `access.grantRole`. What

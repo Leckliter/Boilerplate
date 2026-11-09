@@ -21,6 +21,8 @@ See [actions.md](./actions.md) for how the system works.
 | `docs.internal` | Read internal (staff-only) docs at /docs and over the API/MCP. | ✓ | ✓ | ✓ | ✓ |
 | `automations.manage` | Create, edit, turn on/off and test automations, see their runs and the event log. Automations act as the system, so only owners and admins have this. | ✓ | ✓ |  |  |
 | `notifications.manage` | See every notification sent to anyone and its delivery status; retry failed ones. | ✓ | ✓ | ✓ |  |
+| `inquiries.manage` | See and work through website inquiries (contact-form messages): change their status, add notes, archive them. | ✓ | ✓ | ✓ |  |
+| `data.export` | Download CSV exports of contacts and of the activity log (personal data: owners, admins and managers). | ✓ | ✓ | ✓ |  |
 | `system.manage` | See system health, scheduled jobs and background jobs; retry or cancel jobs. (Technical — owners and admins.) | ✓ | ✓ |  |  |
 
 ## Actions
@@ -35,6 +37,10 @@ See [actions.md](./actions.md) for how the system works.
 | [`contacts.restore`](#contactsrestore) | `users.manage` | yes |
 | [`contacts.addTags`](#contactsaddTags) | `users.manage` | yes |
 | [`contacts.removeTags`](#contactsremoveTags) | `users.manage` | yes |
+| [`contacts.bulkAddTags`](#contactsbulkAddTags) | `users.manage` | yes |
+| [`contacts.bulkArchive`](#contactsbulkArchive) | `users.manage` | yes |
+| [`contacts.import`](#contactsimport) | `users.manage` | yes |
+| [`contacts.exportCsv`](#contactsexportCsv) | `data.export` | yes |
 | [`tags.list`](#tagslist) | `users.read` |  |
 | [`tags.create`](#tagscreate) | `users.manage` | yes |
 | [`tags.delete`](#tagsdelete) | `users.manage` | yes |
@@ -47,6 +53,7 @@ See [actions.md](./actions.md) for how the system works.
 | [`activity.list`](#activitylist) | `activity.read` |  |
 | [`activity.get`](#activityget) | `activity.read` |  |
 | [`activity.changes`](#activitychanges) | `activity.read` |  |
+| [`activity.exportCsv`](#activityexportCsv) | `data.export` | yes |
 | [`errors.list`](#errorslist) | `errors.manage` |  |
 | [`errors.get`](#errorsget) | `errors.manage` |  |
 | [`errors.resolve`](#errorsresolve) | `errors.manage` | yes |
@@ -58,6 +65,9 @@ See [actions.md](./actions.md) for how the system works.
 | [`settings.set`](#settingsset) | `settings.manage` | yes |
 | [`integrations.list`](#integrationslist) | `settings.manage` |  |
 | [`integrations.update`](#integrationsupdate) | `settings.manage` | yes |
+| [`flags.list`](#flagslist) | `settings.manage` |  |
+| [`flags.set`](#flagsset) | `settings.manage` | yes |
+| [`search.query`](#searchquery) | `authenticated` |  |
 | [`system.whoami`](#systemwhoami) | `authenticated` |  |
 | [`system.integrations`](#systemintegrations) | `system.manage` |  |
 | [`system.health`](#systemhealth) | `system.manage` |  |
@@ -80,8 +90,10 @@ See [actions.md](./actions.md) for how the system works.
 | [`automations.cancelRun`](#automationscancelRun) | `automations.manage` | yes |
 | [`automations.retryRun`](#automationsretryRun) | `automations.manage` | yes |
 | [`notifications.list`](#notificationslist) | `authenticated` |  |
+| [`notifications.recent`](#notificationsrecent) | `authenticated` |  |
 | [`notifications.unreadCount`](#notificationsunreadCount) | `authenticated` |  |
 | [`notifications.markRead`](#notificationsmarkRead) | `authenticated` | yes |
+| [`notifications.markAllRead`](#notificationsmarkAllRead) | `authenticated` | yes |
 | [`notifications.dismiss`](#notificationsdismiss) | `authenticated` | yes |
 | [`notifications.open`](#notificationsopen) | `authenticated` | yes |
 | [`notifications.preferences`](#notificationspreferences) | `authenticated` |  |
@@ -92,10 +104,30 @@ See [actions.md](./actions.md) for how the system works.
 | [`notifications.deliveries`](#notificationsdeliveries) | `notifications.manage` |  |
 | [`notifications.retry`](#notificationsretry) | `notifications.manage` | yes |
 | [`notifications.recordSuppression`](#notificationsrecordSuppression) | `system` | yes |
+| [`push.subscribe`](#pushsubscribe) | `authenticated` | yes |
+| [`push.unsubscribe`](#pushunsubscribe) | `authenticated` | yes |
+| [`push.status`](#pushstatus) | `authenticated` |  |
+| [`webhooks.resendEvent`](#webhooksresendEvent) | `system` | yes |
+| [`webhooks.quoEvent`](#webhooksquoEvent) | `system` | yes |
 | [`files.requestUpload`](#filesrequestUpload) | `authenticated` | yes |
 | [`files.confirm`](#filesconfirm) | `authenticated` | yes |
 | [`files.list`](#fileslist) | `authenticated` |  |
 | [`files.delete`](#filesdelete) | `authenticated` | yes |
+| [`inquiries.create`](#inquiriescreate) | `public` | yes |
+| [`inquiries.list`](#inquirieslist) | `inquiries.manage` |  |
+| [`inquiries.get`](#inquiriesget) | `inquiries.manage` |  |
+| [`inquiries.update`](#inquiriesupdate) | `inquiries.manage` | yes |
+| [`inquiries.archive`](#inquiriesarchive) | `inquiries.manage` | yes |
+| [`newsletter.subscribe`](#newslettersubscribe) | `public` | yes |
+| [`newsletter.confirm`](#newsletterconfirm) | `public` | yes |
+| [`newsletter.unsubscribe`](#newsletterunsubscribe) | `public` | yes |
+| [`account.exportData`](#accountexportData) | `authenticated` | yes |
+| [`account.exportPayload`](#accountexportPayload) | `system` |  |
+| [`account.recordExport`](#accountrecordExport) | `system` | yes |
+| [`account.requestDeletion`](#accountrequestDeletion) | `authenticated` | yes |
+| [`account.cancelDeletion`](#accountcancelDeletion) | `authenticated` | yes |
+| [`account.deletionStatus`](#accountdeletionStatus) | `authenticated` |  |
+| [`account.processDeletions`](#accountprocessDeletions) | `system` | yes |
 | [`docs.list`](#docslist) | `public` |  |
 | [`docs.get`](#docsget) | `public` |  |
 
@@ -418,6 +450,147 @@ See [actions.md](./actions.md) for how the system works.
     "id",
     "tags"
   ]
+}
+```
+
+### contacts.bulkAddTags
+
+**Add tags to many contacts** — Add tags to up to 500 contacts at once, all in ONE transaction (all or nothing) and ONE activity-log entry. Contacts that already have a tag keep it. Emits `contact.tagged` for each contact that really got a new tag. An unknown id or tag slug fails the whole call before anything changes.
+
+- Who: `users.manage`
+- Changes data: yes (written to the activity log)
+- Returns: { contacts: number, tagged: number }  (contacts looked at, contacts that got something new)
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "ids": {
+      "minItems": 1,
+      "maxItems": 500,
+      "type": "array",
+      "items": {
+        "type": "string",
+        "format": "uuid",
+        "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+      },
+      "description": "Contact ids (at most 500)."
+    },
+    "tags": {
+      "minItems": 1,
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "description": "Tag slugs, e.g. [\"customer\"] or [\"staff\",\"customer\"]. Use tags.list to see them."
+    }
+  },
+  "required": [
+    "ids",
+    "tags"
+  ]
+}
+```
+
+### contacts.bulkArchive
+
+**Archive many contacts** — Archive up to 500 contacts at once in ONE transaction and ONE activity-log entry (their logins and API keys stop working; reversible with contacts.restore). Already archived ones are skipped. Refused (nothing archived) when it would archive the last active owner. Emits `contact.archived` for each.
+
+- Who: `users.manage`
+- Changes data: yes (written to the activity log)
+- Returns: { archived: number, alreadyArchived: number }
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "ids": {
+      "minItems": 1,
+      "maxItems": 500,
+      "type": "array",
+      "items": {
+        "type": "string",
+        "format": "uuid",
+        "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+      },
+      "description": "Contact ids (at most 500)."
+    }
+  },
+  "required": [
+    "ids"
+  ]
+}
+```
+
+### contacts.import
+
+**Import contacts from CSV** — Create contacts from CSV text (a header row, then at most 2000 rows). Recognised columns: first_name, last_name, company, email, phone, notes, tags (semicolon-separated slugs). Every row is validated; a row whose email already exists (in the system or earlier in the file) is a duplicate and skipped — existing contacts are never changed. Each created contact gets `tags` (the input, plus its own tags column), source "import" and a `contact.created` event. ALWAYS run it first with dryRun=true: nothing is saved, and `problems` lists every row that would be skipped and why. Without dryRun, valid rows are created (one transaction) and bad rows are skipped, not fatal.
+
+- Who: `users.manage`
+- Changes data: yes (written to the activity log)
+- Returns: { dryRun, total, created, duplicates, invalid, problems: [{ row, status: "duplicate" | "invalid", message }], problemsTruncated }  (row = the row’s number in the file, the header being row 1; blank lines are not counted)
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "csv": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2000000,
+      "description": "The file’s text, header row first."
+    },
+    "dryRun": {
+      "default": false,
+      "description": "Check only: save nothing.",
+      "type": "boolean"
+    },
+    "tags": {
+      "default": [],
+      "description": "Tags added to every created contact.",
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    }
+  },
+  "required": [
+    "csv"
+  ]
+}
+```
+
+### contacts.exportCsv
+
+**Export contacts as CSV** — Personal data, so it needs `data.export` and is written to the activity log. Returns the contacts (filter by tag slug and/or search; archived are left out unless asked) as CSV text — columns id, first_name, last_name, company, email, phone, tags (semicolon-separated), status, source, sms_consent, notes, created_at — in `csv`, with the suggested `filename`. At most 10,000 rows (`truncated` says when more matched). The same columns are what contacts.import reads back.
+
+- Who: `data.export`
+- Changes data: yes (written to the activity log)
+- Returns: { filename, contentType: "text/csv", csv, rows, truncated }
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "tag": {
+      "description": "Only contacts with this tag slug.",
+      "type": "string"
+    },
+    "search": {
+      "description": "Matches name, email, phone or company.",
+      "type": "string"
+    },
+    "includeArchived": {
+      "default": false,
+      "type": "boolean"
+    }
+  }
 }
 ```
 
@@ -853,6 +1026,66 @@ See [actions.md](./actions.md) for how the system works.
 }
 ```
 
+### activity.exportCsv
+
+**Export the activity log as CSV** — The audit trail as CSV text for a period (`from` / `to`) and optional filters — columns occurred_at, kind, action, actor_kind, actor, channel, subject_type, subject_id, summary, ok, error_code, error_ref, ip, request_id. Inputs are not included. Needs `data.export`; the export itself is logged. At most 20,000 rows, newest first (`truncated` says when more matched).
+
+- Who: `data.export`
+- Changes data: yes (written to the activity log)
+- Returns: { filename, contentType: "text/csv", csv, rows, truncated }
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "from": {
+      "anyOf": [
+        {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+        },
+        {
+          "type": "string",
+          "format": "date",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+        }
+      ]
+    },
+    "to": {
+      "anyOf": [
+        {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+        },
+        {
+          "type": "string",
+          "format": "date",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+        }
+      ]
+    },
+    "kind": {
+      "type": "string",
+      "enum": [
+        "change",
+        "read",
+        "auth"
+      ]
+    },
+    "action": {
+      "type": "string"
+    },
+    "failedOnly": {
+      "default": false,
+      "type": "boolean"
+    }
+  }
+}
+```
+
 ### errors.list
 
 **List errors** — Unexpected failures (bugs and outages), grouped: occurrences of the same bug share a fingerprint and are listed once with a count. Each group shows its newest reference — pass that to errors.get for the full report (stack, input, diagnosis). Open = at least one occurrence not marked fixed.
@@ -1001,6 +1234,8 @@ See [actions.md](./actions.md) for how the system works.
           "docs.internal",
           "automations.manage",
           "notifications.manage",
+          "inquiries.manage",
+          "data.export",
           "system.manage"
         ]
       }
@@ -1194,6 +1429,131 @@ See [actions.md](./actions.md) for how the system works.
   },
   "required": [
     "id"
+  ]
+}
+```
+
+### flags.list
+
+**List feature flags** — Every feature flag the code knows, with its description, whether it was ever configured, and its current setting: `enabled` (the master switch), `percent` (gradual rollout, 0–100), `roles` and `contactIds` (always on for these). With none of percent/roles/contactIds an enabled flag is on for everyone.
+
+- Who: `settings.manage`
+- Changes data: no
+- Returns: [{ name, description, default, configured, enabled, percent?, roles?, contactIds? }]
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {}
+}
+```
+
+### flags.set
+
+**Change a feature flag** — Turn a flag on/off (`enabled`) and/or change who gets it: `percent` (0–100, a stable share of people), `roles`, `contactIds`. Fields you leave out keep their value; pass null to clear percent / roles / contactIds. Only flags the code declares (flags.list) can be set. Takes up to ~10 seconds to reach every server.
+
+- Who: `settings.manage`
+- Changes data: yes (written to the activity log)
+- Returns: The flag with its new setting
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "enum": [
+        "beta-dashboard",
+        "new-checkout",
+        "holiday-banner"
+      ]
+    },
+    "enabled": {
+      "type": "boolean"
+    },
+    "percent": {
+      "anyOf": [
+        {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "roles": {
+      "anyOf": [
+        {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "owner",
+              "admin",
+              "manager",
+              "staff"
+            ]
+          }
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "contactIds": {
+      "anyOf": [
+        {
+          "maxItems": 500,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "name"
+  ]
+}
+```
+
+### search.query
+
+**Search everything** — One search box for the ⌘K palette: contacts (name, email, phone, company), tags, docs, automations, inquiries, error reports by reference (type `E-…`) and activity-log summaries — only the kinds the caller may see (a customer gets docs only). Each hit is `{ type, id, title, subtitle, href }`; `href` is the page to open. Results are grouped by kind in a fixed order and cut at `limit`.
+
+- Who: `authenticated`
+- Changes data: no
+- Returns: { results: [{ type, id, title, subtitle, href }] }
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "q": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100
+    },
+    "limit": {
+      "default": 20,
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 50
+    }
+  },
+  "required": [
+    "q"
   ]
 }
 ```
@@ -1933,6 +2293,8 @@ See [actions.md](./actions.md) for how the system works.
                     "docs.internal",
                     "automations.manage",
                     "notifications.manage",
+                    "inquiries.manage",
+                    "data.export",
                     "system.manage"
                   ]
                 },
@@ -2682,6 +3044,8 @@ See [actions.md](./actions.md) for how the system works.
                     "docs.internal",
                     "automations.manage",
                     "notifications.manage",
+                    "inquiries.manage",
+                    "data.export",
                     "system.manage"
                   ]
                 },
@@ -3239,6 +3603,29 @@ See [actions.md](./actions.md) for how the system works.
 }
 ```
 
+### notifications.recent
+
+**Recent notifications (the bell)** — The latest few items of the signed-in person’s inbox for the notification bell, newest first, each with the `href` to open, plus the unread count. Lighter than notifications.list (no paging, no views). Dismissed items are left out.
+
+- Who: `authenticated`
+- Changes data: no
+- Returns: { items: [{ id, type, title, body, href, action, urgent, createdAt, readAt }], unread, attention }
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "limit": {
+      "default": 8,
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 20
+    }
+  }
+}
+```
+
 ### notifications.unreadCount
 
 **Unread notifications** — How many unread notifications the signed-in person has in the inbox (dismissed ones are not counted).
@@ -3283,6 +3670,22 @@ See [actions.md](./actions.md) for how the system works.
       "type": "boolean"
     }
   }
+}
+```
+
+### notifications.markAllRead
+
+**Mark all notifications read** — Mark every unread notification in the signed-in person’s inbox as read (the bell’s “Mark all read”).
+
+- Who: `authenticated`
+- Changes data: yes (written to the activity log)
+- Returns: { updated: number, unread: 0 }
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {}
 }
 ```
 
@@ -3609,6 +4012,178 @@ See [actions.md](./actions.md) for how the system works.
 }
 ```
 
+### push.subscribe
+
+**Turn on push on this device** — Save this browser’s Web Push subscription (the object `pushManager.subscribe()` returns: `endpoint` and `keys.p256dh` / `keys.auth`) so notifications can reach it. Needs the VAPID public key from push.status. Subscribing the same endpoint again just refreshes it; an endpoint that belonged to someone else on a shared device moves to the person now signed in.
+
+- Who: `authenticated`
+- Changes data: yes (written to the activity log)
+- Rate limit: 30 per 3600s per caller
+- Returns: { id, endpoint, label }
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "endpoint": {
+      "type": "string",
+      "maxLength": 2000,
+      "format": "uri"
+    },
+    "keys": {
+      "type": "object",
+      "properties": {
+        "p256dh": {
+          "type": "string",
+          "minLength": 10,
+          "maxLength": 200
+        },
+        "auth": {
+          "type": "string",
+          "minLength": 8,
+          "maxLength": 100
+        }
+      },
+      "required": [
+        "p256dh",
+        "auth"
+      ]
+    },
+    "label": {
+      "description": "e.g. \"Chrome on Android\".",
+      "type": "string",
+      "maxLength": 100
+    }
+  },
+  "required": [
+    "endpoint",
+    "keys"
+  ]
+}
+```
+
+### push.unsubscribe
+
+**Turn off push on this device** — Forget one of your own push subscriptions by its `endpoint`. Removing one that is not there is fine. (Also call `subscription.unsubscribe()` in the browser.)
+
+- Who: `authenticated`
+- Changes data: yes (written to the activity log)
+- Returns: { removed: number }
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "endpoint": {
+      "type": "string",
+      "maxLength": 2000,
+      "format": "uri"
+    }
+  },
+  "required": [
+    "endpoint"
+  ]
+}
+```
+
+### push.status
+
+**Push status** — Is Web Push set up on this server (`configured`), the VAPID `publicKey` the browser subscribes with, and the signed-in person’s subscribed devices. Call it before offering a "Turn on notifications" button.
+
+- Who: `authenticated`
+- Changes data: no
+- Returns: { configured, publicKey, subscriptions: [{ id, label, endpointHost, createdAt, lastSuccessAt }] }
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {}
+}
+```
+
+### webhooks.resendEvent
+
+**Handle a Resend webhook** — System only: apply one verified Resend event. `email.delivered` marks the delivery delivered; `email.bounced` (a permanent bounce suppresses the address) and `email.complained` (always suppresses) mark it failed / flagged and emit `email.bounced`; `email.failed` marks the delivery failed. Other types are acknowledged and ignored. Safe to repeat.
+
+- Who: `system`
+- Changes data: yes (written to the activity log)
+- Returns: { handled: boolean, type }
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "eventId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200,
+      "description": "The provider’s event/delivery id (the dedupe key)."
+    },
+    "type": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100
+    },
+    "data": {
+      "type": "object",
+      "propertyNames": {
+        "type": "string"
+      },
+      "additionalProperties": {}
+    }
+  },
+  "required": [
+    "eventId",
+    "type",
+    "data"
+  ]
+}
+```
+
+### webhooks.quoEvent
+
+**Handle a Quo webhook** — System only: apply one verified Quo event. `message.received` records the inbound text as an `sms.received` event; if the whole message is STOP (also STOPALL, UNSUBSCRIBE, CANCEL, END, QUIT) the number is suppressed and the recorded SMS consent cleared, if it is START (or UNSTOP) the suppression is lifted and consent recorded again (source "sms-reply"). `message.delivered` updates the delivery’s status. Other types are acknowledged and ignored. Safe to repeat.
+
+- Who: `system`
+- Changes data: yes (written to the activity log)
+- Returns: { handled: boolean, type, keyword? }
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "eventId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200,
+      "description": "The provider’s event/delivery id (the dedupe key)."
+    },
+    "type": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100
+    },
+    "data": {
+      "type": "object",
+      "propertyNames": {
+        "type": "string"
+      },
+      "additionalProperties": {}
+    }
+  },
+  "required": [
+    "eventId",
+    "type",
+    "data"
+  ]
+}
+```
+
 ### files.requestUpload
 
 **Start a file upload** — Step 1 of uploading a photo or document to a record: checks the type and size, and returns `uploadUrl`. PUT the raw bytes there with the same Content-Type header (within 2 hours), then call files.confirm. Needs permission to add files of that purpose to that record.
@@ -3627,9 +4202,10 @@ See [actions.md](./actions.md) for how the system works.
       "type": "string",
       "enum": [
         "avatar",
-        "contact_document"
+        "contact_document",
+        "data_export"
       ],
-      "description": "What the file is: avatar (a contact’s public profile photo; only yourself or staff with users.manage) or contact_document (private paperwork on a contact; users.manage to add, users.read to see)."
+      "description": "What the file is: avatar (a contact’s public profile photo; only yourself or staff with users.manage) or contact_document (private paperwork on a contact; users.manage to add, users.read to see) or data_export (a person’s own data export, made by account.exportData; cannot be uploaded)."
     },
     "subjectId": {
       "type": "string",
@@ -3707,9 +4283,10 @@ See [actions.md](./actions.md) for how the system works.
       "type": "string",
       "enum": [
         "avatar",
-        "contact_document"
+        "contact_document",
+        "data_export"
       ],
-      "description": "What the file is: avatar (a contact’s public profile photo; only yourself or staff with users.manage) or contact_document (private paperwork on a contact; users.manage to add, users.read to see)."
+      "description": "What the file is: avatar (a contact’s public profile photo; only yourself or staff with users.manage) or contact_document (private paperwork on a contact; users.manage to add, users.read to see) or data_export (a person’s own data export, made by account.exportData; cannot be uploaded)."
     },
     "subjectId": {
       "type": "string",
@@ -3747,6 +4324,463 @@ See [actions.md](./actions.md) for how the system works.
   "required": [
     "fileId"
   ]
+}
+```
+
+### inquiries.create
+
+**Send an inquiry** — Public: the website’s contact form. Stores the message, links it to the contact with that email (creating a `lead` contact when there is none — an existing customer is linked, not re-tagged), emits `inquiry.created` and tells staff with inquiries.manage. Always answers `{ received: true }`. `website` is a honeypot for bots: real forms leave it empty (hide it with CSS); anything in it is silently dropped. Rate-limited and bot-checked.
+
+- Who: `public`
+- Changes data: yes (written to the activity log)
+- Rate limit: 5 per 3600s per caller
+- Guests must pass the human check (Turnstile) when it is configured
+- Returns: { received: true }
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 120
+    },
+    "email": {
+      "description": "Email address. Stored lower-case; must be unique across contacts.",
+      "type": "string"
+    },
+    "phone": {
+      "description": "Phone number in any common format; stored as E.164 (+18165551234). US is assumed.",
+      "type": "string"
+    },
+    "subject": {
+      "type": "string",
+      "maxLength": 200
+    },
+    "message": {
+      "type": "string",
+      "minLength": 5,
+      "maxLength": 5000
+    },
+    "source": {
+      "default": "website",
+      "description": "Which form, e.g. \"pricing\".",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 50
+    },
+    "website": {
+      "description": "Honeypot — leave empty.",
+      "type": "string",
+      "maxLength": 500
+    }
+  },
+  "required": [
+    "name",
+    "email",
+    "message"
+  ]
+}
+```
+
+### inquiries.list
+
+**List inquiries** — Website inquiries, newest first, with how many there are per status. Without `status` the list shows new, in-progress and resolved ones (spam and archived are hidden). Search `q` matches name, email, subject and message.
+
+- Who: `inquiries.manage`
+- Changes data: no
+- Returns: { inquiries: [{ id, contactId, name, email, phone, subject, message, status, staffNote, source, createdAt, … }], total, counts: { new, in_progress, resolved, spam, archived } }
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "status": {
+      "type": "string",
+      "enum": [
+        "new",
+        "in_progress",
+        "resolved",
+        "spam",
+        "archived"
+      ]
+    },
+    "q": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100
+    },
+    "limit": {
+      "default": 50,
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 200
+    },
+    "offset": {
+      "default": 0,
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    }
+  }
+}
+```
+
+### inquiries.get
+
+**Get an inquiry** — One inquiry with the contact it belongs to (with their tags) and who handled it.
+
+- Who: `inquiries.manage`
+- Changes data: no
+- Returns: { …inquiry, contact: Contact | null, handledByName }
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid",
+      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+    }
+  },
+  "required": [
+    "id"
+  ]
+}
+```
+
+### inquiries.update
+
+**Update an inquiry** — Change an inquiry’s `status` (new, in_progress, resolved, spam, archived) and/or replace the internal staff `note` (never shown to the visitor; null clears it). The first status change records who is handling it.
+
+- Who: `inquiries.manage`
+- Changes data: yes (written to the activity log)
+- Returns: The updated inquiry
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid",
+      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "new",
+        "in_progress",
+        "resolved",
+        "spam",
+        "archived"
+      ]
+    },
+    "note": {
+      "anyOf": [
+        {
+          "type": "string",
+          "maxLength": 5000
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "id"
+  ]
+}
+```
+
+### inquiries.archive
+
+**Archive an inquiry** — Hide an inquiry from the default list (status "archived"). Nothing is deleted; set another status with inquiries.update to bring it back.
+
+- Who: `inquiries.manage`
+- Changes data: yes (written to the activity log)
+- Returns: { id, status }
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid",
+      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+    }
+  },
+  "required": [
+    "id"
+  ]
+}
+```
+
+### newsletter.subscribe
+
+**Subscribe to the newsletter** — Public: ask to join the newsletter. Double opt-in: this only records a PENDING subscription (with the wording shown) and emails a confirmation link; nobody is subscribed until they click it (newsletter.confirm). Finds or creates the contact (a new one is tagged `lead`). The answer is the same whether or not the address was already known, so it cannot be used to find out who is on the list. `website` is a honeypot: leave it empty.
+
+- Who: `public`
+- Changes data: yes (written to the activity log)
+- Rate limit: 5 per 3600s per caller
+- Guests must pass the human check (Turnstile) when it is configured
+- Returns: { received: true, message }
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "email": {
+      "description": "Email address. Stored lower-case; must be unique across contacts.",
+      "type": "string"
+    },
+    "firstName": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100
+    },
+    "source": {
+      "default": "website",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 50
+    },
+    "website": {
+      "description": "Honeypot — leave empty.",
+      "type": "string",
+      "maxLength": 500
+    }
+  },
+  "required": [
+    "email"
+  ]
+}
+```
+
+### newsletter.confirm
+
+**Confirm a newsletter subscription** — Public: the second step of the double opt-in. Takes the signed `token` from the confirmation email (valid 7 days), marks the subscription subscribed, records the consent (when, what wording, through which door), tags the contact `newsletter` and emits `newsletter.subscribed`. Confirming twice is fine.
+
+- Who: `public`
+- Changes data: yes (written to the activity log)
+- Rate limit: 30 per 3600s per caller
+- Returns: { status: "subscribed", email }
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "token": {
+      "type": "string",
+      "minLength": 10,
+      "maxLength": 500
+    }
+  },
+  "required": [
+    "token"
+  ]
+}
+```
+
+### newsletter.unsubscribe
+
+**Unsubscribe from the newsletter** — Public: leave the newsletter. Pass the signed `token` from the link in a newsletter, or — when signed in — nothing, to unsubscribe your own address. Removes the `newsletter` tag and records when. Unsubscribing twice is fine. (Transactional emails like receipts are not affected.)
+
+- Who: `public`
+- Changes data: yes (written to the activity log)
+- Rate limit: 30 per 3600s per caller
+- Returns: { status: "unsubscribed" }
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "token": {
+      "type": "string",
+      "minLength": 10,
+      "maxLength": 500
+    }
+  }
+}
+```
+
+### account.exportData
+
+**Download my data** — Ask for a copy of everything we hold about the signed-in person: their contact record, tags and roles, notification and consent settings, devices, inbox, inquiries, newsletter status, files list, API keys (never the secrets) and the activity about them — as one JSON file. It is built in the background; when it is ready they get a notification, and `files.list` (purpose `data_export`, subjectId = their contact id) returns it with a download link. A new export replaces the previous one; files are removed after 7 days. Needs file storage.
+
+- Who: `authenticated`
+- Changes data: yes (written to the activity log)
+- Rate limit: 3 per 86400s per caller
+- Returns: { queued: true }
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {}
+}
+```
+
+### account.exportPayload
+
+**Gather a person’s data** — System only (used by the data-export job): everything held about one contact as a JSON-able object.
+
+- Who: `system`
+- Changes data: no
+- Returns: The export document (object)
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "contactId": {
+      "type": "string",
+      "format": "uuid",
+      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+    }
+  },
+  "required": [
+    "contactId"
+  ]
+}
+```
+
+### account.recordExport
+
+**Record a finished data export** — System only (used by the data-export job): register the stored export file for the contact, replace their previous export, and tell them it is ready.
+
+- Who: `system`
+- Changes data: yes (written to the activity log)
+- Returns: { fileId }
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "contactId": {
+      "type": "string",
+      "format": "uuid",
+      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+    },
+    "fileId": {
+      "type": "string",
+      "format": "uuid",
+      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+    },
+    "bucket": {
+      "type": "string"
+    },
+    "path": {
+      "type": "string"
+    },
+    "filename": {
+      "type": "string"
+    },
+    "sizeBytes": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    }
+  },
+  "required": [
+    "contactId",
+    "fileId",
+    "bucket",
+    "path",
+    "filename",
+    "sizeBytes"
+  ]
+}
+```
+
+### account.requestDeletion
+
+**Delete my account** — Ask to delete the signed-in person’s account. Nothing is erased yet: after a grace period (setting `account.deletionGraceDays`, default 14 days) the daily job wipes their personal data (name, email, phone, tags, roles, inbox, devices, files, API keys) and unlinks their login; the contact row stays, anonymised, so history still points somewhere. They can cancel any time before (account.cancelDeletion). Refused for the last owner. Only the person themself, signed in on the website — not an API key or AI. Asking again while a request is pending returns that request.
+
+- Who: `authenticated`
+- Changes data: yes (written to the activity log)
+- Rate limit: 5 per 3600s per caller
+- Returns: { id, requestedAt, scheduledFor, graceDays, alreadyRequested }
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "reason": {
+      "type": "string",
+      "maxLength": 1000
+    }
+  }
+}
+```
+
+### account.cancelDeletion
+
+**Keep my account** — Cancel a pending account deletion before the grace period ends. Nothing was erased yet.
+
+- Who: `authenticated`
+- Changes data: yes (written to the activity log)
+- Returns: { id }
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {}
+}
+```
+
+### account.deletionStatus
+
+**Is my account being deleted?** — The signed-in person’s pending deletion request (when it was asked and when it will happen), or null, and the grace period in days.
+
+- Who: `authenticated`
+- Changes data: no
+- Returns: { pending: { id, requestedAt, scheduledFor } | null, graceDays }
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {}
+}
+```
+
+### account.processDeletions
+
+**Carry out due account deletions** — System only (the daily maintenance step): anonymise every contact whose pending deletion is past its scheduled time, emit `account.deleted` for each, and keep (with a note) any request that would remove the last active owner. Safe to run repeatedly.
+
+- Who: `system`
+- Changes data: yes (written to the activity log)
+- Returns: { processed: number, skipped: number }
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "limit": {
+      "default": 25,
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 100
+    }
+  }
 }
 ```
 

@@ -25,6 +25,8 @@ not error reports.
 | A page, layout, route handler or server action crashing | `apps/web/instrumentation.ts` (`onRequestError`)                  | `request` |
 | Browser code: error pages, event handlers, promises     | `app/error.tsx`, `instrumentation-client.ts` → `POST /api/errors` | `client`  |
 | Anything else (scripts, jobs, route handlers you wrote) | `reportError(err, { source: 'job', … })`                          | `job` …   |
+| A provider webhook that crashed outside its action      | `handleWebhook` in `apps/web/app/api/webhooks/_lib/handle.ts`     | `webhook` |
+| A cron module step or tick that threw                   | the cron routes / `runMaintenance` (the step name is in context)  | `job`     |
 
 Each report is a row in `app.error_events`: message, stack and `cause` chain, the action and its
 redacted input, the actor, IP, browser, request id, environment, the deployed commit and the
@@ -34,6 +36,10 @@ shown as a **Reload** toast, not reported.
 
 **Alerts** (to everyone with `errors.manage`): a `staff.newError` notification for the first
 occurrence of a fingerprint, and `staff.errorSpike` when an open bug happens 10 times in 15 minutes.
+
+A webhook answers `500` with the reference after a crash, so the provider retries; a bad signature (`401`) or an
+unreadable body (`400`) is a normal answer, logged but not reported. The matching structured log line carries the same
+`ref` ([logging.md](logging.md) → Server log lines).
 
 ## How people see it
 

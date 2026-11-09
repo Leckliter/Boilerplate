@@ -17,7 +17,9 @@ import {
 } from '@app/db';
 
 import { IDEMPOTENCY_TTL_MS } from './idempotency';
+import { reportError } from './errors/report';
 import { enqueue, getJob } from './jobs';
+import { listMaintenanceSteps } from './maintenance-steps';
 
 /** API/AI reads in the activity log are kept this long; changes are kept forever. */
 export const READ_LOG_RETENTION_DAYS = 365;
@@ -41,6 +43,8 @@ export type MaintenanceResult = {
   automationRunsDeleted: number;
   cronRunsDeleted: number;
   abandonedUploads: number;
+  /** What each module's daily step returned (`{ error }` for one that failed — it was reported). */
+  steps: Record<string, unknown>;
 };
 
 /**
@@ -53,6 +57,8 @@ export type MaintenanceResult = {
  *   (runs still waiting are kept, however old — they carry a copy of their trigger).
  * - marks uploads that were started but never finished as deleted (and queues `files.deleteObject`
  *   for their bytes when the files module registered that job).
+ * - runs the daily steps modules registered (`registerMaintenanceStep`): e.g. `account.deletions`
+ *   anonymises accounts whose deletion grace period is over.
  * Deletes in batches so a big backlog never holds long locks.
  */
 export async function runMaintenance(
@@ -136,6 +142,17 @@ export async function runMaintenance(
     return rows.length;
   });
 
+  // Module steps: one failing never stops the others (or the cleanup above, already done).
+  const stepResults: Record<string, unknown> = {};
+  for (const [name, step] of listMaintenanceSteps()) {
+    try {
+      stepResults[name] = await step(now);
+    } catch (err) {
+      const ref = await reportError(err, { source: 'job', context: { maintenanceStep: name } });
+      stepResults[name] = { error: ref };
+    }
+  }
+
   return {
     readLogsDeleted,
     rateLimitRowsDeleted: counters.length,
@@ -145,5 +162,6 @@ export async function runMaintenance(
     automationRunsDeleted: oldRuns.length,
     cronRunsDeleted: oldCronRuns.length,
     abandonedUploads: abandoned,
+    steps: stepResults,
   };
 }

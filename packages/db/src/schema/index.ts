@@ -10,3 +10,5 @@ export * from './automations';
 export * from './notifications';
 export * from './files';
 export * from './ops';
+export * from './leads';
+export * from './privacy';

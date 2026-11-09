@@ -8,7 +8,6 @@ import {
   eq,
   inArray,
   lt,
-  messageSuppressions,
   notificationDeliveries,
   notifications,
 } from '@app/db';
@@ -16,6 +15,7 @@ import { z } from 'zod';
 
 import { enqueue } from '../../jobs/enqueue';
 import { notify } from '../../notifications/notify';
+import { suppressAddress } from '../../notifications/suppress';
 import { ActionError, defineAction } from '../define';
 import { instantField } from '../fields';
 import { channelField, me } from './shared';
@@ -169,17 +169,7 @@ export const recordSuppression = defineAction({
     detail: z.string().max(500).optional(),
   }),
   async run({ input, tx, log }) {
-    const address = input.address.toLowerCase();
-    await tx
-      .insert(messageSuppressions)
-      .values({ channel: input.channel, address, reason: input.reason, detail: input.detail })
-      .onConflictDoNothing();
-    if (input.channel === 'sms' && input.reason === 'stop') {
-      await tx
-        .update(contacts)
-        .set({ smsConsentAt: null, smsConsentSource: null, smsConsentText: null })
-        .where(eq(contacts.phone, input.address));
-    }
+    const address = await suppressAddress(tx, input);
     log({ summary: `Stopped ${input.channel} messages to ${address} (${input.reason})` });
     return { channel: input.channel, address };
   },

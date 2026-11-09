@@ -1,6 +1,6 @@
 ---
 name: new-project-from-boilerplate
-description: Turn a fresh copy of this boilerplate into a real project — rename @app, pick Neon or Supabase, set the brand colour, delete the modules you don't need. Use when the owner says "start a new project from this boilerplate", "rename the app", "pick a backend" or "remove the REST/MCP/automations module".
+description: Turn a fresh copy of this boilerplate into a real project — rename @app, pick Neon or Supabase, set the brand colour, delete the modules you don't need. Use when the owner says "start a new project from this boilerplate", "rename the app", "pick a backend" or "remove the automations module".
 ---
 
 # New project from the boilerplate
@@ -16,7 +16,38 @@ Collect: the project name (display + slug), the npm scope they want instead of `
 domain, the brand colour (or "keep the default"), the owner's email, and which modules to keep
 (below). Write the answers at the top of TODO.md.
 
-## 1. Rename `@app`
+## 1. Run the script (rename, backend, modules)
+
+`scripts/new-project.mjs` does steps 1, 2 and 4 in one go and is safe to run twice. Always look at the
+dry run first, then run it for real on a branch (`git status` clean, `git switch -c chore/new-project`):
+
+```bash
+node scripts/new-project.mjs --name "Acme Rentals" --scope @acme --backend supabase \
+  --modules automations,docs --dry-run
+node scripts/new-project.mjs --name "Acme Rentals" --scope @acme --backend supabase \
+  --modules automations,docs
+node scripts/new-project.mjs --modules list     # what can be removed
+```
+
+- **Scope + names**: `@app` → your scope in every file (package names, imports, docs, skills, the rules
+  script's `CONFIG`), the display name in `apps/web/lib/site.ts`, the logo, `.env.example`, README title, the
+  root package name and the local database name. Your own prose in the docs is yours to rewrite (step 5).
+- **Backend** (`--backend neon|supabase` = the one to KEEP): deletes the other adapter and its test, the
+  `app/api/auth` proxy (Neon), its dependency, env block and `turbo.json` pattern, and makes
+  `lib/auth/index.ts` return the remaining adapter. Data code is untouched (Drizzle over `DATABASE_URL`).
+- **Modules** (`--modules a,b` = the ones to REMOVE): deletes folders, registrations (`modules.ts`),
+  nav and site links, package exports, scripts, CI steps and every `emit(tx, …)` call of the events
+  module. Whatever still uses a removed module (a clean-up step, a search source, a test) is printed as
+  **Needs you**: fix each one by hand. With `automations` removed it also runs `pnpm db:generate` to
+  write a NEW migration that drops its tables (review it; never edit an applied migration).
+- It runs Prettier and `pnpm install`, adds a checklist to TODO.md, and never commits.
+
+Then `pnpm check`. Anything that fails is either a "Needs you" item or a real bug in the script: fix
+the manifest in `scripts/new-project.mjs` (and its test, `pnpm test:scripts`).
+
+The sections below say what the script does, for a manual run or a part it does not cover.
+
+## 1a. Rename `@app` by hand (only if the script cannot run)
 
 1. `git status` must be clean. Make a branch `chore/rename`.
 2. Replace the scope everywhere, including docs, skills and the rules script:
@@ -30,12 +61,9 @@ domain, the brand colour (or "keep the default"), the owner's email, and which m
 
 ## 2. Pick a backend
 
-Follow docs/choosing-a-backend.md "Removing a provider". In short: set `BACKEND` in `.env`;
-delete the other adapter (`apps/web/lib/auth/{neon,supabase}.ts`), its branch in
-`lib/auth/index.ts`, its env block in `.env.example`, and its package dependencies; keep the
-S3 storage settings. Data code does not change — it is Drizzle over `DATABASE_URL` either way.
-Then walk the owner through creating the database and auth project (what only they can do goes in
-TODO.md under "Owner"). Run `pnpm db:migrate` against a LOCAL database only.
+Follow docs/choosing-a-backend.md "Removing a provider" (the script's `--backend` does it). Then walk
+the owner through creating the database and auth project (docs/choosing-a-backend.md → Provider setup;
+what only they can do goes in TODO.md under "Owner"). Run `pnpm db:migrate` against a LOCAL database only.
 
 ## 3. Brand
 
@@ -45,10 +73,10 @@ replace logo artwork in `apps/web/public/brand/` and the favicon. No raw colours
 
 ## 4. Delete unused modules
 
-Each module is deletable as one folder plus its registrations (docs/architecture.md → Modules).
-For each module the owner does not want: delete its folder(s), remove its re-export/registration,
-its migration tables only if nothing was ever applied (otherwise leave the tables, add a NEW
-migration to drop them), its env vars, its docs page, and its entry in docs/README.md. Then
+`--modules` does this (see above). By hand: each module is one folder plus its registrations
+(docs/architecture.md → Modules): delete its folder(s), remove its re-export/registration, its
+migration tables only if nothing was ever applied (otherwise leave the tables, add a NEW migration to
+drop them), its env vars, its docs page and its entry in docs/README.md. Then
 `pnpm typecheck && pnpm rules && pnpm test`. Never leave a half-removed module.
 
 ## 5. Make the docs yours

@@ -9,9 +9,13 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 jobs:
   check:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     services:
       postgres:
         image: postgres:16
@@ -34,7 +38,7 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - name: Typecheck
         run: pnpm typecheck
-      - name: Lint
+      - name: Lint (oxlint + tsc)
         run: pnpm lint
       - name: Rules (AGENTS.md, checked mechanically)
         run: |
@@ -44,13 +48,77 @@ jobs:
         run: pnpm format
       - name: Action docs are up to date
         run: pnpm actions:docs --check
+      - name: In-app docs are up to date
+        run: pnpm docs:build --check
       - name: Migrations apply cleanly
         run: pnpm db:migrate
       - name: Migrations match the schema
         run: pnpm --filter @app/db exec drizzle-kit check
-      - name: Tests
+      - name: Tests (core against Postgres, ui, web unit tests)
         run: pnpm test
       - name: Every action has a "works" and a "refused" test
         run: pnpm actions:tests
       - name: Build
         run: pnpm --filter web build
+
+  # Dead code, unused and unlisted dependencies (knip.json).
+  knip:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm knip
+
+  # Browser tests (apps/web/e2e) against `next dev` with DEV_LOGIN and a throw-away Postgres.
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: app
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      # The suite creates and seeds its own `app_e2e` database next to this one (scripts/e2e-db.mjs).
+      DATABASE_URL: postgres://postgres:postgres@localhost:5432/app
+      CI: 'true'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Playwright browsers (cached)
+        id: pw-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+      - name: Install Chromium
+        run: |
+          if [ "${{ steps.pw-cache.outputs.cache-hit }}" = "true" ]; then
+            pnpm --filter web exec playwright install-deps chromium
+          else
+            pnpm --filter web exec playwright install --with-deps chromium
+          fi
+      - name: End-to-end tests
+        run: pnpm --filter web e2e
+      - name: Keep the failure screenshots
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-results
+          path: apps/web/test-results
+          retention-days: 7

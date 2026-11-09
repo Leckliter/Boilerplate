@@ -17,3 +17,4 @@ test-results
 playwright-report
 .action-coverage
 .claude/worktrees/
+.next-e2e

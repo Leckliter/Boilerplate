@@ -5,8 +5,10 @@
 export {
   dismissNotifications,
   listNotifications,
+  markAllRead,
   markRead,
   openNotification,
+  recentNotifications,
   unreadCount,
 } from './inbox';
 export { getPreferences, setPreference, setSmsConsent, unsubscribe } from './preferences';

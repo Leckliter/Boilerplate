@@ -55,13 +55,19 @@ export async function actorFromRequest(
 
 /** Jobs a change queued (notifications, event dispatch, file deletes) run right after the response. */
 export function runJobsAfterResponse() {
-  after(async () => {
+  const work = async () => {
     try {
       await runDueJobs({ limit: 10, deadlineMs: 20_000 });
     } catch (err) {
       await reportError(err, { source: 'job', context: { where: 'api after()' } });
     }
-  });
+  };
+  try {
+    after(work);
+  } catch {
+    // Expected: `after()` only works inside a real request (route tests call the handlers directly).
+    // Without it the cron route (every minute) still runs the jobs.
+  }
 }
 
 /** Browser (cookie) callers must send same-origin JSON: blocks cross-site form posts. */

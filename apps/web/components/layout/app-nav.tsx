@@ -47,6 +47,12 @@ function Row({
       }
     >
       {item.label}
+      {item.count ? (
+        <span className="ml-2 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-xs font-semibold text-primary-foreground tabular-nums">
+          <span className="sr-only">New: </span>
+          {item.count > 99 ? '99+' : item.count}
+        </span>
+      ) : null}
     </Sidebar.MenuButton>
   );
 }

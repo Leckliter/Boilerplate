@@ -188,6 +188,132 @@ const automationFailed = event<'automation.failed'>()({
   },
 });
 
+// ---------------------------------------------------------------- messaging webhooks
+
+const emailBounced = event<'email.bounced'>()({
+  type: 'email.bounced',
+  description:
+    'An email we sent bounced or was marked as spam (reported by Resend’s webhook). A permanent bounce or a ' +
+    'complaint also stops all future email to that address (message suppression). A good trigger for “ask for a ' +
+    'new email address”.',
+  subject: { type: 'contact', id: (d) => d.contactId },
+  data: z.object({
+    emailId: z.string().describe('The provider’s email id (matches a delivery’s providerId).'),
+    email: z.string(),
+    kind: z.enum(['bounce', 'complaint']),
+    permanent: z
+      .boolean()
+      .describe('false for a temporary bounce (mailbox full …); nothing is suppressed'),
+    reason: z.string().nullable(),
+    contactId: id.nullable().describe('The contact with that address, when there is one'),
+  }),
+  example: {
+    emailId: 're_123',
+    email: 'pat@example.com',
+    kind: 'bounce',
+    permanent: true,
+    reason: 'The recipient’s mailbox does not exist.',
+    contactId: EXAMPLE_ID,
+  },
+});
+
+const smsReceived = event<'sms.received'>()({
+  type: 'sms.received',
+  description:
+    'A text message arrived on our number (Quo webhook). `keyword` is "stop" or "start" when the whole message ' +
+    'was an opt-out / opt-in word (consent has already been cleared / restored by then), otherwise null.',
+  subject: { type: 'contact', id: (d) => d.contactId },
+  data: z.object({
+    messageId: z.string(),
+    from: z.string().describe('The sender’s number, E.164'),
+    to: z.string().describe('Our number that received it'),
+    text: z.string().describe('The message, cut at 1,600 characters'),
+    keyword: z.enum(['stop', 'start']).nullable(),
+    contactId: id.nullable().describe('The contact with that phone number, when there is one'),
+  }),
+  example: {
+    messageId: 'AC123',
+    from: '+18165550100',
+    to: '+18165550199',
+    text: 'Can I move my appointment to Friday?',
+    keyword: null,
+    contactId: EXAMPLE_ID,
+  },
+});
+
+// ---------------------------------------------------------------- leads
+
+const inquiryCreated = event<'inquiry.created'>()({
+  type: 'inquiry.created',
+  description:
+    'Someone sent the website contact form (inquiries.create). They are already a lead contact by now. ' +
+    'Spam caught by the honeypot never gets here.',
+  subject: { type: 'contact', id: (d) => d.contactId },
+  data: z.object({
+    inquiryId: id,
+    contactId: id,
+    name: z.string(),
+    email: z.string(),
+    subject: z.string().nullable(),
+    newContact: z.boolean().describe('true when this created the contact (a brand-new lead)'),
+  }),
+  example: {
+    inquiryId: EXAMPLE_ID,
+    contactId: EXAMPLE_ID,
+    name: 'Pat Example',
+    email: 'pat@example.com',
+    subject: 'Do you do weekends?',
+    newContact: true,
+  },
+});
+
+const newsletterSubscribed = event<'newsletter.subscribed'>()({
+  type: 'newsletter.subscribed',
+  description:
+    'Someone confirmed their newsletter subscription (double opt-in: they clicked the link in the confirmation ' +
+    'email). They now carry the `newsletter` tag.',
+  subject: { type: 'contact', id: (d) => d.contactId },
+  data: z.object({ contactId: id, email: z.string(), source: z.string() }),
+  example: { contactId: EXAMPLE_ID, email: 'pat@example.com', source: 'website' },
+});
+
+// ---------------------------------------------------------------- account data
+
+const accountDeletionRequested = event<'account.deletion_requested'>()({
+  type: 'account.deletion_requested',
+  description:
+    'Someone asked to delete their account (account.requestDeletion). Their data is wiped after the grace period ' +
+    '(setting account.deletionGraceDays, default 14 days) unless they cancel.',
+  subject: { type: 'contact', id: (d) => d.contactId },
+  data: z.object({
+    contactId: id,
+    displayName: z.string(),
+    scheduledFor: z.string().describe('ISO time the account will be anonymised'),
+  }),
+  example: {
+    contactId: EXAMPLE_ID,
+    displayName: 'Pat Example',
+    scheduledFor: '2026-12-01T05:00:00.000Z',
+  },
+});
+
+const accountDeleted = event<'account.deleted'>()({
+  type: 'account.deleted',
+  description:
+    'A deletion request was carried out: the contact’s personal data was wiped (anonymised) and their login unlinked. ' +
+    'The contact row remains so history still points somewhere, but it holds no personal data any more. ' +
+    'Delete the person’s login at your auth provider when you see this.',
+  subject: { type: 'contact', id: (d) => d.contactId },
+  data: z.object({
+    contactId: id,
+    authUserId: z
+      .string()
+      .nullable()
+      .describe('The login that was unlinked (delete it at the provider)'),
+  }),
+  example: { contactId: EXAMPLE_ID, authUserId: 'user_123' },
+});
+
 export const EVENT_TYPES = [
   contactCreated,
   contactUpdated,
@@ -200,6 +326,12 @@ export const EVENT_TYPES = [
   errorNew,
   errorSpike,
   automationFailed,
+  emailBounced,
+  smsReceived,
+  inquiryCreated,
+  newsletterSubscribed,
+  accountDeletionRequested,
+  accountDeleted,
 ] as const;
 
 /** Event names and the data each one carries — `emit` is checked against this. */

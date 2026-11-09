@@ -32,13 +32,60 @@ Call actions through `runAction` / `callAction` with a test actor; never reach i
 assert more than the result and what the database shows afterwards. Add a new table to the reset
 list in `test/setup.ts`.
 
-## End-to-end (optional)
+## Unit tests in `apps/web`
 
-Browser tests (Playwright) against the **built** app and a seeded database live in `apps/web/e2e/`
-if you add them: public pages, sign-in redirects, the REST API. Build, seed, then run:
+`pnpm --filter web test` (Vitest, `apps/web/vitest.config.ts`): code that needs neither a browser nor a
+database, mainly the auth adapters with mocked SDKs (`lib/auth/*.test.ts`). `server-only` is stubbed and
+`@/` resolves to `apps/web`. Business logic is NOT tested here: it lives in `packages/core`.
+
+## End-to-end (Playwright)
+
+`apps/web/e2e/` drives a real browser against the real app and a real, throw-away database:
 
 ```bash
-pnpm db:migrate && pnpm db:seed && pnpm --filter web build && pnpm --filter web e2e
+pnpm e2e                 # = pnpm --filter web e2e: starts everything itself
+pnpm e2e -- admin-users  # one spec file; add --headed / --ui to watch
 ```
+
+What it does (`playwright.config.ts`, `scripts/e2e-db.mjs`): drops and recreates a database named
+`<DATABASE_URL's name>_e2e` (or `app_e2e` on the local test Postgres: `node packages/db/scripts/test-db.mjs`),
+migrates and seeds it, starts `next dev` on port 3100 with `DEV_LOGIN=1 BACKEND=neon`, warms the main
+routes, closes the owner's one-time welcome dialog, then runs the specs. It is `next dev` and not
+`next start` because dev login is refused by production builds. The dev server writes to `.next-e2e`, so
+it never fights `pnpm dev`. `E2E_BASE_URL` is ignored by `pnpm e2e` (it is for `e2e:test-site`).
+
+Signing in: `signInAs(page, email)` in `e2e/support/auth.ts` (`/api/dev-login`). Seeded people:
+`owner@example.com` (the only owner), `admin@`, `manager@`, `staff@`, `casey@example.com` (customer).
+Specs share one database and run in parallel: create your own records with `uniq()` names instead of
+editing seeded ones, and never remove the owner's role (one spec proves the last owner is protected).
+
+| Spec          | Covers                                                                                                                                                                             |
+| ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `public`      | public pages, sign-in form, redirects for signed-out visitors, 401 / 403 from the APIs                                                                                             |
+| `admin-users` | dashboard, New user dialog (no / field error / `E-` reference / success), edit in place, field history, roles, last-owner guard, Activity before/after                             |
+| `errors`      | the error pipeline: reference shown → Admin → Errors → "Copy for AI agent" (reference + `## Stack`) for a page bug, a server crash, a client crash, a timer error, a failing route |
+| `account`     | profile edit, cancel, sign out                                                                                                                                                     |
+| `navigation`  | keyboard-only: skip link, sidebar, command palette (Ctrl+K, arrows, Escape); dark mode persistence with no flash                                                                   |
+| `responsive`  | no sideways scroll at 320px on every main route                                                                                                                                    |
+| `a11y`        | axe-core (WCAG A/AA) on the main screens in light and dark; zero serious/critical, with a `KNOWN` list that can only shrink                                                        |
+
+The crashes come from dev-only routes in `apps/web/app/api/dev/` (`boom`, `crash`, `crash/client`): each
+404s unless `DEV_LOGIN` is on in a non-production build.
+
+`pnpm e2e:test-site` runs the same specs against `E2E_BASE_URL` (a deployed test site; no server or
+database is started). Specs that need dev login skip themselves where it is off.
+
+Browsers: `npx playwright install chromium` once (CI does it). In the cloud sandbox the config falls back
+to any Chromium under `PLAYWRIGHT_BROWSERS_PATH`; or set `PLAYWRIGHT_CHROMIUM_PATH`.
+
+Rules for new specs: select by role and accessible name (it doubles as an a11y check); never `sleep`
+(wait for a URL, a role or text); check phone width for a new screen; a spec that finds a bug in the app
+is a good spec: fix the app, or `test.fixme` it with a TODO.md item, never loosen it.
+
+## Script tests
+
+`pnpm test:scripts` (Node's test runner): `scripts/new-project.test.mjs` runs the new-project script on a
+copy of the repo and typechecks the result against an untouched copy (about a minute;
+`NEW_PROJECT_SKIP_TYPECHECK=1` skips that part).
 
 Check phone width (320px) for any screen you add.

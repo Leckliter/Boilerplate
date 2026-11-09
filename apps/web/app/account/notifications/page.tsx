@@ -1,13 +1,15 @@
-import { getPreferences, listNotifications } from '@app/core/notifications';
+import { getPreferences, listNotifications, pushStatus } from '@app/core/notifications';
 import { callAction } from '@app/core';
 import { BellIcon } from '@app/ui/components/icons';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@app/ui/components/card';
 import { Empty } from '@app/ui/components/empty';
+import { LinkButton } from '@app/ui/components/link-button';
 import { PageHeader } from '@app/ui/components/page';
 
 import { ActionError } from '@/components/action-error';
 import { FilterLinks } from '@/components/admin/filter-links';
 import { InboxList } from '@/components/notifications/inbox-list';
+import { PushCard } from '@/components/notifications/push-card';
 import { PreferenceGrid } from '@/components/notifications/preference-grid';
 import { SendTestButton } from '@/components/notifications/send-test-button';
 import { SmsConsentCard } from '@/components/notifications/sms-consent-card';
@@ -52,6 +54,11 @@ async function Inbox({ actor }: { actor: Actor }) {
           icon={<BellIcon />}
           title="Nothing new"
           description="When something happens that you should know about, it shows up here."
+          contents={
+            <LinkButton href="/account/notifications?tab=settings" variant="primary">
+              Notification settings
+            </LinkButton>
+          }
         />
       </Card>
     );
@@ -60,11 +67,36 @@ async function Inbox({ actor }: { actor: Actor }) {
 }
 
 async function Settings({ actor }: { actor: Actor }) {
-  const res = await callAction(getPreferences, {}, actor);
+  const [res, push] = await Promise.all([
+    callAction(getPreferences, {}, actor),
+    callAction(pushStatus, {}, actor),
+  ]);
   if (!res.ok) return <ActionError error={res.error} what="your settings" />;
   const p = res.data;
   return (
     <>
+      <Card>
+        <CardHeader>
+          <CardTitle>Push notifications</CardTitle>
+          <CardDescription>
+            Get a notification on this device, even when the site is closed. Turn it on per device.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <PushCard
+            devices={
+              push.ok
+                ? push.data.subscriptions.map((d) => ({
+                    id: d.id,
+                    label: d.label,
+                    endpointHost: d.endpointHost,
+                    createdAt: new Date(d.createdAt).toISOString(),
+                  }))
+                : []
+            }
+          />
+        </CardContent>
+      </Card>
       <Card>
         <CardHeader>
           <CardTitle>Text messages</CardTitle>

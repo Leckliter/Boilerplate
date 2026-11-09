@@ -1,0 +1,66 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "workspaces": {
+    ".": {
+      "entry": [
+        "scripts/*.mjs",
+        ".claude/hooks/*.mjs"
+      ],
+      "project": [
+        "scripts/**",
+        ".claude/hooks/**"
+      ]
+    },
+    "apps/web": {
+      "entry": [
+        "app/**/{page,layout,loading,error,global-error,not-found,route,template,default}.{ts,tsx}",
+        "app/{manifest,robots,sitemap}.ts",
+        "e2e/**/*.ts"
+      ],
+      "project": [
+        "**/*.{ts,tsx}"
+      ]
+    },
+    "packages/core": {
+      "entry": [
+        "scripts/*.ts",
+        "test/**/*.ts"
+      ],
+      "project": [
+        "src/**/*.ts",
+        "scripts/**/*.ts",
+        "test/**/*.ts"
+      ]
+    },
+    "packages/db": {
+      "entry": [
+        "scripts/*.{ts,mjs}"
+      ],
+      "project": [
+        "src/**/*.ts",
+        "scripts/**/*"
+      ]
+    },
+    "packages/ui": {
+      "entry": [
+        "src/components/*.tsx",
+        "src/lib/*.ts"
+      ],
+      "project": [
+        "src/**/*.{ts,tsx}"
+      ]
+    }
+  },
+  "ignoreDependencies": [
+    "tailwindcss"
+  ],
+  "rules": {
+    "exports": "off",
+    "types": "off",
+    "duplicates": "off",
+    "enumMembers": "off"
+  },
+  "ignoreBinaries": [
+    "su"
+  ]
+}

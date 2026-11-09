@@ -2,7 +2,8 @@ import { callAction, listActivity, listChanges } from '@app/core';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@app/ui/components/card';
 
 import { ActionError } from '@/components/action-error';
-import { ActivityList, actorLabel, timeFormat } from './activity-list';
+import { actorLabel, timeFormat } from './activity-list';
+import { ActivityTimeline } from './dashboard/activity-timeline';
 import { ChangeList } from './change-list';
 import type { Viewer } from '@/lib/viewer';
 
@@ -40,7 +41,15 @@ export async function RecordHistory({
         </CardHeader>
         <CardContent>
           {activity.ok ? (
-            <ActivityList entries={activity.data} />
+            <ActivityTimeline
+              items={activity.data.map((e) => ({
+                id: e.id,
+                summary: e.summary ?? e.action,
+                who: `${actorLabel(e)} · ${e.channel}`,
+                at: new Date(e.occurredAt).toISOString(),
+                ok: e.ok,
+              }))}
+            />
           ) : (
             <ActionError error={activity.error} what="the activity" />
           )}

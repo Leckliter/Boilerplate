@@ -27,3 +27,16 @@ export {
 } from './jobs';
 export { CRONS, cronHealth, healthReport, queueStats, recordCronRun, staleCrons } from './health';
 export { takeRateLimit, type RateLimit } from './rate-limit';
+export { registerMaintenanceStep, type MaintenanceStep } from './maintenance-steps';
+export { logger, setLogSinkForTests, currentLogLevel, type Logger, type LogLevel } from './logger';
+export {
+  FLAGS,
+  FLAG_NAMES,
+  evaluateFlag,
+  isEnabled,
+  rolloutBucket,
+  type FlagName,
+  type FlagSetting,
+  type FlagSubject,
+} from './flags';
+export { deepHealthChecks, type DeepCheck } from './health-deep';

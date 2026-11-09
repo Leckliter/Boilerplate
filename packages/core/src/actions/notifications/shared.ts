@@ -18,6 +18,7 @@ export function visibleTypes(actor: Actor) {
   return NOTIFICATION_TYPES.filter(
     (t) =>
       t.key !== 'system.test' &&
+      !('hidden' in t && t.hidden) &&
       (t.audience === 'customer' || (t.permission && hasPermission(actor, t.permission))),
   );
 }

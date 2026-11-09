@@ -14,6 +14,8 @@ import {
   useState,
 } from 'react';
 
+import { useTranslations } from 'next-intl';
+
 import { BottomSheet } from './bottom-sheet';
 
 export type MobileDockItem = { href: string; label: string; icon: Icon; exact?: boolean };
@@ -36,6 +38,7 @@ export function MobileDock({
   allItems?: MobileDockItem[];
   title?: string;
 }) {
+  const t = useTranslations('shell');
   const path = usePathname();
   const [open, setOpen] = useState(false);
   const fab = allItems.length > 0;
@@ -44,7 +47,7 @@ export function MobileDock({
   return (
     <>
       <nav
-        aria-label="Quick navigation"
+        aria-label={t('quickNavigation')}
         className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background md:hidden"
         style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
       >

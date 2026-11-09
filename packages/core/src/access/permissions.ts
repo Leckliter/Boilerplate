@@ -24,6 +24,10 @@ export const PERMISSIONS = {
     'Automations act as the system, so only owners and admins have this.',
   'notifications.manage':
     'See every notification sent to anyone and its delivery status; retry failed ones.',
+  'inquiries.manage':
+    'See and work through website inquiries (contact-form messages): change their status, add notes, archive them.',
+  'data.export':
+    'Download CSV exports of contacts and of the activity log (personal data: owners, admins and managers).',
   'system.manage':
     'See system health, scheduled jobs and background jobs; retry or cancel jobs. (Technical — owners and admins.)',
 } as const;
@@ -63,6 +67,8 @@ export const ROLE_PERMISSIONS: Record<AppRole, readonly Permission[]> = {
     'settings.manage',
     'docs.internal',
     'notifications.manage',
+    'inquiries.manage',
+    'data.export',
   ],
   staff: ['admin.access', 'users.read', 'docs.internal'],
 };

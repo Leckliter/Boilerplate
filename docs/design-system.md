@@ -74,6 +74,21 @@ DetailItem, EditableCard, RecordHeader, SummaryList/SummaryRow, Checkbox/Checkbo
 CopyButton/ErrorReference, FileDrop, CodeBlock, CommandPalette, TagInput, Autocomplete, CountBadge.
 Form wiring in apps/web: `ActionForm`, `FormDialog`, `DeleteForm` ([actions.md](actions.md)).
 
-Helpers: `formatMoney`/`parseMoney` (`@app/ui/lib/money`, integer cents), `formatDate`/
+Added in the kit v2: DataTable (+ActionBar), StatTile, Sparkline/BarChart/DonutChart (SVG, `--chart-1…6`),
+Timeline, Wizard, AvatarUpload, NotificationList, KeyValueList, SearchInput, PageActions/MobileActionBar,
+Pill/StatusDot, ConfirmButton, Kbd, ThemeToggle, LanguageSelect, Accordion, Progress, InlineEdit, and
+FileDrop/DropZone `status` states. (CopyableCode already exists as `ClipboardText`/`CodeBlock`.) Calendar
+event colours are `--event-<name>[-tint|-ink]` tokens. `<Logo tone="onBrand">` on brand backgrounds.
+Tests: `pnpm --filter @app/ui test` (vitest + Testing Library + jest-axe; `test/axe.ts`).
+
+## Time zone in client components
+
+`formatDate` etc. default to the module zone (`APP_TIME_ZONE`, set on the server). Browsers don't see
+that env, so mount `<TimeZoneProvider zone={getAppTimeZone()}>` (`@app/ui/components/ui-context`) once in
+`AppProviders` with the server's zone, and in client components use `useAppTimeZone()` or
+`const { formatDate, formatDateTime } = useDates()`. Every formatter also takes a trailing `zone`
+argument. Timeline and NotificationList already use `useDates()`. (Web worker: mount the provider.)
+
+Helpers: `formatMoney(cents, { currency, trimZeros })`/`parseMoneyToCents` (alias `parseMoney`) (`@app/ui/lib/money`, integer cents), `formatDate`/
 `formatDateTime`/`formatDay` (`@app/ui/lib/dates`, always in `APP_TIME_ZONE`, default
 `America/Chicago`; storage is UTC). A literal colour string: `THEME_COLORS`.

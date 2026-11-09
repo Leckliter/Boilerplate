@@ -37,9 +37,11 @@ export function requireFileAccess(
 ) {
   const needed = purpose.access[mode];
   const ok =
-    needed === 'self'
-      ? subjectId === actor.contactId || hasPermission(actor, 'users.manage')
-      : hasPermission(actor, needed);
+    needed === 'self-only'
+      ? subjectId === actor.contactId
+      : needed === 'self'
+        ? subjectId === actor.contactId || hasPermission(actor, 'users.manage')
+        : hasPermission(actor, needed);
   if (!ok) {
     throw new ActionError(
       'forbidden',

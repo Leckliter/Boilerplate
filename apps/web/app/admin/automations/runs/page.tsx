@@ -2,6 +2,7 @@ import { callAction } from '@app/core';
 import { listRuns } from '@app/core/automations';
 import { Card } from '@app/ui/components/card';
 import { Empty } from '@app/ui/components/empty';
+import { LinkButton } from '@app/ui/components/link-button';
 import { LightningIcon } from '@app/ui/components/icons';
 import { rowLink, rowLinkRow } from '@app/ui/components/link';
 import { PageHeader } from '@app/ui/components/page';
@@ -69,6 +70,11 @@ export default async function RunsPage({
             icon={<LightningIcon />}
             title="No runs"
             description="Runs show up here when an automation starts."
+            contents={
+              <LinkButton href="/admin/automations" variant="primary">
+                Open automations
+              </LinkButton>
+            }
           />
         </Card>
       ) : (

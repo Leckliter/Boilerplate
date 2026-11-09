@@ -13,6 +13,9 @@
 import './automations/register'; // events + automations: emit(), automations.*, events.list
 import './notifications/register'; // notify(), inbox, preferences, delivery log, email/SMS
 import './files/register'; // S3 uploads: files.requestUpload / confirm / delete
+import './inquiries/register'; // website contact form (public) + staff inbox
+import './newsletter/register'; // newsletter sign-up with double opt-in
+import './account-data/register'; // my data export + delete my account (grace period)
 import './docs/register'; // in-app docs: docs.list / docs.get
 
 export { registerTick, runModuleTicks, listTicks, type ModuleTick } from './module-ticks';

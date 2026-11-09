@@ -5,13 +5,20 @@ export { instantField } from './fields';
 export { getMyAccount, updateMyAccount } from './account';
 export { grantRole, listRoles, listStaff, revokeRole } from './access';
 export { getActivity, listActivity, listChanges } from './activity';
+export { exportActivityCsv } from './activity/export';
+export { listFlags, setFeatureFlag } from './flags';
+export { search, type SearchResult } from './search';
 export { errorBrief, getError, listErrors, resolveError } from './errors';
 export { createApiKey, listApiKeys, revokeApiKey } from './api-keys';
 export {
   addContactTags,
   archiveContact,
+  bulkAddContactTags,
+  bulkArchiveContacts,
   createContact,
+  exportContactsCsv,
   getContact,
+  importContacts,
   listContacts,
   removeContactTags,
   restoreContact,

@@ -11,15 +11,12 @@ import {
   DropdownMenuTrigger,
 } from '@app/ui/components/dropdown-menu';
 import { MoonIcon, SunIcon } from '@app/ui/components/icons';
+import { useTranslations } from 'next-intl';
 import { useSyncExternalStore } from 'react';
 
 import { THEME_KEY, type ThemeChoice } from '@/lib/theme';
 
-const CHOICES: { value: ThemeChoice; label: string }[] = [
-  { value: 'light', label: 'Light' },
-  { value: 'dark', label: 'Dark' },
-  { value: 'system', label: 'System' },
-];
+const CHOICES: ThemeChoice[] = ['light', 'dark', 'system'];
 
 const listeners = new Set<() => void>();
 function subscribe(cb: () => void) {
@@ -60,29 +57,30 @@ export function useTheme(): ThemeChoice {
 
 /** Light / dark / system, remembered in this browser. `compact` is an icon button for headers. */
 export function ThemeSwitch({ compact = false }: { compact?: boolean }) {
+  const t = useTranslations('shell');
   const theme = useTheme();
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
         render={
           compact ? (
-            <Button variant="ghost" shape="square" aria-label="Theme" title="Theme" />
+            <Button variant="ghost" shape="square" aria-label={t('theme')} title={t('theme')} />
           ) : (
-            <Button aria-label="Theme" />
+            <Button aria-label={t('theme')} />
           )
         }
       >
         <SunIcon className="dark:hidden" />
         <MoonIcon className="hidden dark:block" />
-        {!compact && <span className="capitalize">{theme}</span>}
+        {!compact && <span>{t(theme)}</span>}
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuGroup>
-          <DropdownMenuLabel>Theme</DropdownMenuLabel>
+          <DropdownMenuLabel>{t('theme')}</DropdownMenuLabel>
           <DropdownMenuRadioGroup value={theme} onValueChange={(v) => applyTheme(v as ThemeChoice)}>
             {CHOICES.map((c) => (
-              <DropdownMenuRadioItem key={c.value} value={c.value}>
-                {c.label}
+              <DropdownMenuRadioItem key={c} value={c}>
+                {t(c)}
               </DropdownMenuRadioItem>
             ))}
           </DropdownMenuRadioGroup>
