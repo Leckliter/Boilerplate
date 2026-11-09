@@ -18,7 +18,7 @@ export default defineConfig({
     ],
   },
   test: {
-    include: ['test/**/*.test.ts', 'lib/**/*.test.ts'],
+    include: ['test/**/*.test.ts', 'lib/**/*.test.ts', 'messages/**/*.test.ts'],
     globalSetup: ['test/global-setup.ts'],
     setupFiles: ['test/setup.ts'],
     // One shared database: run files one after another.

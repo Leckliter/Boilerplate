@@ -13,12 +13,22 @@ type DefinedAction = ActionDefinition<any, any, any>;
  */
 const byName = new Map<string, AnyAction>();
 
-/** Register actions. Names are permanent and unique: a duplicate is a bug and throws. */
+/**
+ * Register actions. Names are permanent and unique: a duplicate is a bug and throws (production and
+ * tests). In `next dev`, hot reload re-evaluates module files that register themselves, so there a
+ * repeat registration replaces the earlier one instead of crashing every page.
+ */
 export function registerActions(...list: readonly DefinedAction[]) {
   for (const action of list as readonly AnyAction[]) {
-    if (byName.has(action.name)) throw new Error(`Duplicate action name: ${action.name}`);
+    if (byName.has(action.name) && !isDevReload()) {
+      throw new Error(`Duplicate action name: ${action.name}`);
+    }
     byName.set(action.name, action);
   }
+}
+
+function isDevReload() {
+  return process.env.NODE_ENV === 'development';
 }
 
 export function getAction(name: string): AnyAction | undefined {
