@@ -3,7 +3,6 @@ import { createHmac } from 'node:crypto';
 import {
   contacts,
   eq,
-  events,
   getDb,
   messageSuppressions,
   notificationDeliveries,
@@ -15,7 +14,7 @@ import { systemActor } from '../src/access';
 import { callAction } from '../src/actions';
 import { quoWebhook, resendWebhook, smsKeyword } from '../src/actions/webhooks';
 import { verifyQuo, verifySvix } from '../src/webhooks/verify';
-import { assertLocalDatabase, makeActor, resetDatabase } from './setup';
+import { assertLocalDatabase, ifEventsEnabled, makeActor, resetDatabase } from './setup';
 
 beforeAll(assertLocalDatabase);
 beforeEach(resetDatabase);
@@ -26,8 +25,7 @@ const run = async <T>(p: Promise<{ ok: boolean }>) => {
   if (!r.ok) throw new Error(JSON.stringify(r.error));
   return r.data as T;
 };
-const eventsOf = async (type: string) =>
-  (await getDb().select().from(events)).filter((e) => e.type === type);
+// Event assertions run only when the events module is on (docs/architecture.md → Modules).
 
 // ---------------------------------------------------------------- signatures
 
@@ -232,13 +230,14 @@ describe('webhooks.resendEvent', () => {
     expect(await getDb().select().from(messageSuppressions)).toMatchObject([
       { channel: 'email', address: 'pat@example.com', reason: 'bounce' },
     ]);
-    const emitted = await eventsOf('email.bounced');
-    expect(emitted).toHaveLength(1);
-    expect(emitted[0]!.data).toMatchObject({
-      kind: 'bounce',
-      permanent: true,
-      contactId: contact.id,
-      email: 'pat@example.com',
+    await ifEventsEnabled('email.bounced', (emitted) => {
+      expect(emitted).toHaveLength(1);
+      expect(emitted[0]!.data).toMatchObject({
+        kind: 'bounce',
+        permanent: true,
+        contactId: contact.id,
+        email: 'pat@example.com',
+      });
     });
   });
 
@@ -256,7 +255,9 @@ describe('webhooks.resendEvent', () => {
       ),
     );
     expect(await getDb().select().from(messageSuppressions)).toHaveLength(0);
-    expect((await eventsOf('email.bounced'))[0]!.data).toMatchObject({ permanent: false });
+    await ifEventsEnabled('email.bounced', (e) =>
+      expect(e[0]!.data).toMatchObject({ permanent: false }),
+    );
   });
 
   it('a spam complaint suppresses the address', async () => {
@@ -271,7 +272,9 @@ describe('webhooks.resendEvent', () => {
     expect(await getDb().select().from(messageSuppressions)).toMatchObject([
       { reason: 'complaint' },
     ]);
-    expect((await eventsOf('email.bounced'))[0]!.data).toMatchObject({ kind: 'complaint' });
+    await ifEventsEnabled('email.bounced', (e) =>
+      expect(e[0]!.data).toMatchObject({ kind: 'complaint' }),
+    );
   });
 
   it('ignores types it does not know and refuses everyone but the system', async () => {
@@ -325,14 +328,15 @@ describe('webhooks.quoEvent', () => {
     const c = await consenting();
     await run(callAction(quoWebhook, inbound('Can I move to Friday?'), sys()));
     await run(callAction(quoWebhook, inbound('Can I move to Friday?'), sys()));
-    const rows = await eventsOf('sms.received');
-    expect(rows).toHaveLength(1);
-    expect(rows[0]!.data).toMatchObject({
-      from: '+18165550100',
-      to: '+18165550199',
-      text: 'Can I move to Friday?',
-      keyword: null,
-      contactId: c.id,
+    await ifEventsEnabled('sms.received', (rows) => {
+      expect(rows).toHaveLength(1);
+      expect(rows[0]!.data).toMatchObject({
+        from: '+18165550100',
+        to: '+18165550199',
+        text: 'Can I move to Friday?',
+        keyword: null,
+        contactId: c.id,
+      });
     });
     expect((await fresh(c.id)).smsConsentAt).not.toBeNull();
   });
@@ -344,7 +348,9 @@ describe('webhooks.quoEvent', () => {
     expect(await getDb().select().from(messageSuppressions)).toMatchObject([
       { channel: 'sms', address: '+18165550100', reason: 'stop' },
     ]);
-    expect((await eventsOf('sms.received'))[0]!.data).toMatchObject({ keyword: 'stop' });
+    await ifEventsEnabled('sms.received', (e) =>
+      expect(e[0]!.data).toMatchObject({ keyword: 'stop' }),
+    );
 
     await run(callAction(quoWebhook, inbound('start', 'AC3'), sys()));
     expect(await fresh(c.id)).toMatchObject({ smsConsentSource: 'sms-reply' });
@@ -354,7 +360,9 @@ describe('webhooks.quoEvent', () => {
 
   it('a number nobody has still gets its text recorded (no contact)', async () => {
     await run(callAction(quoWebhook, inbound('hello', 'AC4', '+18165550777'), sys()));
-    expect((await eventsOf('sms.received'))[0]!.data).toMatchObject({ contactId: null });
+    await ifEventsEnabled('sms.received', (e) =>
+      expect(e[0]!.data).toMatchObject({ contactId: null }),
+    );
   });
 
   it('delivery reports update the delivery; outbound messages are ignored', async () => {
@@ -381,7 +389,7 @@ describe('webhooks.quoEvent', () => {
       data: { object: { id: 'AC5', from: '+18165550199', direction: 'outgoing', text: 'hi' } },
     };
     expect(await run(callAction(quoWebhook, outbound, sys()))).toMatchObject({ handled: false });
-    expect(await eventsOf('sms.received')).toHaveLength(0);
+    await ifEventsEnabled('sms.received', (e) => expect(e).toHaveLength(0));
   });
 
   it('is system only', async () => {

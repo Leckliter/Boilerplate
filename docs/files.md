@@ -16,4 +16,4 @@ files with URLs (private ones: signed, valid an hour); `files.delete` marks it d
   `files.requestUpload` refuses it, and readable only by the person it is about — access `'self-only'`, not even staff;
   removed after 7 days). Access is a permission, `'self'` (the contact themself or `users.manage`) or `'self-only'`.
   Add yours there and a subject check in `actions/files/subjects.ts`.
-- **Removing it:** delete `files/`, `actions/files`, the `modules.ts` line; maintenance skips the job when absent.
+- **Removing it:** delete `files/`, `actions/files`, the `modules.ts` line; its daily `files.abandoned` maintenance step and the job go with it.

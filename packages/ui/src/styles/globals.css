@@ -53,7 +53,7 @@
 
   /* Quiet text & fills */
   --muted: oklch(0.96 0 0);
-  --muted-foreground: oklch(0.53 0 0);
+  --muted-foreground: oklch(0.5 0 0);
 
   /* Status */
   --destructive: oklch(0.505 0.213 27.5);

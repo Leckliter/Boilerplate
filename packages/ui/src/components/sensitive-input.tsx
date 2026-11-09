@@ -123,10 +123,10 @@ export const SensitiveInput = forwardRef<HTMLInputElement, SensitiveInputProps>(
 
     const inputRef = useRef<HTMLInputElement | null>(null);
     const containerRef = useRef<HTMLDivElement>(null);
+    const revealRef = useRef<HTMLButtonElement>(null);
     const liveRegionId = useId();
     const generatedId = useId();
     const inputId = id ?? generatedId;
-    const maskedInstructionId = useId();
 
     const mergedRef = useCallback(
       (node: HTMLInputElement | null) => {
@@ -204,29 +204,13 @@ export const SensitiveInput = forwardRef<HTMLInputElement, SensitiveInputProps>(
       }
     }
 
-    const handleContainerClick = useCallback(
-      (e: React.MouseEvent) => {
-        if (disabled) return;
-        // Ignore clicks that originated from outside (e.g., label click focusing input)
-        // Label clicks trigger a click on the input, but the click coordinates are outside the container
-        if (containerRef.current) {
-          const rect = containerRef.current.getBoundingClientRect();
-          const isClickInsideContainer =
-            e.clientX >= rect.left &&
-            e.clientX <= rect.right &&
-            e.clientY >= rect.top &&
-            e.clientY <= rect.bottom;
-          if (!isClickInsideContainer) return;
-        }
-        if (mode === 'masked' && hasValue) {
-          setMode('revealed');
-          if (!readOnly) {
-            setTimeout(() => inputRef.current?.focus(), 0);
-          }
-        }
-      },
-      [mode, hasValue, disabled, readOnly],
-    );
+    const reveal = useCallback(() => {
+      if (disabled) return;
+      setMode('revealed');
+      if (!readOnly) {
+        setTimeout(() => inputRef.current?.focus(), 0);
+      }
+    }, [disabled, readOnly]);
 
     const handleToggleVisibility = useCallback(
       (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -274,28 +258,12 @@ export const SensitiveInput = forwardRef<HTMLInputElement, SensitiveInputProps>(
       [hasValue],
     );
 
-    const handleContainerKeyDown = useCallback(
-      (e: React.KeyboardEvent<HTMLDivElement>) => {
-        if (disabled) return;
-        if (mode === 'masked' && hasValue) {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            setMode('revealed');
-            if (!readOnly) {
-              setTimeout(() => inputRef.current?.focus(), 0);
-            }
-          }
-        }
-      },
-      [mode, hasValue, disabled, readOnly],
-    );
-
     const handleInputKeyDown = useCallback(
       (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (mode === 'revealed' && e.key === 'Escape') {
           setMode('masked');
-          // Move focus to container to avoid focus trap (input becomes tabIndex={-1})
-          setTimeout(() => containerRef.current?.focus(), 0);
+          // Move focus to the reveal button to avoid a focus trap (input becomes tabIndex={-1})
+          setTimeout(() => revealRef.current?.focus(), 0);
         }
       },
       [mode],
@@ -360,12 +328,8 @@ export const SensitiveInput = forwardRef<HTMLInputElement, SensitiveInputProps>(
             size === 'lg' && 'px-4',
             // Hidden when not masked
             !isMaskedWithValue && 'invisible',
-            // When masked: enable pointer events
-            isMaskedWithValue && 'pointer-events-auto',
             // Text color - use text-foreground to contrast with bg-control input background
             'text-foreground',
-            // Hover state - pure CSS, no React state (group for children)
-            'group/mask',
           )}
           aria-hidden="true"
         >
@@ -375,18 +339,34 @@ export const SensitiveInput = forwardRef<HTMLInputElement, SensitiveInputProps>(
               className={cn(
                 isMaskedWithValue &&
                   !disabled &&
-                  'group-focus-within/container:invisible group-hover/mask:invisible',
+                  'group-focus-within/container:invisible group-hover/container:invisible',
               )}
             >
               ••••••••
             </span>
             {isMaskedWithValue && !disabled && (
-              <span className="invisible absolute top-0 left-0 whitespace-nowrap text-muted-foreground group-focus-within/container:visible group-hover/mask:visible">
+              <span className="invisible absolute top-0 left-0 whitespace-nowrap text-muted-foreground group-focus-within/container:visible group-hover/container:visible">
                 Click to reveal
               </span>
             )}
           </span>
         </span>
+
+        {/* Reveal button: a sibling of Copy and Eye (not their parent), so no interactive element nests another. */}
+        {isMaskedWithValue && (
+          <button
+            ref={revealRef}
+            type="button"
+            onClick={reveal}
+            disabled={disabled}
+            aria-label={`${ariaLabelFallback}, masked. Click or press Enter to reveal.`}
+            aria-describedby={liveRegionId}
+            className={cn(
+              'absolute inset-0 m-0 h-auto min-h-0 w-full rounded-[inherit] border-none bg-transparent p-0 shadow-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-hidden',
+              disabled ? 'cursor-not-allowed' : 'cursor-pointer',
+            )}
+          />
+        )}
 
         {/* Eye button - absolutely positioned to the right */}
         <button
@@ -436,33 +416,9 @@ export const SensitiveInput = forwardRef<HTMLInputElement, SensitiveInputProps>(
 
     const input = (
       <div>
-        {isMaskedWithValue ? (
-          <div
-            ref={containerRef}
-            // Cannot use <button> here because containerContent contains interactive button elements (Copy, Reveal).
-            // Using role="button" with proper keyboard handling instead.
-            // oxlint-disable-next-line prefer-tag-over-role
-            role="button"
-            tabIndex={disabled ? -1 : 0}
-            className={containerClassName}
-            onClick={handleContainerClick}
-            onKeyDown={handleContainerKeyDown}
-            aria-label={`${ariaLabelFallback}, masked.`}
-            aria-describedby={`${maskedInstructionId} ${liveRegionId}`}
-            aria-disabled={disabled}
-          >
-            {containerContent}
-          </div>
-        ) : (
-          <div ref={containerRef} className={containerClassName}>
-            {containerContent}
-          </div>
-        )}
-        {isMaskedWithValue && (
-          <span id={maskedInstructionId} className="sr-only">
-            Click or press Enter to reveal.
-          </span>
-        )}
+        <div ref={containerRef} className={containerClassName}>
+          {containerContent}
+        </div>
         <span id={liveRegionId} className="sr-only" aria-live="polite">
           {mode === 'masked' && hasValue && 'Value hidden'}
           {copied && 'Copied to clipboard'}

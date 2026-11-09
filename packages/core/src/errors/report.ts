@@ -144,7 +144,7 @@ function pick(e: object): Record<string, unknown> {
   );
 }
 
-const clean = (s: string) => s.replace(/\u0000/g, '');
+const clean = (s: string) => s.split(String.fromCharCode(0)).join('');
 const clip = (s: string, n: number) => (s.length > n ? `${s.slice(0, n)}…` : s);
 
 /** A spike = this many occurrences of one open bug within SPIKE_MINUTES. */

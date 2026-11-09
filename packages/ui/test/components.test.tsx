@@ -184,10 +184,7 @@ describe('AvatarUpload', () => {
     const ok = new File(['x'], 'a.png', { type: 'image/png' });
     await user.upload(input, ok);
     expect(onChange).toHaveBeenCalledWith(ok);
-    expect(screen.getByRole('img', { name: "Sam Lee's picture" })).toHaveAttribute(
-      'src',
-      'blob:preview',
-    );
+    expect(screen.getByRole('img', { name: 'Sam Lee' })).toHaveAttribute('src', 'blob:preview');
     await user.click(screen.getByRole('button', { name: /Remove/ }));
     expect(onChange).toHaveBeenLastCalledWith(null);
   });

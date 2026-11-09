@@ -180,14 +180,19 @@ const leafStepSchema = z.discriminatedUnion('type', [
 type LeafStep = z.infer<typeof leafStepSchema>;
 type LeafStepInput = z.input<typeof leafStepSchema>;
 
-/** If/else: the `then` steps when the conditions hold, else the `else` steps; then carry on. */
+/**
+ * If/else: the `thenSteps` when the conditions hold, else the `else` steps; then carry on.
+ * (Named `thenSteps`, not `then`: an object with a `then` property is "thenable" and `await`
+ * would call it. The JSON key `then`, which older automations stored, is still read: see
+ * `normalizeStep` and `stepSchema`.)
+ */
 type BranchStep = {
   type: 'branch';
   id?: string | undefined;
   label?: string | undefined;
   match: ConditionMatch;
   conditions: Condition[];
-  then: Step[];
+  thenSteps: Step[];
   else: Step[];
 };
 type BranchStepInput = {
@@ -196,6 +201,8 @@ type BranchStepInput = {
   label?: string | undefined;
   match?: ConditionMatch | undefined;
   conditions: Condition[];
+  thenSteps?: StepInput[] | undefined;
+  /** Legacy spelling of `thenSteps`, still accepted. */
   then?: StepInput[] | undefined;
   else?: StepInput[] | undefined;
 };
@@ -216,7 +223,7 @@ const branchSchema = z.object({
   match: matchField,
   conditions: z.array(conditionSchema).min(1).max(20),
   // Getters: a branch holds steps, which may be branches (zod's recursive objects).
-  get then(): StepArray {
+  get thenSteps(): StepArray {
     return z.array(stepSchema).max(50).default([]).describe('Steps when the conditions hold');
   },
   get else(): StepArray {
@@ -224,11 +231,34 @@ const branchSchema = z.object({
   },
 });
 
+/**
+ * Older automations stored a branch's steps under `then`. Rename it to `thenSteps` (at every depth:
+ * a nested step is parsed by this same schema) so stored and API-supplied JSON keep working.
+ */
+function aliasThen(value: unknown): unknown {
+  if (value && typeof value === 'object' && !Array.isArray(value)) {
+    const v = value as Record<string, unknown>;
+    if (v.type === 'branch' && 'then' in v) {
+      const { then: legacy, ...rest } = v;
+      return { ...rest, thenSteps: rest.thenSteps ?? legacy };
+    }
+  }
+  return value;
+}
+
 /** One step: any of the step types above, or a branch. */
-export const stepSchema = z.discriminatedUnion('type', [
-  leafStepSchema,
-  branchSchema,
-]) as unknown as z.ZodType<Step, StepInput>;
+export const stepSchema = z.preprocess(
+  aliasThen,
+  z.discriminatedUnion('type', [leafStepSchema, branchSchema]),
+) as unknown as z.ZodType<Step, StepInput>;
+
+/**
+ * A branch's "yes" steps, wherever they were stored: `thenSteps`, or the legacy `then` key of a
+ * definition saved before the rename and read straight from the database without parsing.
+ */
+function thenOf(step: BranchStep): Step[] {
+  return step.thenSteps ?? (step as unknown as { then?: Step[] }).then ?? [];
+}
 
 /** Visit every step, including those inside branches (depth 0 = top level). */
 export function walkSteps(
@@ -241,8 +271,8 @@ export function walkSteps(
     const where = `${prefix}${i + 1}`;
     fn(step, where, depth);
     if (step.type === 'branch') {
-      walkSteps(step.then, fn, `${where} → yes → step `, depth + 1);
-      walkSteps(step.else, fn, `${where} → no → step `, depth + 1);
+      walkSteps(thenOf(step), fn, `${where} → yes → step `, depth + 1);
+      walkSteps(step.else ?? [], fn, `${where} → no → step `, depth + 1);
     }
   });
 }
@@ -255,7 +285,7 @@ export function walkSteps(
  * knows where its `else` steps start and where the whole if/else ends; the
  * engine jumps there (see nextIndex).
  */
-type FlatBranch = Omit<BranchStep, 'then' | 'else'> & { elseAt: number; endAt: number };
+type FlatBranch = Omit<BranchStep, 'thenSteps' | 'else'> & { elseAt: number; endAt: number };
 export type FlatStep = LeafStep | FlatBranch;
 
 export function flattenSteps(steps: readonly Step[]): FlatStep[] {
@@ -266,12 +296,14 @@ export function flattenSteps(steps: readonly Step[]): FlatStep[] {
         out.push(step);
         continue;
       }
-      const { then, else: otherwise, ...rest } = step;
+      const { thenSteps: _yes, else: otherwise, ...kept } = step;
+      // A definition read raw from the database may still carry the legacy `then` key.
+      const { then: _legacy, ...rest } = kept as typeof kept & { then?: Step[] };
       const flat: FlatBranch = { ...rest, elseAt: -1, endAt: -1 };
       out.push(flat);
-      add(then);
+      add(thenOf(step));
       flat.elseAt = out.length;
-      add(otherwise);
+      add(otherwise ?? []);
       flat.endAt = out.length;
     }
   };
@@ -281,7 +313,7 @@ export function flattenSteps(steps: readonly Step[]): FlatStep[] {
 
 /**
  * The step after `i` when `i` finished normally. Reaching the start of a
- * branch's `else` steps that way means its `then` steps are done: skip to its end.
+ * branch's `else` steps that way means its `thenSteps` are done: skip to its end.
  */
 export function nextIndex(steps: readonly FlatStep[], i: number): number {
   let n = i + 1;
@@ -303,7 +335,7 @@ export const STEP_TYPES: Record<StepType, string> = {
   condition:
     'Stop the run here (as completed) unless the conditions hold (match: all = AND, any = OR).',
   branch:
-    'If/else: when the conditions hold (match all/any), do the `then` steps, otherwise the `else` steps; then carry on ' +
+    'If/else: when the conditions hold (match all/any), do the `thenSteps` (JSON key `then` also works), otherwise the `else` steps; then carry on ' +
     'with the steps after the branch. Branches can hold branches. Output = { matched }.',
   notifyStaff: 'Inbox + email/push to staff with a permission (their notification settings apply).',
   notifyContact:

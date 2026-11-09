@@ -120,6 +120,8 @@ function EditableCard({
       </CardHeader>
       <CardContent>
         {editing ? (
+          // Escape from any field inside the form cancels the edit; the key event bubbles here.
+          // oxlint-disable-next-line no-noninteractive-element-interactions
           <form
             ref={formRef}
             className="grid gap-4"

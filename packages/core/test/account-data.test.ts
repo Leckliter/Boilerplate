@@ -7,7 +7,6 @@ import {
   contactTags,
   deletionRequests,
   eq,
-  events,
   files,
   getDb,
   inquiries,
@@ -36,7 +35,7 @@ import { subscribePush } from '../src/actions/push';
 import { setStorageForTests, type Storage } from '../src/files/s3';
 import { runDueJobs } from '../src/jobs';
 import { runMaintenance } from '../src/maintenance';
-import { assertLocalDatabase, makeActor, resetDatabase } from './setup';
+import { assertLocalDatabase, ifEventsEnabled, makeActor, resetDatabase } from './setup';
 
 beforeAll(assertLocalDatabase);
 beforeEach(resetDatabase);
@@ -214,9 +213,6 @@ describe('account.exportData', () => {
 });
 
 describe('account deletion', () => {
-  const eventCount = async (t: string) =>
-    (await getDb().select().from(events)).filter((e) => e.type === t).length;
-
   it('request → grace period → cancel; status reflects it', async () => {
     const { id, actor } = await person();
     expect(await ok(callAction(deletionStatus, {}, actor))).toMatchObject({
@@ -237,7 +233,7 @@ describe('account deletion', () => {
         (n) => n.type === 'account.deletionScheduled' && n.contactId === id,
       ),
     ).toBe(true);
-    expect(await eventCount('account.deletion_requested')).toBe(1);
+    await ifEventsEnabled('account.deletion_requested', (e) => expect(e).toHaveLength(1));
 
     await ok(callAction(cancelDeletion, {}, actor));
     expect(await ok(callAction(deletionStatus, {}, actor))).toMatchObject({ pending: null });
@@ -407,9 +403,9 @@ describe('account deletion', () => {
       (a) => a.subjectId === id && a.action === 'contacts.create',
     );
     expect(created?.input ?? null).toBeNull();
-    expect(
-      (await getDb().select().from(events)).find((e) => e.type === 'account.deleted')!.data,
-    ).toMatchObject({ contactId: id, authUserId: 'auth-pat' });
+    await ifEventsEnabled('account.deleted', (e) =>
+      expect(e[0]!.data).toMatchObject({ contactId: id, authUserId: 'auth-pat' }),
+    );
     // Running again is harmless.
     expect((await runMaintenance()).steps['account.deletions']).toMatchObject({ processed: 0 });
   });

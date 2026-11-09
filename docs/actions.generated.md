@@ -1529,7 +1529,7 @@ See [actions.md](./actions.md) for how the system works.
 
 ### search.query
 
-**Search everything** — One search box for the ⌘K palette: contacts (name, email, phone, company), tags, docs, automations, inquiries, error reports by reference (type `E-…`) and activity-log summaries — only the kinds the caller may see (a customer gets docs only). Each hit is `{ type, id, title, subtitle, href }`; `href` is the page to open. Results are grouped by kind in a fixed order and cut at `limit`.
+**Search everything** — One search box for the ⌘K palette: contacts (name, email, phone, company), tags, error reports by reference (type `E-…`) and activity-log summaries, plus docs, automations and inquiries when those modules are on — only the kinds the caller may see (a customer gets docs only). Each hit is `{ type, id, title, subtitle, href }`; `href` is the page to open. Results are grouped by kind in a fixed order and cut at `limit`.
 
 - Who: `authenticated`
 - Changes data: no
@@ -2570,8 +2570,7 @@ See [actions.md](./actions.md) for how the system works.
                 ]
               }
             },
-            "then": {
-              "default": [],
+            "thenSteps": {
               "description": "Steps when the conditions hold",
               "maxItems": 50,
               "type": "array",
@@ -2580,7 +2579,6 @@ See [actions.md](./actions.md) for how the system works.
               }
             },
             "else": {
-              "default": [],
               "description": "Steps when they don’t",
               "maxItems": 50,
               "type": "array",
@@ -3321,8 +3319,7 @@ See [actions.md](./actions.md) for how the system works.
                 ]
               }
             },
-            "then": {
-              "default": [],
+            "thenSteps": {
               "description": "Steps when the conditions hold",
               "maxItems": 50,
               "type": "array",
@@ -3331,7 +3328,6 @@ See [actions.md](./actions.md) for how the system works.
               }
             },
             "else": {
-              "default": [],
               "description": "Steps when they don’t",
               "maxItems": 50,
               "type": "array",

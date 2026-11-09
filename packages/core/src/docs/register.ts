@@ -5,5 +5,10 @@
  */
 import { registerActions } from '../actions/registry-store';
 import { getDoc, listDocs } from '../actions/docs';
+import { registerSearchProvider } from '../actions/search/providers';
+import { searchDocsProvider } from './search';
 
 registerActions(listDocs, getDoc);
+
+// ⌘K search: docs (visibility follows docs.list).
+registerSearchProvider('docs', searchDocsProvider, { order: 20 });

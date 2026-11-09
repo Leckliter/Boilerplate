@@ -2,7 +2,6 @@ import {
   contacts,
   contactTags,
   eq,
-  events,
   getDb,
   inquiries,
   newsletterSubscriptions,
@@ -28,7 +27,7 @@ import {
 } from '../src/actions/newsletter';
 import { setSendersForTests } from '../src/notifications';
 import { signLink } from '../src/notifications/tokens';
-import { assertLocalDatabase, makeActor, resetDatabase } from './setup';
+import { assertLocalDatabase, ifEventsEnabled, makeActor, resetDatabase } from './setup';
 
 beforeAll(assertLocalDatabase);
 beforeEach(resetDatabase);
@@ -48,7 +47,6 @@ const tagsOf = async (contactId: string) =>
       .innerJoin(tags, eq(tags.id, contactTags.tagId))
       .where(eq(contactTags.contactId, contactId))
   ).map((t) => t.slug);
-const eventTypes = async () => (await getDb().select().from(events)).map((e) => e.type);
 
 const form = (over: object = {}) => ({
   name: 'Pat Example',
@@ -74,9 +72,11 @@ describe('inquiries.create (public form)', () => {
     const [lead] = await getDb().select().from(contacts).where(eq(contacts.id, row!.contactId!));
     expect(lead).toMatchObject({ firstName: 'Pat', lastName: 'Example', source: 'website' });
     expect(await tagsOf(lead!.id)).toEqual(['lead']);
-    const types = await eventTypes();
-    expect(types).toContain('inquiry.created');
-    expect(types).toContain('contact.created');
+    await ifEventsEnabled(undefined, (all) => {
+      const types = all.map((e) => e.type);
+      expect(types).toContain('inquiry.created');
+      expect(types).toContain('contact.created');
+    });
     const told = await getDb().select().from(notifications);
     expect(told.map((n) => [n.type, n.contactId])).toEqual([
       ['staff.newInquiry', manager.contactId],
@@ -95,9 +95,9 @@ describe('inquiries.create (public form)', () => {
     ).toHaveLength(1);
     expect((await getDb().select().from(inquiries))[0]!.contactId).toBe(customer!.id);
     expect(await tagsOf(customer!.id)).toEqual([]);
-    expect(
-      (await getDb().select().from(events)).find((e) => e.type === 'inquiry.created')!.data,
-    ).toMatchObject({ newContact: false });
+    await ifEventsEnabled('inquiry.created', (e) =>
+      expect(e[0]!.data).toMatchObject({ newContact: false }),
+    );
   });
 
   it('silently drops a filled honeypot, rejects a short message, and rate-limits by IP', async () => {
@@ -260,7 +260,7 @@ describe('newsletter double opt-in', () => {
     expect(await idOf('new@example.com')).toMatchObject({ status: 'subscribed' });
     expect((await idOf('new@example.com')).consentAt).not.toBeNull();
     expect(await tagsOf(sub.contactId!)).toEqual(expect.arrayContaining(['lead', 'newsletter']));
-    expect((await eventTypes()).filter((t) => t === 'newsletter.subscribed')).toHaveLength(1);
+    await ifEventsEnabled('newsletter.subscribed', (e) => expect(e).toHaveLength(1));
 
     const unsub = signLink('newsletter.unsubscribe', sub.id, 60_000);
     expect(await ok(callAction(unsubscribeNewsletter, { token: unsub }, visitor()))).toEqual({

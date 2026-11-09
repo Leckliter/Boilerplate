@@ -35,6 +35,8 @@ function TagInput({
   className?: string;
   id?: string;
   'aria-describedby'?: string;
+  /** Names the text box when there is no visible `<Field label>` pointing at it. */
+  'aria-label'?: string;
   'aria-invalid'?: React.AriaAttributes['aria-invalid'];
 }) {
   // Base UI's Field.Control picks the id the label points at; only a caller's own id overrides it.
@@ -90,10 +92,12 @@ function TagInput({
       {value.length < maxTags && (
         <FieldBase.Control
           render={(controlProps) => (
+            // Named by the surrounding <Field label> (via controlProps) or by an explicit `aria-label`.
             <input
               {...(controlProps as React.ComponentProps<'input'>)}
               {...props}
               list={listId}
+              aria-label={rest['aria-label']}
               value={text}
               placeholder={value.length ? '' : placeholder}
               maxLength={maxLength + 1}
@@ -121,7 +125,7 @@ function TagInput({
         {suggestions
           .filter((s) => !has(s))
           .map((s) => (
-            <option key={s} value={s} />
+            <option key={s} value={s} aria-label={s} />
           ))}
       </datalist>
     </div>

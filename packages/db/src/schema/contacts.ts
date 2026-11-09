@@ -1,5 +1,5 @@
 import { sql } from 'drizzle-orm';
-import { index, text, timestamp, uniqueIndex, uuid } from 'drizzle-orm/pg-core';
+import { index, text, timestamp, uniqueIndex } from 'drizzle-orm/pg-core';
 
 import { app, createdAt, id, updatedAt } from './_shared';
 

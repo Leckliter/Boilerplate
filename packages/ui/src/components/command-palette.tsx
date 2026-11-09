@@ -56,6 +56,26 @@ function CommandPalette({
   const shown = groups.filter((g) => g.items.length > 0);
   const hintsId = React.useId();
 
+  // Focus goes back to whatever opened the palette (the trigger button, or the field that had
+  // focus when ⌘K was pressed). While it is closed we remember the last focused element outside
+  // it; `finalFocus` hands that element back on close (Escape, selecting an item, a click outside).
+  const openerRef = React.useRef<HTMLElement | null>(null);
+  React.useEffect(() => {
+    // Mount: whatever already has focus (the page was clicked before the palette rendered).
+    if (document.activeElement instanceof HTMLElement && document.activeElement !== document.body) {
+      openerRef.current = document.activeElement;
+    }
+  }, []);
+  React.useEffect(() => {
+    if (open) return;
+    const remember = (e: FocusEvent) => {
+      const t = e.target;
+      if (t instanceof HTMLElement && t !== document.body) openerRef.current = t;
+    };
+    document.addEventListener('focusin', remember);
+    return () => document.removeEventListener('focusin', remember);
+  }, [open]);
+
   return (
     <DialogPrimitive.Root open={open} onOpenChange={onOpenChange}>
       <DialogPrimitive.Portal>
@@ -64,6 +84,7 @@ function CommandPalette({
           <DialogPrimitive.Popup
             data-slot="command-palette"
             aria-label="Command palette"
+            finalFocus={openerRef}
             className={cn(
               'flex max-h-[min(36rem,80dvh)] w-full max-w-2xl flex-col overflow-hidden rounded-lg bg-elevated text-foreground shadow-xs ring ring-hairline outline-none',
               'transition-[translate,scale,opacity] duration-150 data-ending-style:scale-95 data-ending-style:opacity-0 data-starting-style:scale-95 data-starting-style:opacity-0',

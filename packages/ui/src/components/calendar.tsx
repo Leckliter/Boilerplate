@@ -408,9 +408,7 @@ function CalendarWeek({
       </div>
       {allDay.some((l) => l.length) && (
         <div className="grid border-b border-hairline" style={{ gridTemplateColumns: cols }}>
-          <span className="py-1 pr-1 text-right text-[0.625rem] text-muted-foreground">
-            all day
-          </span>
+          <span className="py-1 pr-1 text-right text-xs text-muted-foreground">all day</span>
           {allDay.map((list, i) => (
             <div
               key={days[i]}
@@ -437,7 +435,7 @@ function CalendarWeek({
           {hours.map((h, i) => (
             <span
               key={h}
-              className="absolute right-1 -translate-y-1/2 text-[0.625rem] text-muted-foreground tabular-nums"
+              className="absolute right-1 -translate-y-1/2 text-xs text-muted-foreground tabular-nums"
               style={{ top: i * HOUR_PX }}
             >
               {i === 0 ? '' : hourLabel(h)}
@@ -453,7 +451,7 @@ function CalendarWeek({
           return (
             <div
               key={day}
-              role={onSlotClick ? 'presentation' : undefined}
+              role="presentation"
               className={cn(
                 'relative min-w-0 border-l border-hairline',
                 day === today && 'bg-primary/[0.03]',
@@ -493,6 +491,15 @@ function CalendarWeek({
                   : undefined
               }
             >
+              {onSlotClick && (
+                <button
+                  type="button"
+                  className="sr-only focus-visible:not-sr-only focus-visible:absolute focus-visible:top-1 focus-visible:left-1 focus-visible:z-10 focus-visible:rounded-md focus-visible:bg-card focus-visible:px-2 focus-visible:py-1 focus-visible:text-xs focus-visible:ring-2 focus-visible:ring-primary"
+                  onClick={() => onSlotClick(day, Math.min(Math.max(9 * 60, dayStart), dayEnd))}
+                >
+                  Add event on {day}
+                </button>
+              )}
               {placed.map((p) => (
                 <div
                   key={p.e.id}

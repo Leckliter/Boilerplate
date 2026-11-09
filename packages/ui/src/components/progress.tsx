@@ -9,7 +9,11 @@ import { cn } from '../lib/utils';
  * Progress of a task (upload, import, setup). `value={null}` is indeterminate (still working, no
  * percentage). For a quantity against a limit (storage used) use Meter. Base UI Progress.
  */
-type ProgressProps = Omit<ComponentPropsWithoutRef<typeof BaseProgress.Root>, 'children'> & {
+type ProgressProps = Omit<
+  ComponentPropsWithoutRef<typeof BaseProgress.Root>,
+  'children' | 'aria-label'
+> & {
+  /** The words above the bar. Also the progress bar's accessible name, so it is required. */
   label: string;
   /** Show the percentage next to the label. Default true. */
   showValue?: boolean;
@@ -31,6 +35,7 @@ function Progress({
     <BaseProgress.Root
       data-slot="progress"
       value={value}
+      aria-label={label}
       {...props}
       className={cn('flex w-full flex-col gap-2', className)}
     >

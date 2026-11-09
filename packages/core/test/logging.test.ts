@@ -1,4 +1,4 @@
-import { activityLog, changeLog, contacts, eq, errorEvents, getDb, sql, type Tx } from '@app/db';
+import { activityLog, changeLog, contacts, eq, errorEvents, getDb, sql } from '@app/db';
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { z } from 'zod';
 

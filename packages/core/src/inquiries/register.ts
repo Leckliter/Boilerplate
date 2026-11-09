@@ -12,5 +12,10 @@ import {
   updateInquiry,
 } from '../actions/inquiries';
 import { registerActions } from '../actions/registry-store';
+import { registerSearchProvider } from '../actions/search/providers';
+import { searchInquiries } from './search';
 
 registerActions(createInquiry, listInquiries, getInquiry, updateInquiry, archiveInquiry);
+
+// ⌘K search: inquiries, for people who manage them.
+registerSearchProvider('inquiries', searchInquiries, { order: 40 });

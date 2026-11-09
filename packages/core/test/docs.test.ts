@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { beforeAll, describe, expect, it } from 'vitest';
 
 import { guestActor } from '../src/access';
 import { callAction } from '../src/actions';
@@ -7,7 +7,6 @@ import { canReadDoc, docTree, findDoc, searchDocs } from '../src/docs';
 import { inlineText, parseMarkdown } from '../src/docs/markdown';
 import type { Doc } from '../src/docs/types';
 import { assertLocalDatabase, makeActor } from './setup';
-import { beforeAll } from 'vitest';
 
 beforeAll(assertLocalDatabase);
 

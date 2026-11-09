@@ -1,7 +1,6 @@
 import type * as React from 'react';
 
 import { cn } from '../lib/utils';
-import { Empty } from './empty';
 
 /**
  * Page anatomy used by every app screen: a header (title, description,

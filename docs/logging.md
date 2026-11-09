@@ -79,4 +79,4 @@ log or contacts (`activity.exportCsv`, `contacts.exportCsv`) is itself logged. T
 `CRON_SECRET`) deletes only API/AI reads older than 365 days and rate-limit counters older than a
 day. Changes, failed changes, denied attempts, sign-ins and the whole change log are kept forever.
 Scheduled-job runs are recorded in `app.cron_runs`. Modules add their own daily steps with
-`registerMaintenanceStep(name, fn)` (e.g. `account.deletions`); `runMaintenance()` returns what each did under `steps`.
+`registerMaintenanceStep(name, fn)` (`account.deletions`, `events.retention`, `files.abandoned`); `runMaintenance()` returns what each did under `steps`. The ⌘K search works the same way: modules add results with `registerSearchProvider(name, fn, { order })` (`actions/search/providers.ts`).

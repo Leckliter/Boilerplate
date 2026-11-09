@@ -37,16 +37,27 @@ type SliderValue = number | readonly number[];
  * <Slider label="Price" defaultValue={[25, 75]} />
  * ```
  */
-export interface SliderProps<Value extends SliderValue = SliderValue>
-  extends Omit<BaseSlider.Root.Props<Value>, 'children' | 'orientation'>, UiSliderVariantsProps {
-  /** Label displayed above the slider track. */
-  label?: ReactNode;
-  /**
-   * Accessible name for each thumb. Use it when there is no visible `label`,
-   * or to tell the thumbs of a range slider apart.
-   */
-  getAriaLabel?: (index: number) => string;
-}
+export type SliderProps<Value extends SliderValue = SliderValue> = Omit<
+  BaseSlider.Root.Props<Value>,
+  'children' | 'orientation' | 'aria-label' | 'aria-labelledby'
+> &
+  UiSliderVariantsProps & {
+    /** Label displayed above the slider track. */
+    label?: ReactNode;
+    /**
+     * Accessible name for each thumb. Use it when there is no visible `label`,
+     * or to tell the thumbs of a range slider apart.
+     */
+    getAriaLabel?: (index: number) => string;
+    /** Accessible name when there is no visible `label`. */
+    'aria-label'?: string;
+    'aria-labelledby'?: string;
+  } & (
+    | { label: ReactNode }
+    | { getAriaLabel: (index: number) => string }
+    | { 'aria-label': string }
+    | { 'aria-labelledby': string }
+  );
 
 function countThumbs(value: SliderValue | undefined) {
   return Array.isArray(value) ? value.length : 1;
@@ -75,6 +86,7 @@ export function Slider<Value extends SliderValue = SliderValue>({
   locale,
   value,
   defaultValue,
+  'aria-label': ariaLabel,
   ...props
 }: SliderProps<Value>) {
   const thumbCount = countThumbs(value ?? defaultValue);
@@ -83,6 +95,11 @@ export function Slider<Value extends SliderValue = SliderValue>({
   const textSize = size === 'sm' ? 'text-xs' : 'text-sm';
   // One step smaller than the track radius, so the inset corners stay concentric.
   const innerRadius = size === 'sm' ? 'rounded' : 'rounded-md';
+  // Every thumb needs a name of its own; a range tells min from max.
+  const name = typeof label === 'string' ? label : ariaLabel;
+  const thumbName = (index: number) =>
+    getAriaLabel?.(index) ??
+    (name ? (isRange ? `${name} ${index === 0 ? 'minimum' : 'maximum'}` : name) : '');
 
   return (
     <BaseSlider.Root
@@ -124,7 +141,7 @@ export function Slider<Value extends SliderValue = SliderValue>({
               <BaseSlider.Thumb
                 key={index}
                 index={isRange ? index : undefined}
-                getAriaLabel={getAriaLabel}
+                getAriaLabel={thumbName}
                 className={cn(
                   'group h-full w-4 cursor-grab outline-none has-focus-visible:ring-2 has-focus-visible:ring-ring has-focus-visible:outline-hidden data-disabled:cursor-not-allowed data-dragging:cursor-grabbing',
                   innerRadius,

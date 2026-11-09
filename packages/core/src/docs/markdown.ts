@@ -19,7 +19,7 @@ export function parseMarkdown(source: string): Block[] {
     const l = lines[idx]!;
     return (
       /^(#{2,4})\s/.test(l) ||
-      /^```/.test(l) ||
+      l.startsWith('```') ||
       /^\s*([-*+])\s+/.test(l) ||
       /^\s*\d+[.)]\s+/.test(l) ||
       /^>\s?/.test(l) ||

@@ -114,7 +114,7 @@ function Sparkline({
       viewBox={`0 0 ${W} ${H}`}
       className={cn('block aspect-[120/32] h-auto w-full max-w-40 overflow-visible', className)}
     >
-      {data.length > 0 && area && data.length > 1 && (
+      {area && data.length > 1 && (
         <path
           d={`${line} L${pts[pts.length - 1]![0]!.toFixed(1)} ${H} L${pts[0]![0]!.toFixed(1)} ${H} Z`}
           className={cn(s.fill, 'opacity-15')}
@@ -239,7 +239,10 @@ function DonutChart({
   const total = data.reduce((n, d) => n + Math.max(d.value, 0), 0);
   const R = 40;
   const C = 2 * Math.PI * R;
-  let offset = 0;
+  const offsets = data.reduce<number[]>((acc, d, i) => {
+    acc.push((acc[i - 1] ?? 0) + (Math.max(d.value, 0) / (total || 1)) * C);
+    return acc;
+  }, []);
   const desc = `${description ? `${description} ` : ''}${data
     .map(
       (d) =>
@@ -261,7 +264,8 @@ function DonutChart({
         {total > 0 &&
           data.map((d, i) => {
             const len = (Math.max(d.value, 0) / total) * C;
-            const el = (
+            const offset = (offsets[i] ?? 0) - len;
+            return (
               <circle
                 key={d.label}
                 cx={50}
@@ -275,8 +279,6 @@ function DonutChart({
                 className={SERIES[i % SERIES.length]!.stroke}
               />
             );
-            offset += len;
-            return el;
           })}
         <text
           x={50}

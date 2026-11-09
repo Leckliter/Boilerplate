@@ -74,7 +74,7 @@ function AvatarUpload({
         // eslint-disable-next-line @next/next/no-img-element -- a local blob preview or a storage URL; the UI package has no next/image
         <img
           src={shown}
-          alt={`${name}'s picture`}
+          alt={name}
           className="size-16 shrink-0 rounded-full object-cover ring ring-border"
         />
       ) : (

@@ -59,8 +59,12 @@ function DetailItem({
 }
 
 /** A value that's a link (mailto:, tel:, another record). */
-function DetailLink({ className, ...props }: React.ComponentProps<'a'>) {
-  return <a className={cn(linkVariants(), className)} {...props} />;
+function DetailLink({ className, children, ...props }: React.ComponentProps<'a'>) {
+  return (
+    <a className={cn(linkVariants(), className)} {...props}>
+      {children}
+    </a>
+  );
 }
 
 export { DetailItem, DetailLink, DetailList };

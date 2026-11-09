@@ -109,6 +109,12 @@ export type TabsProps = UiTabsVariantsProps & {
   indicatorClassName?: string;
   /** Labels for internationalization of aria-labels. All labels have English defaults. */
   labels?: TabsLabels;
+  /**
+   * A control that sits beside the tabs but is not one of them, such as an "Add tab" button.
+   * It renders outside the `role="tablist"` element, so the tablist only ever contains tabs
+   * (aria-required-children).
+   */
+  trailing?: ReactNode;
 };
 
 /**
@@ -137,13 +143,9 @@ export function Tabs({
   labels: labelsProp,
   variant = 'segmented',
   size = 'base',
+  trailing,
 }: TabsProps) {
   const items: TabsItem[] = tabs ?? [];
-
-  if (items.length === 0) {
-    return null;
-  }
-
   const fallbackValue = items[0]?.value;
   const isControlled = value !== undefined;
   const rootProps = {
@@ -164,7 +166,12 @@ export function Tabs({
   } = useOverflowDetect(true, overflowWatchKey);
   const bindDrag = useHorizontalDragScroll(listRef, isOverflowing);
 
-  return (
+  // Hooks above always run; an empty list renders nothing.
+  if (items.length === 0) {
+    return null;
+  }
+
+  const root = (
     <TabsPrimitive.Root
       {...rootProps}
       className={cn(
@@ -277,6 +284,14 @@ export function Tabs({
         </>
       )}
     </TabsPrimitive.Root>
+  );
+
+  if (!trailing) return root;
+  return (
+    <div className="flex min-w-0 items-center gap-2">
+      <div className="min-w-0 flex-1">{root}</div>
+      <div className="shrink-0">{trailing}</div>
+    </div>
   );
 }
 

@@ -6,6 +6,7 @@ import {
   createContext,
   isValidElement,
   useContext,
+  useId,
   type ReactNode,
   type ReactElement,
   type ForwardedRef,
@@ -233,7 +234,7 @@ export type RadioItemProps<Value = string> = {
 };
 
 // Radio.Item for use within Radio.Group
-function _RadioItem<T = string>(
+function RadioItemRender<T = string>(
   {
     className,
     disabled,
@@ -250,6 +251,8 @@ function _RadioItem<T = string>(
     appearance: groupAppearance,
     orientation,
   } = useContext(RadioGroupContext);
+  // Base UI renders the radio as a role="radio" element, which a wrapping <label> does not name.
+  const labelId = useId();
   const appearance =
     groupAppearance === 'segmented' ? groupAppearance : (appearanceProp ?? groupAppearance);
   const isCard = appearance === 'card';
@@ -276,8 +279,14 @@ function _RadioItem<T = string>(
           className,
         )}
       >
-        <BaseRadio.Root ref={ref} value={value} disabled={disabled} className="sr-only" />
-        <span>{label}</span>
+        <BaseRadio.Root
+          ref={ref}
+          value={value}
+          disabled={disabled}
+          aria-labelledby={labelId}
+          className="sr-only"
+        />
+        <span id={labelId}>{label}</span>
       </label>
     );
   }
@@ -318,13 +327,16 @@ function _RadioItem<T = string>(
         )}
       >
         <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-          <span className="text-base font-medium text-foreground">{label}</span>
+          <span id={labelId} className="text-base font-medium text-foreground">
+            {label}
+          </span>
           {description && <span className="text-sm text-muted-foreground">{description}</span>}
         </div>
         <BaseRadio.Root
           ref={ref}
           value={value}
           disabled={disabled}
+          aria-labelledby={labelId}
           className={cn(
             'relative mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-0 bg-card ring focus:ring-ring focus:outline-hidden focus-visible:ring-2 focus-visible:ring-primary',
             variant === 'error' ? 'ring-destructive' : 'ring-border',
@@ -358,6 +370,7 @@ function _RadioItem<T = string>(
         ref={ref}
         value={value}
         disabled={disabled}
+        aria-labelledby={labelId}
         className={cn(
           'relative mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-0 bg-card ring after:absolute after:-inset-x-3 after:-inset-y-2 focus:outline-hidden',
           variant === 'error' ? 'ring-destructive' : 'ring-border',
@@ -374,7 +387,9 @@ function _RadioItem<T = string>(
           <span className="h-2 w-2 rounded-full bg-card" />
         </BaseRadio.Indicator>
       </BaseRadio.Root>
-      <span className="text-base text-foreground">{label}</span>
+      <span id={labelId} className="text-base text-foreground">
+        {label}
+      </span>
     </label>
   );
 }
@@ -382,7 +397,7 @@ function _RadioItem<T = string>(
 // React's `forwardRef` erases generic type parameters, so we cast the result
 // back to a generic call signature. The cast is required to support React 18
 // consumers (where function components can't receive `ref` as a plain prop).
-const RadioItem = forwardRef(_RadioItem) as <T = string>(
+const RadioItem = forwardRef(RadioItemRender) as <T = string>(
   props: RadioItemProps<T> & { ref?: ForwardedRef<HTMLButtonElement> },
 ) => ReactElement;
 

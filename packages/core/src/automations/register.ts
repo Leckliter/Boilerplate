@@ -5,6 +5,8 @@
  * events. The module is the folders `events/` and `automations/`, `actions/events/`,
  * `actions/automations/` and this line in modules.ts (docs/events.md).
  */
+import { and, automationRuns, events, getDb, inArray, isNotNull, lt } from '@app/db';
+
 import { registerActions } from '../actions/registry-store';
 import {
   archiveAutomation,
@@ -25,7 +27,10 @@ import { listEvents, recordSignIn } from '../actions/events';
 import { registerErrorAlerts } from '../errors/alerts';
 import { emit } from '../events/emit';
 import { registerJob } from '../jobs';
+import { registerMaintenanceStep } from '../maintenance-steps';
 import { registerTick } from '../module-ticks';
+import { searchAutomations } from './search';
+import { registerSearchProvider } from '../actions/search/providers';
 import { advanceRunJob, dispatchEventJob } from './jobs';
 import { startScheduledAutomations } from './runs';
 
@@ -73,3 +78,28 @@ registerErrorAlerts(async (tx, alert) => {
     );
   }
 });
+
+/** Dispatched events and finished automation runs are kept this long. */
+const EVENT_RETENTION_DAYS = 365;
+
+// Daily cleanup (runMaintenance): runs still waiting are kept however old, they carry a copy of their trigger.
+registerMaintenanceStep('events.retention', async (now) => {
+  const cutoff = new Date(now.getTime() - EVENT_RETENTION_DAYS * 86_400_000);
+  const oldRuns = await getDb()
+    .delete(automationRuns)
+    .where(
+      and(
+        inArray(automationRuns.status, ['completed', 'failed', 'cancelled', 'skipped']),
+        lt(automationRuns.createdAt, cutoff),
+      ),
+    )
+    .returning({ id: automationRuns.id });
+  const oldEvents = await getDb()
+    .delete(events)
+    .where(and(isNotNull(events.dispatchedAt), lt(events.occurredAt, cutoff)))
+    .returning({ id: events.id });
+  return { eventsDeleted: oldEvents.length, automationRunsDeleted: oldRuns.length };
+});
+
+// ⌘K search: automations, for people who may manage them.
+registerSearchProvider('automations', searchAutomations, { order: 30 });

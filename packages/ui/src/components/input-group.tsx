@@ -327,6 +327,12 @@ export const Button = forwardRef<HTMLButtonElement, PropsWithChildren<InputGroup
 Button.displayName = 'InputGroup.Button';
 
 // ── Root
+/** Click-to-focus for the invisible overlay: a pointer affordance only; the visible label does the a11y work. */
+function focusInput(e: React.MouseEvent, id: string) {
+  e.preventDefault();
+  document.getElementById(id)?.focus();
+}
+
 /**
  * Compound input component for building inputs with icons, addons, inline
  * suffixes, and action buttons. Accepts Field props and wraps content in
@@ -490,11 +496,11 @@ const Root = forwardRef<HTMLElement, PropsWithChildren<InputGroupRootPropsIntern
               {/* When label exists, an invisible <label> overlay enables click-to-focus inside the container zone without nesting visible <label> elements */}
               {label && (
                 // Invisible overlay for click-to-focus; the visible Field label handles a11y
-                <label
-                  htmlFor={inputId}
+                <span
                   // Positioned behind children (z-0) so it catches clicks on empty space
                   className="absolute inset-0 z-0 mb-0! cursor-text"
                   aria-hidden="true"
+                  onMouseDown={(e) => focusInput(e, inputId)}
                 />
               )}
               {containerZone}
@@ -549,11 +555,11 @@ const Root = forwardRef<HTMLElement, PropsWithChildren<InputGroupRootPropsIntern
             className={containerClassName}
             {...rest}
           >
-            <label
-              htmlFor={inputId}
+            <span
               // Positioned behind children (z-0) so it catches clicks on empty space
               className="absolute inset-0 z-0 mb-0!"
               aria-hidden="true"
+              onMouseDown={(e) => focusInput(e, inputId)}
             />
             {children}
           </div>

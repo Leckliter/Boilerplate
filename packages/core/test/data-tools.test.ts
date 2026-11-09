@@ -1,4 +1,4 @@
-import { activityLog, contacts, contactTags, eq, events, getDb, tags } from '@app/db';
+import { activityLog, contacts, contactTags, eq, getDb, tags } from '@app/db';
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
 
 import { guestActor } from '../src/access';
@@ -14,7 +14,7 @@ import {
   bulkArchiveContacts,
 } from '../src/actions';
 import { parseCsv, toCsv } from '../src/csv';
-import { assertLocalDatabase, makeActor, resetDatabase } from './setup';
+import { assertLocalDatabase, eventsIfEnabled, makeActor, resetDatabase } from './setup';
 
 beforeAll(assertLocalDatabase);
 beforeEach(resetDatabase);
@@ -24,8 +24,13 @@ const ok = async <T>(p: Promise<{ ok: boolean }>) => {
   if (!r.ok) throw new Error(JSON.stringify(r.error));
   return r.data as T;
 };
-const count = async (type: string) =>
-  (await getDb().select().from(events)).filter((e) => e.type === type).length;
+/** How many events of a type exist; null when the events module is off. */
+const count = async (type: string) => (await eventsIfEnabled(type))?.length ?? null;
+/** Assert an event count, only when the events module is on. */
+const expectCount = async (type: string, n: number) => {
+  const c = await count(type);
+  if (c !== null) expect(c).toBe(n);
+};
 
 describe('csv helpers', () => {
   it('quotes commas, quotes and newlines and defuses spreadsheet formulas', () => {
@@ -182,7 +187,7 @@ describe('contacts.import', () => {
     ]);
     expect(r.problems[0]!.message).toMatch(/email/i);
     expect((await getDb().select().from(contacts)).length).toBe(before);
-    expect(await count('contact.created')).toBe(1); // only the one the test created itself
+    await expectCount('contact.created', 1); // only the one the test created itself
   });
 
   it('imports the valid rows (source "import", tags, events), skips the rest, and is not repeatable', async () => {
@@ -209,7 +214,7 @@ describe('contacts.import', () => {
         .map((t) => t.slug)
         .sort();
     expect(await slugs(ann.id)).toEqual(['customer', 'lead', 'vip']);
-    expect(await count('contact.created')).toBe(3);
+    await expectCount('contact.created', 3);
     // The same file again creates nothing new: everything valid is now a duplicate.
     const again = await ok<Report>(callAction(importContacts, { csv: file }, manager));
     expect(again).toMatchObject({ created: 0, duplicates: 4, invalid: 3 });
@@ -263,7 +268,7 @@ describe('bulk actions', () => {
     const manager = await makeActor(['manager']);
     const ids = await many(manager);
     await ok(callAction(addContactTags, { id: ids[0]!, tags: ['customer'] }, manager));
-    const taggedBefore = await count('contact.tagged');
+    const taggedBefore = (await count('contact.tagged')) ?? 0;
     const activityBefore = (await getDb().select().from(activityLog)).length;
     expect(
       await ok(callAction(bulkAddContactTags, { ids, tags: ['customer', 'lead'] }, manager)),
@@ -271,7 +276,7 @@ describe('bulk actions', () => {
     expect(
       await ok(callAction(bulkAddContactTags, { ids, tags: ['customer', 'lead'] }, manager)),
     ).toEqual({ contacts: 4, tagged: 0 });
-    expect(await count('contact.tagged')).toBe(taggedBefore + 4);
+    await expectCount('contact.tagged', taggedBefore + 4);
     const bulk = (await getDb().select().from(activityLog)).filter(
       (a) => a.action === 'contacts.bulkAddTags',
     );
@@ -307,7 +312,7 @@ describe('bulk actions', () => {
       archived: 2,
       alreadyArchived: 1,
     });
-    expect(await count('contact.archived')).toBe(3);
+    await expectCount('contact.archived', 3);
     expect(
       await callAction(bulkArchiveContacts, { ids: [owner.contactId!, ...ids] }, owner),
     ).toMatchObject({ ok: false, error: { code: 'conflict' } });

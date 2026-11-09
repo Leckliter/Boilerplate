@@ -1,15 +1,11 @@
 import {
   activityLog,
   and,
-  automationRuns,
   cronRuns,
   eq,
-  events,
-  files,
   getDb,
   idempotencyKeys,
   inArray,
-  isNotNull,
   jobs,
   lt,
   or,
@@ -18,7 +14,6 @@ import {
 
 import { IDEMPOTENCY_TTL_MS } from './idempotency';
 import { reportError } from './errors/report';
-import { enqueue, getJob } from './jobs';
 import { listMaintenanceSteps } from './maintenance-steps';
 
 /** API/AI reads in the activity log are kept this long; changes are kept forever. */
@@ -28,22 +23,20 @@ const RATE_LIMIT_RETENTION_HOURS = 24;
 const BATCH = 5_000;
 /** Finished background jobs are kept this long (failed ones three times as long). */
 const JOB_RETENTION_DAYS = 30;
-/** Events, finished automation runs and cron runs are kept this long. */
-const EVENT_RETENTION_DAYS = 365;
+/** Cron-run records are kept this long. */
 const CRON_RUN_RETENTION_DAYS = 30;
-/** An upload that was started but never finished is abandoned after this. */
-const ABANDONED_UPLOAD_HOURS = 24;
 
 export type MaintenanceResult = {
   readLogsDeleted: number;
   rateLimitRowsDeleted: number;
   idempotencyKeysDeleted: number;
   jobsDeleted: number;
-  eventsDeleted: number;
-  automationRunsDeleted: number;
   cronRunsDeleted: number;
-  abandonedUploads: number;
-  /** What each module's daily step returned (`{ error }` for one that failed — it was reported). */
+  /**
+   * What each module's daily step returned (`{ error }` for one that failed — it was reported):
+   * `events.retention` { eventsDeleted, automationRunsDeleted } and `files.abandoned`
+   * { abandonedUploads } when those modules are on, `account.deletions` { processed … }.
+   */
   steps: Record<string, unknown>;
 };
 
@@ -53,12 +46,10 @@ export type MaintenanceResult = {
  *   Changes, sign-ins and the change log are never deleted.
  * - deletes old rate-limit counters, expired idempotency keys and old cron runs.
  * - deletes finished background jobs after JOB_RETENTION_DAYS (failed: 3×).
- * - deletes dispatched events and finished automation runs after EVENT_RETENTION_DAYS
- *   (runs still waiting are kept, however old — they carry a copy of their trigger).
- * - marks uploads that were started but never finished as deleted (and queues `files.deleteObject`
- *   for their bytes when the files module registered that job).
- * - runs the daily steps modules registered (`registerMaintenanceStep`): e.g. `account.deletions`
- *   anonymises accounts whose deletion grace period is over.
+ * - runs the daily steps modules registered (`registerMaintenanceStep`), so this file touches no
+ *   module table: `events.retention` deletes dispatched events and finished automation runs after a
+ *   year, `files.abandoned` marks uploads that never finished as deleted (and queues
+ *   `files.deleteObject`), `account.deletions` anonymises accounts whose grace period is over.
  * Deletes in batches so a big backlog never holds long locks.
  */
 export async function runMaintenance(
@@ -110,38 +101,6 @@ export async function runMaintenance(
     )
     .returning({ id: jobs.id });
 
-  const eventCutoff = new Date(now.getTime() - EVENT_RETENTION_DAYS * 86_400_000);
-  const oldRuns = await getDb()
-    .delete(automationRuns)
-    .where(
-      and(
-        inArray(automationRuns.status, ['completed', 'failed', 'cancelled', 'skipped']),
-        lt(automationRuns.createdAt, eventCutoff),
-      ),
-    )
-    .returning({ id: automationRuns.id });
-  const oldEvents = await getDb()
-    .delete(events)
-    .where(and(isNotNull(events.dispatchedAt), lt(events.occurredAt, eventCutoff)))
-    .returning({ id: events.id });
-
-  const abandoned = await getDb().transaction(async (tx) => {
-    const rows = await tx
-      .update(files)
-      .set({ status: 'deleted' })
-      .where(
-        and(
-          eq(files.status, 'pending'),
-          lt(files.createdAt, new Date(now.getTime() - ABANDONED_UPLOAD_HOURS * 3_600_000)),
-        ),
-      )
-      .returning({ bucket: files.bucket, path: files.path });
-    if (getJob('files.deleteObject')) {
-      for (const f of rows) await enqueue(tx, 'files.deleteObject', f);
-    }
-    return rows.length;
-  });
-
   // Module steps: one failing never stops the others (or the cleanup above, already done).
   const stepResults: Record<string, unknown> = {};
   for (const [name, step] of listMaintenanceSteps()) {
@@ -158,10 +117,7 @@ export async function runMaintenance(
     rateLimitRowsDeleted: counters.length,
     idempotencyKeysDeleted: keys.length,
     jobsDeleted: oldJobs.length,
-    eventsDeleted: oldEvents.length,
-    automationRunsDeleted: oldRuns.length,
     cronRunsDeleted: oldCronRuns.length,
-    abandonedUploads: abandoned,
     steps: stepResults,
   };
 }

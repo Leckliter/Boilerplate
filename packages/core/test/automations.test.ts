@@ -29,6 +29,7 @@ import {
   updateAutomation,
 } from '../src/actions/automations';
 import { dispatchEvent } from '../src/automations';
+import { flattenSteps, stepSchema, walkSteps } from '../src/automations/definition';
 import { startScheduledAutomations } from '../src/automations/runs';
 import { dueSlot } from '../src/automations/schedule';
 import { render } from '../src/automations/template';
@@ -71,6 +72,56 @@ describe('templates and schedules', () => {
     expect(dueSlot({ type: 'schedule', dailyAt: '08:30' }, t)).toBe('daily:2026-01-15');
     expect(dueSlot({ type: 'schedule', dailyAt: '09:00' }, t)).toBeNull();
     expect(dueSlot({ type: 'schedule', dailyAt: '08:30', weekdays: [6, 7] }, t)).toBeNull();
+  });
+});
+
+describe('branch steps: `thenSteps`, with the legacy `then` key still read', () => {
+  // Built with a computed key: that is how old stored JSON looks, and lint forbids a literal `then`.
+  const LEGACY = ['th', 'en'].join('');
+  const check = { type: 'condition', conditions: [{ path: 'event.type', op: 'exists' }] };
+  const legacy = {
+    type: 'branch',
+    conditions: [{ path: 'event.data.x', op: 'exists' }],
+    [LEGACY]: [
+      { ...check, id: 'yes' },
+      { type: 'branch', conditions: check.conditions, [LEGACY]: [{ ...check, id: 'deep' }] },
+    ],
+    else: [{ ...check, id: 'no' }],
+  };
+
+  it('renames a stored `then` to `thenSteps`, at every depth', () => {
+    const step = stepSchema.parse(legacy) as unknown as Record<string, unknown>;
+    expect(step).not.toHaveProperty('then');
+    const yes = step.thenSteps as Record<string, unknown>[];
+    expect(yes.map((s) => s.id ?? s.type)).toEqual(['yes', 'branch']);
+    expect(yes[1]).not.toHaveProperty('then');
+    expect((yes[1]!.thenSteps as unknown[]).length).toBe(1);
+  });
+
+  it('prefers `thenSteps` when both are given', () => {
+    const step = stepSchema.parse({
+      ...legacy,
+      thenSteps: [{ ...check, id: 'new' }],
+    }) as unknown as {
+      thenSteps: { id: string }[];
+    };
+    expect(step.thenSteps.map((s) => s.id)).toEqual(['new']);
+  });
+
+  it('flattens and walks a definition read raw from the database (no parse)', () => {
+    const raw = [legacy] as never;
+    const flat = flattenSteps(raw);
+    expect(flat.map((s) => ('id' in s && s.id) || s.type)).toEqual([
+      'branch',
+      'yes',
+      'branch',
+      'deep',
+      'no',
+    ]);
+    expect(flat[0]).not.toHaveProperty('then');
+    const seen: string[] = [];
+    walkSteps(raw, (s) => seen.push(('id' in s && s.id) || s.type));
+    expect(seen).toEqual(['branch', 'yes', 'branch', 'deep', 'no']);
   });
 });
 
@@ -200,7 +251,7 @@ describe('running automations', () => {
         {
           type: 'branch',
           conditions: [{ path: 'event.data.firstName', op: 'equals', value: 'x' }],
-          then: [
+          thenSteps: [
             { id: 'yes', type: 'condition', conditions: [{ path: 'event.type', op: 'exists' }] },
           ],
           else: [

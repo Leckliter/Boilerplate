@@ -4,6 +4,11 @@ import { cn } from '../lib/utils';
  * Placeholder wordmark. Replace the body with your own artwork (inline SVG paths take
  * their colour from tokens, so they follow light/dark mode) or keep the text version.
  *
+ * Accessible name: the product name is real text (visible, or `sr-only` when `compact`), so a link
+ * or button around the Logo is named by it. Don't add `aria-label` on the Logo (a `<span>` can't
+ * carry one). If the wrapping link needs its own `aria-label` it must start with / contain the
+ * visible name ("Acme home"), or screen-reader and voice-control users get a mismatch (WCAG 2.5.3).
+ *
  * `tone="onBrand"` is for brand-coloured backgrounds (`bg-primary`): the mark inverts so it stays
  * visible, and the wordmark uses the primary-foreground token.
  */
@@ -29,7 +34,6 @@ export function Logo({
         onBrand ? 'text-primary-foreground' : 'text-primary',
         className,
       )}
-      aria-label={name}
     >
       <span
         aria-hidden
@@ -42,7 +46,9 @@ export function Logo({
       >
         {name.charAt(0).toUpperCase()}
       </span>
-      {compact ? null : (
+      {compact ? (
+        <span className="sr-only">{name}</span>
+      ) : (
         <span className={cn('text-base', onBrand ? 'text-primary-foreground' : 'text-foreground')}>
           {name}
         </span>

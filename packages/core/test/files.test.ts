@@ -163,7 +163,7 @@ describe('files: upload flow', () => {
     await getDb()
       .update(files)
       .set({ createdAt: new Date(Date.now() - 3 * 86_400_000) });
-    expect((await runMaintenance()).abandonedUploads).toBe(1);
+    expect((await runMaintenance()).steps['files.abandoned']).toEqual({ abandonedUploads: 1 });
     await runDueJobs();
     expect(s.removed).toHaveLength(1);
     // The system can finish any upload, e.g. one started by an AI agent.

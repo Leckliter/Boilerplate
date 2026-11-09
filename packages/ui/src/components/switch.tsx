@@ -183,6 +183,7 @@ const SwitchRoot = forwardRef<HTMLButtonElement, SwitchProps>(
         ref={ref}
         id={id}
         checked={checked}
+        defaultChecked={defaultChecked}
         disabled={disabled}
         onCheckedChange={onCheckedChange}
         nativeButton
@@ -249,6 +250,7 @@ const SwitchItem = forwardRef<HTMLButtonElement, SwitchItemProps>(
         <BaseSwitch.Root
           ref={ref}
           checked={checked}
+          defaultChecked={defaultChecked}
           disabled={disabled}
           onCheckedChange={onCheckedChange}
           nativeButton
